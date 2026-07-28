@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using SharpDX.Direct2D1.Effects;
 using System;
 
 namespace _1_2D_Top_Down
@@ -9,14 +8,21 @@ namespace _1_2D_Top_Down
     public class Enemy
     {
         private Texture2D texture;
-        private const float speed = 70f;
+        private float speed = 100f;
+
+        private const int FrameCount = 4;
+        private const float FrameDuration = 0.15f;
+        private int currentFrame;
+        private float animationTimer;
+        private int FrameWidth => texture.Width / FrameCount;
+        private int FrameHeight => texture.Height;
 
         public Vector2 Position;
         public Rectangle Bounds => new Rectangle(
         (int)Position.X,
         (int)Position.Y,
-        (int)(texture.Width),
-        (int)(texture.Height));
+        FrameWidth,
+        FrameHeight);
         public Enemy(Texture2D texture, Vector2 startPosition)
         {
             this.texture = texture;
@@ -31,10 +37,33 @@ namespace _1_2D_Top_Down
 
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Position += direction * speed * deltaTime;
+
+            animationTimer += deltaTime;
+
+            if (animationTimer >= FrameDuration)
+            {
+                currentFrame++;
+                animationTimer = 0f;
+
+                if (currentFrame >= FrameCount)
+                    currentFrame = 0;
+            }
         }
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, Position, Color.White);
+            Rectangle sourceRectangle = new Rectangle(
+                currentFrame * FrameWidth,
+                0,
+                FrameWidth,
+                FrameHeight);
+
+            spriteBatch.Draw(
+                texture,
+                Position,
+                sourceRectangle,
+                Color.White);
         }
+
+
     }
 }

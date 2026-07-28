@@ -1,58 +1,42 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 
 namespace _1_2D_Top_Down
 {
-    public class Projectile
+    public class DeathAnimation
     {
         private Texture2D texture;
-        private Vector2 direction;
-        private float speed = 500f;
-        private float rotation;
 
-        private const int FrameCount = 3;
+        private const int FrameCount = 7;
         private const float FrameDuration = 0.1f;
 
         private int currentFrame;
         private float animationTimer;
 
-        public Vector2 Position;
+        public Vector2 Position { get; }
+        public bool IsFinished { get; private set; }
 
         private int FrameWidth => texture.Width / FrameCount;
         private int FrameHeight => texture.Height;
 
-        public Rectangle Bounds => new Rectangle(
-            (int)(Position.X - FrameWidth / 2f),
-            (int)(Position.Y - FrameHeight / 2f),
-            FrameWidth,
-            FrameHeight);
-
-        public Projectile(Texture2D texture, Vector2 startPosition, Vector2 direction)
+        public DeathAnimation(Texture2D texture, Vector2 position)
         {
             this.texture = texture;
-            Position = startPosition;
-            this.direction = direction;
-
-            rotation = MathF.Atan2(direction.Y, direction.X);
+            Position = position;
         }
 
         public void Update(GameTime gameTime)
         {
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            Position += direction * speed * deltaTime;
+            if (animationTimer < FrameDuration)
+                return;
 
-            animationTimer += deltaTime;
+            animationTimer = 0f;
+            currentFrame++;
 
-            if (animationTimer >= FrameDuration)
-            {
-                currentFrame++;
-                animationTimer = 0f;
-
-                if (currentFrame >= FrameCount)
-                    currentFrame = 0;
-            }
+            if (currentFrame >= FrameCount)
+                IsFinished = true;
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -72,7 +56,7 @@ namespace _1_2D_Top_Down
                 Position,
                 sourceRectangle,
                 Color.White,
-                rotation,
+                0f,
                 origin,
                 1f,
                 SpriteEffects.None,
