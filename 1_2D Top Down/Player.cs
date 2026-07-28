@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using SharpDX.Direct2D1.Effects;
 using System;
 
 namespace _1_2D_Top_Down
@@ -15,6 +16,11 @@ namespace _1_2D_Top_Down
 
         public Vector2 Position;
         public Vector2 playerPosition = new Vector2(400, 500);
+        public Rectangle Bounds => new Rectangle(
+        (int)Position.X,
+        (int)Position.Y,
+        (int)(texture.Width * scale),
+        (int)(texture.Height * scale));
 
 
 
@@ -50,9 +56,8 @@ namespace _1_2D_Top_Down
         }
         public void Draw( SpriteBatch spritebatch)
         {
-            spritebatch.Draw(texture,                  // texture
-            new Vector2(Position.X,
-            Position.Y),
+            spritebatch.Draw(texture,                   // texture
+            new Vector2(Position.X,Position.Y),
             null,                                       // sourceRectangle
             Color.White,                                // color
             0.0f,                                       // rotation
