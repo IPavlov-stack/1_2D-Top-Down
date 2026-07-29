@@ -13,7 +13,7 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin enemies/DEATH.png
+#begin ../../../../../Pictures/Pixel Art Magic Spell/Fire Spell/neon_magenta/sprite_sheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -23,9 +23,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:enemies/DEATH.png
+/build:../../../../../Pictures/Pixel Art Magic Spell/Fire Spell/neon_magenta/sprite_sheet.png;projectiles/evil eye/evilEye_projectile_magenta.png
 
-#begin enemies/FLYING.png
+#begin enemies/Demon/DEATH.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -35,7 +35,31 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:enemies/FLYING.png
+/build:enemies/Demon/DEATH.png
+
+#begin enemies/Demon/FLYING.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Demon/FLYING.png
+
+#begin enemies/Evil Eye/Evil Eye Sprite sheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Evil Eye/Evil Eye Sprite sheet.png
 
 #begin player/Charcter.png
 /importer:TextureImporter

@@ -1,15 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using SharpDX.Direct2D1.Effects;
 using System;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace _1_2D_Top_Down
 {
     public class Player
     {
-        private Game game;
         private Texture2D texture;
 
         private const int FrameCount = 4;
@@ -20,17 +17,31 @@ namespace _1_2D_Top_Down
         private int FrameWidth => texture.Width / FrameCount;
         private int FrameHeight => texture.Height;
 
-        private const float Scale = 1.5f;
+        private const float Scale = 1.3f;
         private const float Speed = 300f;
 
         public Vector2 Position;
         public Vector2 playerPosition = new Vector2(400, 500);
-        public Rectangle Bounds => new Rectangle(
-        (int)Position.X,
-        (int)Position.Y,
-        (int)(FrameWidth * Scale),
-        (int)(FrameHeight * Scale));
+        public Rectangle Bounds
+        {
+            get
+            {
+                int spriteWidth = (int)(FrameWidth * Scale);
+                int spriteHeight = (int)(FrameHeight * Scale);
 
+                int hitboxWidth = (int)(spriteWidth * 0.7f);
+                int hitboxHeight = (int)(spriteHeight * 0.7f);
+
+                int offsetX = (spriteWidth - hitboxWidth) / 2;
+                int offsetY = (spriteHeight - hitboxHeight) / 2;
+
+                return new Rectangle(
+                    (int)Position.X + offsetX,
+                    (int)Position.Y + offsetY,
+                    hitboxWidth,
+                    hitboxHeight);
+            }
+        }
 
 
         public Player(Texture2D texture, Vector2 startPosition)
@@ -56,10 +67,10 @@ namespace _1_2D_Top_Down
             if (keyboard.IsKeyDown(Keys.Down) || keyboard.IsKeyDown(Keys.S))
                 Position.Y += Speed * deltaTime;
 
-            float playerWidth = texture.Width * Scale;
-            float playerHeight = texture.Height * Scale;
+            float playerWidth = FrameWidth * Scale;
+            float playerHeight = FrameHeight * Scale;
 
-            Position.X = Math.Clamp(Position.X, 0 , arena.Width - playerWidth);
+            Position.X = Math.Clamp(Position.X, 0, arena.Width - playerWidth);
             Position.Y = Math.Clamp(Position.Y, 0, arena.Height - playerHeight);
 
             animationTimer += deltaTime;
