@@ -20,7 +20,7 @@ namespace _1_2D_Top_Down
         private const int WindowSizeY = 1080;
         private Texture2D pixelTexture;
         private bool isGameOver;
-        private bool isEnemySpawningEnabled = true;
+        private bool isEnemySpawningEnabled = false;
 
         private Random random = new Random();
         private MouseState previousMouseState;
@@ -52,7 +52,7 @@ namespace _1_2D_Top_Down
         private Camera camera;
         private const int WorldWidth = 3000;
         private const int WorldHeight = 2000;
-
+        //world map
         private Texture2D forestTileset;
         private const int TileSize = 64;
         private const int TilesPerRow = 14;
@@ -60,6 +60,7 @@ namespace _1_2D_Top_Down
         private TextureAtlas environmentPropsAtlas;
         private const float EnvironmentScale = 0.25f;
         private TiledGroundMap worldMap;
+        private TiledPropsLayer propsLayer;
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -99,6 +100,7 @@ namespace _1_2D_Top_Down
             environmentGroundAtlas = TextureAtlas.FromFile(Content,"Environment/EnvironmentGroundAtlas.xml");
             environmentPropsAtlas = TextureAtlas.FromFile(Content,"Environment/EnvironmentPropsAtlas.xml");
             worldMap = TiledGroundMap.FromFile(Content,"Maps/ForestMap.tmx","Environment/EnvironmentGroundAtlas",EnvironmentScale);
+            propsLayer = TiledPropsLayer.FromFile(Content,"Maps/ForestMap.tmx",environmentPropsAtlas,EnvironmentScale);
         }
         private void DrawTile(int column, int row, Vector2 position)
         {
@@ -162,7 +164,7 @@ namespace _1_2D_Top_Down
         {
             GraphicsDevice.Clear(isGameOver ? Color.Black : BackgroundColor);
 
-            // Светът — мести се с камерата
+            // Светът се мести се с камерата
             _spriteBatch.Begin(
                 transformMatrix: camera.Transform,
                 samplerState: SamplerState.PointClamp);
@@ -197,7 +199,7 @@ namespace _1_2D_Top_Down
 
             _spriteBatch.End();
 
-            // UI — остава неподвижно на екрана
+            //UI остава неподвижно на екрана
             _spriteBatch.Begin();
 
             if (isGameOver)
@@ -216,6 +218,7 @@ namespace _1_2D_Top_Down
         private void DrawMap()
         {
             worldMap.Draw(_spriteBatch);
+            propsLayer.Draw(_spriteBatch);
         }
     }
     }

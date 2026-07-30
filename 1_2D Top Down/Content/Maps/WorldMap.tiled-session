@@ -5,19 +5,25 @@
     ],
     "fileStates": {
         "EnvironmentGround.tsx": {
-            "scaleInDock": 0.25,
+            "dynamicWrapping": false,
+            "scaleInDock": 0.06,
             "scaleInEditor": 0.5
         },
+        "EnvironmentProps.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 0.06,
+            "scaleInEditor": 1
+        },
         "ForestMap.tmx": {
-            "scale": 0.25,
-            "selectedLayer": 0,
+            "scale": 0.125,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 4772,
-                "y": 4130
+                "x": 7080,
+                "y": 3516
             }
         }
     },
-    "last.imagePath": "C:/Users/ivan_pavlov/source/MonoGame Practice/1_2D Top Down/1_2D Top Down/Content/Environment",
+    "last.imagePath": "C:/Users/ivan_pavlov/Pictures/craftpix-net-381103-free-simple-summer-top-down-vector-tileset/PNG",
     "map.height": 32,
     "map.lastUsedFormat": "tmx",
     "map.tileHeight": 256,
@@ -25,10 +31,12 @@
     "map.width": 48,
     "openFiles": [
         "ForestMap.tmx",
-        "EnvironmentGround.tsx"
+        "EnvironmentGround.tsx",
+        "EnvironmentProps.tsx"
     ],
     "project": "WorldMap.tiled-project",
     "recentFiles": [
+        "EnvironmentProps.tsx",
         "EnvironmentGround.tsx",
         "ForestMap.tmx"
     ],
@@ -36,5 +44,6 @@
     "tileset.tileSize": {
         "height": 256,
         "width": 256
-    }
+    },
+    "tileset.type": 1
 }
