@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas>
+  <Texture>Environment/EnvironmentPropsAtlas</Texture>
+  <Regions>
+    <Region name="prop_blue_banner" x="0" y="0" width="160" height="240" />
+    <Region name="prop_bushes_large" x="160" y="0" width="240" height="140" />
+    <Region name="prop_bushes_medium" x="400" y="0" width="180" height="140" />
+    <Region name="prop_bushes_small" x="580" y="0" width="140" height="120" />
+    <Region name="prop_campfire" x="720" y="0" width="200" height="160" />
+    <Region name="prop_castle_round" x="920" y="0" width="320" height="480" />
+    <Region name="prop_castle_square" x="0" y="480" width="360" height="400" />
+    <Region name="prop_flag" x="1240" y="0" width="100" height="160" />
+    <Region name="prop_house" x="360" y="160" width="480" height="640" />
+    <Region name="prop_magic_stone_tower" x="1340" y="0" width="240" height="400" />
+    <Region name="prop_red_banner" x="1240" y="400" width="160" height="240" />
+    <Region name="prop_rock_01" x="1400" y="400" width="120" height="100" />
+    <Region name="prop_rock_02" x="0" y="400" width="100" height="60" />
+    <Region name="prop_rock_03" x="100" y="400" width="100" height="60" />
+    <Region name="prop_rock_04" x="200" y="400" width="60" height="60" />
+    <Region name="prop_rock_05" x="260" y="400" width="60" height="60" />
+    <Region name="prop_tent" x="840" y="500" width="300" height="280" />
+    <Region name="prop_treasure_chest" x="1140" y="640" width="200" height="160" />
+    <Region name="prop_tree_medium" x="360" y="800" width="360" height="400" />
+    <Region name="prop_tree_small" x="1340" y="640" width="240" height="280" />
+    <Region name="prop_tree_stump_short" x="1400" y="500" width="120" height="100" />
+    <Region name="prop_tree_stump_tall" x="0" y="920" width="160" height="140" />
+    <Region name="prop_watchtower_short" x="720" y="920" width="240" height="260" />
+    <Region name="prop_watchtower_tall" x="960" y="920" width="260" height="340" />
+    <Region name="prop_well" x="160" y="920" width="200" height="200" />
+    <Region name="prop_windmill" x="1580" y="0" width="720" height="720" />
+    <Region name="prop_wooden_barrel" x="1580" y="720" width="120" height="140" />
+    <Region name="prop_wooden_bridge_horizontal" x="1700" y="720" width="480" height="320" />
+    <Region name="prop_wooden_bridge_vertical" x="1220" y="1040" width="240" height="320" />
+    <Region name="prop_wooden_cart" x="1460" y="1040" width="320" height="160" />
+    <Region name="prop_wooden_fence_horizontal" x="1780" y="1040" width="220" height="80" />
+    <Region name="prop_wooden_fence_vertical" x="2180" y="720" width="80" height="220" />
+    <Region name="prop_tree_large" x="1780" y="1120" width="400" height="480" />
+  </Regions>
+  <Animations />
+</TextureAtlas>

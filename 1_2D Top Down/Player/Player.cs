@@ -7,7 +7,7 @@ namespace _1_2D_Top_Down
 {
     public class Player
     {
-        private Texture2D texture;
+        public Texture2D texture;
 
         private const int FrameCount = 4;
         private const float FrameDuration = 0.15f;

@@ -13,18 +13,6 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin ../../../../../Pictures/Pixel Art Magic Spell/Fire Spell/neon_magenta/sprite_sheet.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:../../../../../Pictures/Pixel Art Magic Spell/Fire Spell/neon_magenta/sprite_sheet.png;projectiles/evil eye/evilEye_projectile_magenta.png
-
 #begin enemies/Demon/DEATH.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -61,6 +49,39 @@
 /processorParam:TextureFormat=Color
 /build:enemies/Evil Eye/Evil Eye Sprite sheet.png
 
+#begin Environment/EnvironmentGroundAtlas.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Environment/EnvironmentGroundAtlas.png
+
+#begin Environment/EnvironmentGroundAtlas.xml
+/copy:Environment/EnvironmentGroundAtlas.xml
+
+#begin Environment/EnvironmentPropsAtlas.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Environment/EnvironmentPropsAtlas.png
+
+#begin Environment/EnvironmentPropsAtlas.xml
+/copy:Environment/EnvironmentPropsAtlas.xml
+
+#begin Maps/ForestMap.tmx
+/copy:Maps/ForestMap.tmx
+
 #begin player/Charcter.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -72,6 +93,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:player/Charcter.png;player/Character.png
+
+#begin projectiles/evilEye/sprite_sheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:projectiles/evilEye/sprite_sheet.png;projectiles/evilEye/evilEye_projectile_sphere.png
 
 #begin projectiles/magic_projectile.png
 /importer:TextureImporter

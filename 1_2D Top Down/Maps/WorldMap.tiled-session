@@ -1,0 +1,40 @@
+{
+    "activeFile": "ForestMap.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "EnvironmentGround.tsx": {
+            "scaleInDock": 0.25,
+            "scaleInEditor": 0.5
+        },
+        "ForestMap.tmx": {
+            "scale": 0.25,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 4772,
+                "y": 4130
+            }
+        }
+    },
+    "last.imagePath": "C:/Users/ivan_pavlov/source/MonoGame Practice/1_2D Top Down/1_2D Top Down/Content/Environment",
+    "map.height": 32,
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 256,
+    "map.tileWidth": 256,
+    "map.width": 48,
+    "openFiles": [
+        "ForestMap.tmx",
+        "EnvironmentGround.tsx"
+    ],
+    "project": "WorldMap.tiled-project",
+    "recentFiles": [
+        "EnvironmentGround.tsx",
+        "ForestMap.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 256,
+        "width": 256
+    }
+}

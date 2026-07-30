@@ -14,9 +14,13 @@ namespace _1_2D_Top_Down
         }
         private void UpdateGameObjects(GameTime gameTime)
         {
-            player.Update(gameTime, GraphicsDevice.Viewport.Bounds);
+            player.Update(gameTime,new Rectangle(0,0,(int)worldMap.WorldWidth,(int)worldMap.WorldHeight));
 
-            UpdateEnemySpawning(gameTime);
+            if (isEnemySpawningEnabled)
+            {
+                UpdateEnemySpawning(gameTime);
+
+            }
             UpdateEvilEyes(gameTime);
             UpdateEnemyProjectiles(gameTime);
             UpdateDemons(gameTime);
@@ -76,6 +80,12 @@ namespace _1_2D_Top_Down
         }
         private void UpdateEnemyProjectiles(GameTime gameTime)
         {
+            Rectangle worldBounds = new Rectangle(
+                0,
+                0,
+                (int)worldMap.WorldWidth,
+                (int)worldMap.WorldHeight);
+
             for (int i = enemyProjectiles.Count - 1; i >= 0; i--)
             {
                 EnemyProjectile enemyProjectile = enemyProjectiles[i];
@@ -89,7 +99,7 @@ namespace _1_2D_Top_Down
                     continue;
                 }
 
-                if (!GraphicsDevice.Viewport.Bounds.Intersects(enemyProjectile.Bounds))
+                if (!worldBounds.Intersects(enemyProjectile.Bounds))
                 {
                     enemyProjectiles.RemoveAt(i);
                 }
@@ -103,10 +113,11 @@ namespace _1_2D_Top_Down
 
                 projectile.Update(gameTime);
 
-                bool isOutsideScreen =
-                    !GraphicsDevice.Viewport.Bounds.Intersects(projectile.Bounds);
+                Rectangle worldBounds = new Rectangle(0, 0, WorldWidth, WorldHeight);
 
-                if (isOutsideScreen)
+                bool isOutsideWorld =
+                    !worldBounds.Intersects(projectile.Bounds);
+                if (isOutsideWorld)
                 {
                     projectiles.RemoveAt(i);
                     continue;
@@ -192,7 +203,11 @@ namespace _1_2D_Top_Down
             }
 
             Vector2 startPosition = player.Bounds.Center.ToVector2();
-            Vector2 direction = mouse.Position.ToVector2() - startPosition;
+
+            Vector2 mouseWorldPosition =
+                mouse.Position.ToVector2() + camera.Position;
+
+            Vector2 direction = mouseWorldPosition - startPosition;
 
             if (direction != Vector2.Zero)
             {

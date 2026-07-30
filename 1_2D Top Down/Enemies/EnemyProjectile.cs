@@ -14,19 +14,19 @@ namespace _1_2D_Top_Down
                 texture,
                 startPosition,
                 direction,
-                speed: 350f,
-                scale: 2.5f,
-                frameCount: 9,
+                speed: 325f,
+                scale: 2f,
+                frameCount: 11,
                 frameRows: 1,
-                frameDuration: 0.08f)
+                frameDuration: 0.04f)
         {
         }
         public override Rectangle Bounds
         {
             get
             {
-                int width = (int)(FrameWidth * scale * 0.4f);
-                int height = (int)(FrameHeight * scale * 0.4f);
+                int width = (int)(FrameWidth * scale * 0.75f);
+                int height = (int)(FrameHeight * scale * 0.75f);
 
                 return new Rectangle(
                     (int)(Position.X - width / 2f),
