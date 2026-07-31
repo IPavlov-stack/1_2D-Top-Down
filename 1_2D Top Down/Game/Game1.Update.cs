@@ -45,9 +45,9 @@ namespace _1_2D_Top_Down
             demonDeathAnimations.Clear();
             coins.Clear();
             coinsCollected = 0;
-            nextCoinPickupSoundIndex = 0;
 
             player.Position = playerStartPosition;
+            player.Health.Reset();
             spawnTimer = 0f;
 
             SpawnEnemy();
@@ -62,7 +62,12 @@ namespace _1_2D_Top_Down
 
                 if (player.Bounds.Intersects(demon.Bounds))
                 {
-                    isGameOver = true;
+                    player.TakeDamage(20);
+
+                    if (player.Health.IsDead)
+                    {
+                        isGameOver = true;
+                    }
                 }
             }
         }
@@ -104,8 +109,15 @@ namespace _1_2D_Top_Down
 
                 if (enemyProjectile.Bounds.Intersects(player.Bounds))
                 {
-                    isGameOver = true;
+                    player.TakeDamage(15);
+
                     enemyProjectiles.RemoveAt(i);
+
+                    if (player.Health.IsDead)
+                    {
+                        isGameOver = true;
+                    }
+
                     continue;
                 }
 
@@ -227,8 +239,12 @@ namespace _1_2D_Top_Down
             if (coinPickupSounds == null || coinPickupSounds.Length == 0)
                 return;
 
-            coinPickupSounds[nextCoinPickupSoundIndex].Play();
-            nextCoinPickupSoundIndex = (nextCoinPickupSoundIndex + 1) % coinPickupSounds.Length;
+            int randomSoundIndex = random.Next(coinPickupSounds.Length);
+
+            coinPickupSounds[randomSoundIndex].Play(
+                SoundEffectsVolume, //volume
+                0f,                 //pitch
+                0f);                //pan
         }
 
         private void UpdateDemonDeathAnimations(GameTime gameTime)
@@ -285,6 +301,14 @@ namespace _1_2D_Top_Down
                         playerProjectileTexture,
                         startPosition,
                         direction));
+            }
+        }
+        private void HandleDeveloperMode(KeyboardState keyboard)
+        {
+            if (keyboard.IsKeyDown(Keys.F3) &&
+                previousKeyboard.IsKeyUp(Keys.F3))
+            {
+                isDeveloperMode = !isDeveloperMode;
             }
         }
     }

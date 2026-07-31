@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using MonoGameLibrary.Graphics;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace _1_2D_Top_Down
         private Color BackgroundColor = new Color(119, 167, 255); // sky blue-ish
         private Texture2D pixelTexture;
         private bool isGameOver;
-        private bool isEnemySpawningEnabled = false;
+        private bool isEnemySpawningEnabled = true;
         private const int WindowSizeX = 1920;
         private const int WindowSizeY = 1080;
 
@@ -36,12 +37,11 @@ namespace _1_2D_Top_Down
         private List<PlayerProjectile> projectiles = new List<PlayerProjectile>();
 
         //collectables info
-        private const int CoinDropChancePercent = 30;
+        private const int CoinDropChancePercent = 25;
         private Texture2D coinTexture;
         private List<Coin> coins = new List<Coin>();
         private int coinsCollected;
         private SoundEffect[] coinPickupSounds;
-        private int nextCoinPickupSoundIndex;
 
         //demon info
         private Texture2D demonTexture;
@@ -76,9 +76,18 @@ namespace _1_2D_Top_Down
         private TiledCollisionLayer collisionLayer;
         private List<Rectangle> solidCollisionRectangles;
 
+        //ui info
+
+        //sound effects
+        private const float SoundEffectsVolume = 0.65f;
+
+        //music
+        private Song backgroundMusic;
+        private const float MusicVolume = 0.3f;
 
         //others
         private Random random = new Random();
+        private bool isDeveloperMode;
 
         public Game1()
         {
@@ -152,34 +161,18 @@ namespace _1_2D_Top_Down
             LoadPortals();
 
             player = new Player(playerTexture, playerStartPosition);
-        }
-        private void DrawTile(int column, int row, Vector2 position)
-        {
-            Rectangle sourceRectangle = new Rectangle(
-                column * TileSize,
-                row * TileSize,
-                TileSize,
-                TileSize);
 
-            _spriteBatch.Draw(
-                forestTileset,
-                position,
-                sourceRectangle,
-                Color.White);
-        }
-        private void DrawEnvironment(TextureAtlas atlas, string regionName, Vector2 position)
-        {
-            TextureRegion region = atlas.GetRegion(regionName);
+            backgroundMusic = Content.Load<Song>("Music/ambient_forest");
 
-            region.Draw(
-                _spriteBatch,
-                position,
-                Color.White,
-                0f,
-                Vector2.Zero,
-                EnvironmentScale,
-                SpriteEffects.None,
-                0f);
+            MediaPlayer.IsRepeating = true;
+            MediaPlayer.Volume = MusicVolume;
+
+            if (MediaPlayer.State != MediaState.Stopped)
+            {
+                MediaPlayer.Stop();
+            }
+
+            MediaPlayer.Play(backgroundMusic);
         }
         protected override void Update(GameTime gameTime)
         {
@@ -189,6 +182,7 @@ namespace _1_2D_Top_Down
             MouseState mouse = Mouse.GetState();
 
             HandleExit(keyboard);
+            HandleDeveloperMode(keyboard);
             Vector2 playerCenter = player.Position +
                        new Vector2(player.texture.Width / 2, player.texture.Height / 2);
 
@@ -215,49 +209,61 @@ namespace _1_2D_Top_Down
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(isGameOver ? Color.Black : BackgroundColor);
+            GraphicsDevice.Clear(
+                isDeveloperMode
+                    ? Color.DimGray
+                    : isGameOver ? Color.Black : BackgroundColor);
 
             // Светът се мести се с камерата
             _spriteBatch.Begin(
                 transformMatrix: camera.Transform,
                 samplerState: SamplerState.PointClamp);
-            DrawMap();
 
-            foreach (Coin coin in coins)
+            if (isDeveloperMode)
             {
-                coin.Draw(_spriteBatch);
+                DrawDeveloperMode();
             }
-
-            player.Draw(_spriteBatch);
-            propsLayer.DrawInFrontOfPlayer(_spriteBatch, player.Bounds.Bottom);
-
-            foreach (Projectile projectile in projectiles)
+            else
             {
-                projectile.Draw(_spriteBatch);
-            }
+                DrawMap();
 
-            foreach (Demon demon in demons)
-            {
-                demon.Draw(_spriteBatch);
-            }
+                foreach (Coin coin in coins)
+                {
+                    coin.Draw(_spriteBatch);
+                }
 
-            foreach (DeathAnimation deathAnimation in demonDeathAnimations)
-            {
-                deathAnimation.Draw(_spriteBatch);
-            }
+                player.Draw(_spriteBatch);
+                propsLayer.DrawInFrontOfPlayer(_spriteBatch, player.Bounds.Bottom);
 
-            foreach (Evil_Eye evilEye in evilEyes)
-            {
-                evilEye.Draw(_spriteBatch);
-            }
+                foreach (Projectile projectile in projectiles)
+                {
+                    projectile.Draw(_spriteBatch);
+                }
 
-            foreach (EnemyProjectile enemyProjectile in enemyProjectiles)
-            {
-                enemyProjectile.Draw(_spriteBatch);
+                foreach (Demon demon in demons)
+                {
+                    demon.Draw(_spriteBatch);
+                }
+
+                foreach (DeathAnimation deathAnimation in demonDeathAnimations)
+                {
+                    deathAnimation.Draw(_spriteBatch);
+                }
+
+                foreach (Evil_Eye evilEye in evilEyes)
+                {
+                    evilEye.Draw(_spriteBatch);
+                }
+
+                foreach (EnemyProjectile enemyProjectile in enemyProjectiles)
+                {
+                    enemyProjectile.Draw(_spriteBatch);
+                }
+
+                DrawPlayerHealthBar();
             }
 
             _spriteBatch.End();
-
             //UI остава неподвижно на екрана
             _spriteBatch.Begin();
 
@@ -323,5 +329,106 @@ namespace _1_2D_Top_Down
             portalLayer.Draw(_spriteBatch);
             propsLayer.DrawBehindPlayer(_spriteBatch, player.Bounds.Bottom);
         }
+        private void DrawPlayerHealthBar()
+        {
+            const int barWidth = 80;
+            const int barHeight = 11;
+            const int borderSize = 2;
+            const int distanceAbovePlayer = 18;
+
+            float healthPercent =
+                player.Health.CurrentHealth / (float)player.Health.MaxHealth;
+
+            int x = player.Bounds.Center.X - barWidth / 2;
+            int y = player.Bounds.Top - distanceAbovePlayer;
+
+            Rectangle borderRectangle = new Rectangle(x, y, barWidth, barHeight);
+
+            Rectangle backgroundRectangle = new Rectangle(
+                x + borderSize,
+                y + borderSize,
+                barWidth - borderSize * 2,
+                barHeight - borderSize * 2);
+
+            Rectangle healthRectangle = new Rectangle(
+                x + borderSize,
+                y + borderSize,
+                (int)(backgroundRectangle.Width * healthPercent),
+                backgroundRectangle.Height);
+
+            _spriteBatch.Draw(pixelTexture, borderRectangle, Color.Black);
+            _spriteBatch.Draw(pixelTexture, backgroundRectangle, Color.DarkRed);
+            _spriteBatch.Draw(pixelTexture, healthRectangle, Color.LimeGreen);
+        }
+
+        private void DrawDeveloperMode()
+        {
+            foreach (Rectangle collisionRectangle in solidCollisionRectangles)
+            {
+                DrawDebugRectangle(collisionRectangle, Color.White);
+            }
+
+            DrawDebugRectangle(player.Bounds, Color.DodgerBlue);
+
+            foreach (Coin coin in coins)
+            {
+                DrawDebugRectangle(coin.Bounds, Color.Gold);
+            }
+
+            foreach (PlayerProjectile projectile in projectiles)
+            {
+                DrawDebugRectangle(projectile.Bounds, Color.LimeGreen);
+            }
+
+            foreach (Demon demon in demons)
+            {
+                DrawDebugRectangle(demon.Bounds, Color.Red);
+            }
+
+            foreach (Evil_Eye evilEye in evilEyes)
+            {
+                if (!evilEye.IsDead)
+                {
+                    DrawDebugRectangle(evilEye.Bounds, Color.OrangeRed);
+                }
+            }
+
+            foreach (EnemyProjectile projectile in enemyProjectiles)
+            {
+                DrawDebugRectangle(projectile.Bounds, Color.MediumPurple);
+            }
+        }
+
+        private void DrawDebugRectangle(Rectangle rectangle, Color color)
+        {
+            const int outlineThickness = 2;
+
+            _spriteBatch.Draw(pixelTexture, rectangle, color * 0.25f);
+
+            _spriteBatch.Draw(
+                pixelTexture,
+                new Rectangle(rectangle.X, rectangle.Y,
+                    rectangle.Width, outlineThickness),
+                color);
+
+            _spriteBatch.Draw(
+                pixelTexture,
+                new Rectangle(rectangle.X, rectangle.Bottom - outlineThickness,
+                    rectangle.Width, outlineThickness),
+                color);
+
+            _spriteBatch.Draw(
+                pixelTexture,
+                new Rectangle(rectangle.X, rectangle.Y,
+                    outlineThickness, rectangle.Height),
+                color);
+
+            _spriteBatch.Draw(
+                pixelTexture,
+                new Rectangle(rectangle.Right - outlineThickness, rectangle.Y,
+                    outlineThickness, rectangle.Height),
+                color);
+        }
+
     }
 }

@@ -13,7 +13,7 @@ namespace _1_2D_Top_Down
                 texture,
                 startPosition,
                 direction,
-                speed: 500f,
+                speed: 600f,
                 scale: 0.9f,
                 frameCount: 3,
                 frameRows: 1,

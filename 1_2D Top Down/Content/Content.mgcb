@@ -118,11 +118,17 @@
 #begin Maps/ForestMap.tmx
 /copy:Maps/ForestMap.tmx
 
+#begin Music/AmbientForest.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/AmbientForest.mp3;Music/ambient_forest.mp3
+
 #begin Music/theme_forest.mp3
 /importer:Mp3Importer
 /processor:SongProcessor
 /processorParam:Quality=Best
-/build:Music/theme_forest.mp3
+/build:Music/theme_forest.mp3;Music/boss_theme.mp3
 
 #begin Objects/Portal_orange-sheet.png
 /importer:TextureImporter
@@ -214,4 +220,16 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
 /build:Sprite fonts/GameFont.spritefont
+
+#begin UI/health_bar.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/health_bar.png
 

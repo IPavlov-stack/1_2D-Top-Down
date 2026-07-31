@@ -19,10 +19,15 @@ namespace _1_2D_Top_Down
         private int FrameHeight => texture.Height;
 
         private const float Scale = 1.3f;
-        private const float Speed = 300f;
+        private const float PlayerMoveSpeed = 400f;
 
         public Vector2 Position;
         public Vector2 playerPosition = new Vector2(400, 500);
+
+        public Health Health { get; }
+        private const float InvulnerabilityDuration = 0.75f;
+        private float invulnerabilityTimer;
+
 
         public Rectangle Bounds
         {
@@ -49,6 +54,7 @@ namespace _1_2D_Top_Down
         {
             this.texture = texture;
             Position = startPosition;
+            Health = new Health(100);
         }
 
         public void Update(
@@ -56,6 +62,10 @@ namespace _1_2D_Top_Down
             Rectangle arena,
             IReadOnlyList<Rectangle> collisionRectangles)
         {
+            if (invulnerabilityTimer > 0f)
+            {
+                invulnerabilityTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
             KeyboardState keyboard = Keyboard.GetState();
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
@@ -73,7 +83,7 @@ namespace _1_2D_Top_Down
             if (direction != Vector2.Zero)
                 direction.Normalize();
 
-            float movementDistance = Speed * deltaTime;
+            float movementDistance = PlayerMoveSpeed * deltaTime;
 
             // Each axis is tried independently. If X is blocked but Y is
             // clear, the player still moves along the obstacle instead of
@@ -138,9 +148,23 @@ namespace _1_2D_Top_Down
 
             return false;
         }
+        public void TakeDamage(int damage)
+        {
+            if (invulnerabilityTimer > 0f || Health.IsDead)
+                return;
 
+            Health.TakeDamage(damage);
+            invulnerabilityTimer = InvulnerabilityDuration;
+        }
         public void Draw(SpriteBatch spriteBatch)
         {
+            //=== while player is invulnerable after taking damage: effect
+            if (invulnerabilityTimer > 0f &&
+                (int)(invulnerabilityTimer * 12f) % 2 == 0)
+            {
+                return;
+            }
+            //===
             Rectangle sourceRectangle = new Rectangle(
                 currentFrame * FrameWidth,
                 0,

@@ -15,7 +15,7 @@ namespace _1_2D_Top_Down
                 startPosition,
                 direction,
                 speed: 325f,
-                scale: 2f,
+                scale: 1.75f,
                 frameCount: 11,
                 frameRows: 1,
                 frameDuration: 0.04f)
