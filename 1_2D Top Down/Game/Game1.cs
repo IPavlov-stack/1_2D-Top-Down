@@ -1,10 +1,12 @@
 ﻿using _2D_Top_Down;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGameLibrary.Graphics;
 using System;
 using System.Collections.Generic;
-using MonoGameLibrary.Graphics;
+using Tiled;
 
 
 namespace _1_2D_Top_Down
@@ -15,22 +17,31 @@ namespace _1_2D_Top_Down
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SpriteFont gamefont;
-        private Color BackgroundColor = new Color(119, 167, 255);
-        private const int WindowSizeX = 1920;
-        private const int WindowSizeY = 1080;
+        private Color BackgroundColor = new Color(119, 167, 255); // sky blue-ish
         private Texture2D pixelTexture;
         private bool isGameOver;
         private bool isEnemySpawningEnabled = false;
+        private const int WindowSizeX = 1920;
+        private const int WindowSizeY = 1080;
 
-        private Random random = new Random();
+
+        //input info
         private MouseState previousMouseState;
         private KeyboardState previousKeyboard;
 
         //player info
         private Player player;
-        private Vector2 playerStartPosition = new Vector2(400, 500);
+        private Vector2 playerStartPosition = new Vector2(2150, 1850);
         private Texture2D playerProjectileTexture;
         private List<PlayerProjectile> projectiles = new List<PlayerProjectile>();
+
+        //collectables info
+        private const int CoinDropChancePercent = 30;
+        private Texture2D coinTexture;
+        private List<Coin> coins = new List<Coin>();
+        private int coinsCollected;
+        private SoundEffect[] coinPickupSounds;
+        private int nextCoinPickupSoundIndex;
 
         //demon info
         private Texture2D demonTexture;
@@ -46,21 +57,29 @@ namespace _1_2D_Top_Down
 
         //spawner info
         private float spawnTimer;
-        private const float SpawnInterval = 0.3f;
+        private const float SpawnInterval = 0.5f;
 
-        
+        //camera info
         private Camera camera;
+
+        //world map info
         private const int WorldWidth = 3000;
         private const int WorldHeight = 2000;
-        //world map
-        private Texture2D forestTileset;
         private const int TileSize = 64;
-        private const int TilesPerRow = 14;
+        private const float EnvironmentScale = 0.25f;
+        private Texture2D forestTileset;
         private TextureAtlas environmentGroundAtlas;
         private TextureAtlas environmentPropsAtlas;
-        private const float EnvironmentScale = 0.25f;
-        private TiledGroundMap worldMap;
+        private TiledTileLayer waterMap;
+        private TiledTileLayer worldMap;
         private TiledPropsLayer propsLayer;
+        private TiledCollisionLayer collisionLayer;
+        private List<Rectangle> solidCollisionRectangles;
+
+
+        //others
+        private Random random = new Random();
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -90,17 +109,49 @@ namespace _1_2D_Top_Down
             pixelTexture = new Texture2D(GraphicsDevice, 1, 1);
             pixelTexture.SetData(new[] { Color.White });
             Texture2D playerTexture = Content.Load<Texture2D>("player/Character");
-            player = new Player(playerTexture, playerStartPosition);
             demonTexture = Content.Load<Texture2D>("enemies/Demon/FLYING");
             demonDeathTexture = Content.Load<Texture2D>("enemies/Demon/DEATH");
             playerProjectileTexture = Content.Load<Texture2D>("projectiles/magic_projectile");
+            coinTexture = Content.Load<Texture2D>("Collectables/coin");
+            coinPickupSounds = new[]
+            {
+                Content.Load<SoundEffect>("Sounds/Coin/coin_1"),
+                Content.Load<SoundEffect>("Sounds/Coin/coin_2"),
+                Content.Load<SoundEffect>("Sounds/Coin/coin_3"),
+                Content.Load<SoundEffect>("Sounds/Coin/coin_4"),
+                Content.Load<SoundEffect>("Sounds/Coin/coin_5")
+            };
             evilEyeProjectileTexture = Content.Load<Texture2D>("projectiles/evilEye/evilEye_projectile_sphere");
-            gamefont = Content.Load<SpriteFont>("Sprite fonts/GameFont");
             evilEyeTexture = Content.Load<Texture2D>("enemies/Evil Eye/Evil Eye Sprite sheet");
-            environmentGroundAtlas = TextureAtlas.FromFile(Content,"Environment/EnvironmentGroundAtlas.xml");
-            environmentPropsAtlas = TextureAtlas.FromFile(Content,"Environment/EnvironmentPropsAtlas.xml");
-            worldMap = TiledGroundMap.FromFile(Content,"Maps/ForestMap.tmx","Environment/EnvironmentGroundAtlas",EnvironmentScale);
-            propsLayer = TiledPropsLayer.FromFile(Content,"Maps/ForestMap.tmx",environmentPropsAtlas,EnvironmentScale);
+            gamefont = Content.Load<SpriteFont>("Sprite fonts/GameFont");
+
+
+            environmentGroundAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentGroundAtlas.xml");
+            environmentPropsAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentPropsAtlas.xml");
+            waterMap = TiledTileLayer.FromFile(
+                Content,
+                "Maps/ForestMap.tmx",
+                "Environment/Water/tileset_water256x256",
+                "tileset_water256x256.tsx",
+                EnvironmentScale,
+                "Water");
+
+            worldMap = TiledTileLayer.FromFile(
+                Content,
+                "Maps/ForestMap.tmx",
+                "Environment/EnvironmentGroundAtlas",
+                "EnvironmentGround.tsx",
+                EnvironmentScale,
+                "Ground");
+            propsLayer = TiledPropsLayer.FromFile(Content, "Maps/ForestMap.tmx", environmentPropsAtlas, EnvironmentScale);
+            collisionLayer = TiledCollisionLayer.FromFile(Content, "Maps/ForestMap.tmx", EnvironmentScale);
+            TiledWaterCollisionLayer waterCollisionLayer = TiledWaterCollisionLayer.FromFile(Content, "Maps/ForestMap.tmx", "tileset_water256x256.tsx", EnvironmentScale);
+
+            solidCollisionRectangles = new List<Rectangle>(collisionLayer.Rectangles);
+            solidCollisionRectangles.AddRange(waterCollisionLayer.Rectangles);
+            LoadPortals();
+
+            player = new Player(playerTexture, playerStartPosition);
         }
         private void DrawTile(int column, int row, Vector2 position)
         {
@@ -132,6 +183,8 @@ namespace _1_2D_Top_Down
         }
         protected override void Update(GameTime gameTime)
         {
+            portalLayer.Update(gameTime);
+
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
@@ -170,7 +223,13 @@ namespace _1_2D_Top_Down
                 samplerState: SamplerState.PointClamp);
             DrawMap();
 
+            foreach (Coin coin in coins)
+            {
+                coin.Draw(_spriteBatch);
+            }
+
             player.Draw(_spriteBatch);
+            propsLayer.DrawInFrontOfPlayer(_spriteBatch, player.Bounds.Bottom);
 
             foreach (Projectile projectile in projectiles)
             {
@@ -202,13 +261,55 @@ namespace _1_2D_Top_Down
             //UI остава неподвижно на екрана
             _spriteBatch.Begin();
 
+            _spriteBatch.DrawString(
+                gamefont,
+                $"Coins: {coinsCollected}",
+                new Vector2(20, 20),
+                Color.Gold);
+
             if (isGameOver)
             {
+                Rectangle screenBounds = GraphicsDevice.Viewport.Bounds;
+
+                _spriteBatch.Draw(
+                    pixelTexture,
+                    screenBounds,
+                    Color.Black * 0.60f);
+
+                const string title = "GAME OVER";
+                const string restartText = "Press R to restart";
+                const float titleScale = 3f;
+                const float restartScale = 1.25f;
+                const float spacing = 28f;
+
+                Vector2 titleSize = gamefont.MeasureString(title) * titleScale;
+                Vector2 restartSize = gamefont.MeasureString(restartText) * restartScale;
+                float contentHeight = titleSize.Y + spacing + restartSize.Y;
+                float top = (screenBounds.Height - contentHeight) / 2f;
+
                 _spriteBatch.DrawString(
                     gamefont,
-                    "Game Over!\nPress R to restart.",
-                    new Vector2(20, 80),
-                    Color.Red);
+                    title,
+                    new Vector2((screenBounds.Width - titleSize.X) / 2f, top),
+                    Color.Red,
+                    0f,
+                    Vector2.Zero,
+                    titleScale,
+                    SpriteEffects.None,
+                    0f);
+
+                _spriteBatch.DrawString(
+                    gamefont,
+                    restartText,
+                    new Vector2(
+                        (screenBounds.Width - restartSize.X) / 2f,
+                        top + titleSize.Y + spacing),
+                    Color.White,
+                    0f,
+                    Vector2.Zero,
+                    restartScale,
+                    SpriteEffects.None,
+                    0f);
             }
 
             _spriteBatch.End();
@@ -217,8 +318,10 @@ namespace _1_2D_Top_Down
         }
         private void DrawMap()
         {
+            waterMap.Draw(_spriteBatch);
             worldMap.Draw(_spriteBatch);
-            propsLayer.Draw(_spriteBatch);
+            portalLayer.Draw(_spriteBatch);
+            propsLayer.DrawBehindPlayer(_spriteBatch, player.Bounds.Bottom);
         }
     }
-    }
+}

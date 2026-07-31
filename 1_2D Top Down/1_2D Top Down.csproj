@@ -12,6 +12,12 @@
     <ApplicationIcon>favicon (4).ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Content\Maps\tileset_water256x256.tsx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Maps\tileset_water256x256.tsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="favicon (4).ico" />
   </ItemGroup>
   <ItemGroup>

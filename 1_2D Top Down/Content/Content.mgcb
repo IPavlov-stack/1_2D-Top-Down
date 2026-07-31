@@ -13,6 +13,30 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Collectables/coin.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Collectables/coin.png
+
+#begin Collectables/MonedaD.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Collectables/MonedaD.png
+
 #begin enemies/Demon/DEATH.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -79,8 +103,38 @@
 #begin Environment/EnvironmentPropsAtlas.xml
 /copy:Environment/EnvironmentPropsAtlas.xml
 
+#begin Environment/Water/tileset_water256x256.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Environment/Water/tileset_water256x256.png
+
 #begin Maps/ForestMap.tmx
 /copy:Maps/ForestMap.tmx
+
+#begin Music/theme_forest.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/theme_forest.mp3
+
+#begin Objects/Portal_orange-sheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Objects/Portal_orange-sheet.png
 
 #begin player/Charcter.png
 /importer:TextureImporter
@@ -117,6 +171,42 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:projectiles/magic_projectile.png
+
+#begin Songs/theme_forest.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Songs/theme_forest.mp3
+
+#begin Sounds/Coin/coin_1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Coin/coin_1.wav
+
+#begin Sounds/Coin/coin_2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Coin/coin_2.wav
+
+#begin Sounds/Coin/coin_3.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Coin/coin_3.wav
+
+#begin Sounds/Coin/coin_4.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Coin/coin_4.wav
+
+#begin Sounds/Coin/coin_5.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Coin/coin_5.wav
 
 #begin Sprite fonts/GameFont.spritefont
 /importer:FontDescriptionImporter
