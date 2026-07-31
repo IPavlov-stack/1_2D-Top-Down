@@ -128,8 +128,7 @@
 /importer:Mp3Importer
 /processor:SongProcessor
 /processorParam:Quality=Best
-/build:Music/theme_forest.mp3;Music/boss_theme.mp3
-
+/build:Music/theme_forest.mp3
 #begin Objects/Portal_orange-sheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -202,17 +201,6 @@
 /processorParam:Quality=Best
 /build:Sounds/Coin/coin_3.wav
 
-#begin Sounds/Coin/coin_4.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sounds/Coin/coin_4.wav
-
-#begin Sounds/Coin/coin_5.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sounds/Coin/coin_5.wav
 
 #begin Sprite fonts/GameFont.spritefont
 /importer:FontDescriptionImporter

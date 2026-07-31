@@ -29,6 +29,7 @@ namespace _1_2D_Top_Down
         private float invulnerabilityTimer;
 
 
+
         public Rectangle Bounds
         {
             get
@@ -102,11 +103,36 @@ namespace _1_2D_Top_Down
                     currentFrame = 0;
             }
         }
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            //=== while player is invulnerable after taking damage: effect
+            if (invulnerabilityTimer > 0f &&
+                (int)(invulnerabilityTimer * 12f) % 2 == 0)
+            {
+                return;
+            }
+            //===
+            Rectangle sourceRectangle = new Rectangle(
+                currentFrame * FrameWidth,
+                0,
+                FrameWidth,
+                FrameHeight);
 
+            spriteBatch.Draw(
+                texture,
+                Position,
+                sourceRectangle,
+                Color.White,
+                0f,
+                Vector2.Zero,
+                Scale,
+                SpriteEffects.None,
+                0f);
+        }
         private void TryMoveHorizontally(
-            float distance,
-            Rectangle arena,
-            IReadOnlyList<Rectangle> collisionRectangles)
+           float distance,
+           Rectangle arena,
+           IReadOnlyList<Rectangle> collisionRectangles)
         {
             float previousX = Position.X;
             Position.X += distance;
@@ -155,32 +181,6 @@ namespace _1_2D_Top_Down
 
             Health.TakeDamage(damage);
             invulnerabilityTimer = InvulnerabilityDuration;
-        }
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            //=== while player is invulnerable after taking damage: effect
-            if (invulnerabilityTimer > 0f &&
-                (int)(invulnerabilityTimer * 12f) % 2 == 0)
-            {
-                return;
-            }
-            //===
-            Rectangle sourceRectangle = new Rectangle(
-                currentFrame * FrameWidth,
-                0,
-                FrameWidth,
-                FrameHeight);
-
-            spriteBatch.Draw(
-                texture,
-                Position,
-                sourceRectangle,
-                Color.White,
-                0f,
-                Vector2.Zero,
-                Scale,
-                SpriteEffects.None,
-                0f);
         }
     }
 }

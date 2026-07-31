@@ -234,6 +234,8 @@ namespace _1_2D_Top_Down
             }
         }
 
+       
+
         private void PlayNextCoinPickupSound()
         {
             if (coinPickupSounds == null || coinPickupSounds.Length == 0)
