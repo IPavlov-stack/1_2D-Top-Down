@@ -32,7 +32,9 @@ namespace _1_2D_Top_Down
             foreach (EnemyProjectile enemyProjectile in enemyProjectiles)
                 enemyProjectile.Draw(_spriteBatch);
 
+            DrawEnemyHealthBars();
             DrawPlayerHealthBar();
+            DrawPlayerManaBar();
         }
 
         private void DrawUi()
@@ -40,15 +42,72 @@ namespace _1_2D_Top_Down
             _spriteBatch.Begin();
 
             _spriteBatch.DrawString(
-                gamefont,
+                boldpixels,
                 $"Coins: {coinsCollected}",
                 new Vector2(20, 20),
                 Color.Gold);
+            DrawGameplayUI();
+            DrawExitConfirmation();
 
             if (isGameOver)
                 DrawGameOverScreen();
 
             _spriteBatch.End();
+        }
+
+        private void DrawEnemyHealthBars()
+        {
+            foreach (Demon demon in demons)
+            {
+                DrawEnemyHealthBar(demon.Health, demon.Bounds);
+            }
+
+            foreach (Evil_Eye evilEye in evilEyes)
+            {
+                if (!evilEye.IsDead)
+                {
+                    DrawEnemyHealthBar(evilEye.Health, evilEye.Bounds);
+                }
+            }
+        }
+
+        private void DrawEnemyHealthBar(Health health, Rectangle bounds)
+        {
+            // Не показваме bar при пълна кръв или след смърт.
+            if (health.CurrentHealth >= health.MaxHealth || health.IsDead)
+            {
+                return;
+            }
+
+            const int barWidth = 46;
+            const int barHeight = 7;
+            const int borderSize = 1;
+            const int distanceAboveEnemy = 8;
+
+            float healthPercent =
+                health.CurrentHealth / (float)health.MaxHealth;
+
+            int x = bounds.Center.X - barWidth / 2;
+            int y = bounds.Top - distanceAboveEnemy;
+
+            Rectangle borderRectangle =
+                new Rectangle(x, y, barWidth, barHeight);
+
+            Rectangle backgroundRectangle = new Rectangle(
+                x + borderSize,
+                y + borderSize,
+                barWidth - borderSize * 2,
+                barHeight - borderSize * 2);
+
+            Rectangle currentHealthRectangle = new Rectangle(
+                backgroundRectangle.X,
+                backgroundRectangle.Y,
+                (int)(backgroundRectangle.Width * healthPercent),
+                backgroundRectangle.Height);
+
+            _spriteBatch.Draw(pixelTexture, borderRectangle, Color.Black);
+            _spriteBatch.Draw(pixelTexture, backgroundRectangle, Color.DarkRed);
+            _spriteBatch.Draw(pixelTexture, currentHealthRectangle, Color.LimeGreen);
         }
 
         private void DrawGameOverScreen()
@@ -66,13 +125,13 @@ namespace _1_2D_Top_Down
             const float restartScale = 1.25f;
             const float spacing = 28f;
 
-            Vector2 titleSize = gamefont.MeasureString(title) * titleScale;
-            Vector2 restartSize = gamefont.MeasureString(restartText) * restartScale;
+            Vector2 titleSize = boldpixels.MeasureString(title) * titleScale;
+            Vector2 restartSize = boldpixels.MeasureString(restartText) * restartScale;
             float contentHeight = titleSize.Y + spacing + restartSize.Y;
             float top = (screenBounds.Height - contentHeight) / 2f;
 
             _spriteBatch.DrawString(
-                gamefont,
+                boldpixels,
                 title,
                 new Vector2((screenBounds.Width - titleSize.X) / 2f, top),
                 Color.Red,
@@ -83,7 +142,7 @@ namespace _1_2D_Top_Down
                 0f);
 
             _spriteBatch.DrawString(
-                gamefont,
+                boldpixels,
                 restartText,
                 new Vector2(
                     (screenBounds.Width - restartSize.X) / 2f,
@@ -109,8 +168,7 @@ namespace _1_2D_Top_Down
             const int barWidth = 80;
             const int barHeight = 11;
             const int borderSize = 2;
-            const int distanceAbovePlayer = 18;
-
+            const int distanceAbovePlayer = 30;
             float healthPercent =
                 player.Health.CurrentHealth / (float)player.Health.MaxHealth;
 
@@ -136,6 +194,49 @@ namespace _1_2D_Top_Down
             _spriteBatch.Draw(pixelTexture, healthRectangle, Color.LimeGreen);
         }
 
+        private void DrawPlayerManaBar()
+        {
+            const int barWidth = 80;
+            const int barHeight = 8;
+            const int borderSize = 2;
+
+            const int distanceAbovePlayer = 30;
+            const int healthBarHeight = 11;
+            const int spaceBetweenBars = 3;
+
+            float manaPercent =
+                player.Mana.CurrentMana / player.Mana.MaxMana;
+
+            int x = player.Bounds.Center.X - barWidth / 2;
+
+            int y =
+                player.Bounds.Top -
+                distanceAbovePlayer +
+                healthBarHeight +
+                spaceBetweenBars;
+
+            Rectangle borderRectangle = new Rectangle(
+                x,
+                y,
+                barWidth,
+                barHeight);
+
+            Rectangle backgroundRectangle = new Rectangle(
+                x + borderSize,
+                y + borderSize,
+                barWidth - borderSize * 2,
+                barHeight - borderSize * 2);
+
+            Rectangle manaRectangle = new Rectangle(
+                x + borderSize,
+                y + borderSize,
+                (int)(backgroundRectangle.Width * manaPercent),
+                backgroundRectangle.Height);
+
+            _spriteBatch.Draw(pixelTexture, borderRectangle, Color.Black);
+            _spriteBatch.Draw(pixelTexture, backgroundRectangle, Color.DarkBlue);
+            _spriteBatch.Draw(pixelTexture, manaRectangle, Color.DodgerBlue);
+        }
         private void DrawDeveloperMode()
         {
             foreach (Rectangle collisionRectangle in solidCollisionRectangles)

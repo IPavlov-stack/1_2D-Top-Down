@@ -8,6 +8,16 @@ namespace _1_2D_Top_Down
 {
     public class Player
     {
+        // Health
+        private const int PlayerMaxHealth = 100;
+
+        // Mana
+        private const float PlayerMaxMana = 100f;
+        private const float PlayerManaRegenPerSecond = 12f;
+
+        // Combat
+        public const float BasicAttackManaCost = 8f;
+
         public Texture2D texture;
 
         private const int FrameCount = 4;
@@ -24,9 +34,13 @@ namespace _1_2D_Top_Down
         public Vector2 Position;
         public Vector2 playerPosition = new Vector2(400, 500);
 
+        private const float DamageFlashDuration = 0.75f;
+        private float damageFlashTimer;
+
+
         public Health Health { get; }
-        private const float InvulnerabilityDuration = 0.75f;
-        private float invulnerabilityTimer;
+        public Mana Mana { get; }
+
 
 
 
@@ -55,59 +69,65 @@ namespace _1_2D_Top_Down
         {
             this.texture = texture;
             Position = startPosition;
-            Health = new Health(100);
+            Health = new Health(PlayerMaxHealth);
+            Mana = new Mana( PlayerMaxMana, PlayerManaRegenPerSecond);
         }
 
         public void Update(
             GameTime gameTime,
             Rectangle arena,
-            IReadOnlyList<Rectangle> collisionRectangles)
+            IReadOnlyList<Rectangle> collisionRectangles,
+            bool canMove)
         {
-            if (invulnerabilityTimer > 0f)
+            if (damageFlashTimer > 0f)
             {
-                invulnerabilityTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                damageFlashTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
             KeyboardState keyboard = Keyboard.GetState();
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            Vector2 direction = Vector2.Zero;
-
-            if (keyboard.IsKeyDown(Keys.Left) || keyboard.IsKeyDown(Keys.A))
-                direction.X -= 1f;
-            if (keyboard.IsKeyDown(Keys.Right) || keyboard.IsKeyDown(Keys.D))
-                direction.X += 1f;
-            if (keyboard.IsKeyDown(Keys.Up) || keyboard.IsKeyDown(Keys.W))
-                direction.Y -= 1f;
-            if (keyboard.IsKeyDown(Keys.Down) || keyboard.IsKeyDown(Keys.S))
-                direction.Y += 1f;
-
-            if (direction != Vector2.Zero)
-                direction.Normalize();
-
-            float movementDistance = PlayerMoveSpeed * deltaTime;
-
-            // Each axis is tried independently. If X is blocked but Y is
-            // clear, the player still moves along the obstacle instead of
-            // getting stuck against its corner.
-            TryMoveHorizontally(direction.X * movementDistance, arena, collisionRectangles);
-            TryMoveVertically(direction.Y * movementDistance, arena, collisionRectangles);
-
-            animationTimer += deltaTime;
-
-            if (animationTimer >= FrameDuration)
+            if (canMove)
             {
-                currentFrame++;
-                animationTimer = 0f;
+                float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                if (currentFrame >= FrameCount)
-                    currentFrame = 0;
+                Vector2 direction = Vector2.Zero;
+
+                if (keyboard.IsKeyDown(Keys.Left) || keyboard.IsKeyDown(Keys.A))
+                    direction.X -= 1f;
+                if (keyboard.IsKeyDown(Keys.Right) || keyboard.IsKeyDown(Keys.D))
+                    direction.X += 1f;
+                if (keyboard.IsKeyDown(Keys.Up) || keyboard.IsKeyDown(Keys.W))
+                    direction.Y -= 1f;
+                if (keyboard.IsKeyDown(Keys.Down) || keyboard.IsKeyDown(Keys.S))
+                    direction.Y += 1f;
+
+                if (direction != Vector2.Zero)
+                    direction.Normalize();
+
+                float movementDistance = PlayerMoveSpeed * deltaTime;
+
+                // Each axis is tried independently. If X is blocked but Y is
+                // clear, the player still moves along the obstacle instead of
+                // getting stuck against its corner.
+                TryMoveHorizontally(direction.X * movementDistance, arena, collisionRectangles);
+                TryMoveVertically(direction.Y * movementDistance, arena, collisionRectangles);
+
+                animationTimer += deltaTime;
+
+                if (animationTimer >= FrameDuration)
+                {
+                    currentFrame++;
+                    animationTimer = 0f;
+
+                    if (currentFrame >= FrameCount)
+                        currentFrame = 0;
+                }
+                Mana.Update(gameTime);
             }
         }
         public void Draw(SpriteBatch spriteBatch)
         {
             //=== while player is invulnerable after taking damage: effect
-            if (invulnerabilityTimer > 0f &&
-                (int)(invulnerabilityTimer * 12f) % 2 == 0)
+            if (damageFlashTimer > 0f &&
+                (int)(damageFlashTimer * 12f) % 2 == 0)
             {
                 return;
             }
@@ -176,11 +196,13 @@ namespace _1_2D_Top_Down
         }
         public void TakeDamage(int damage)
         {
-            if (invulnerabilityTimer > 0f || Health.IsDead)
+            if (damage <= 0 || Health.IsDead)
+            {
                 return;
+            }
 
             Health.TakeDamage(damage);
-            invulnerabilityTimer = InvulnerabilityDuration;
+            damageFlashTimer = DamageFlashDuration;
         }
     }
 }

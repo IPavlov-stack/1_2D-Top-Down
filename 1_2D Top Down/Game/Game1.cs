@@ -17,7 +17,6 @@ namespace _1_2D_Top_Down
         //game info
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private SpriteFont gamefont;
         private Color BackgroundColor = new Color(119, 167, 255); // sky blue-ish
         private Texture2D pixelTexture;
         private bool isGameOver;
@@ -35,6 +34,7 @@ namespace _1_2D_Top_Down
         private Vector2 playerStartPosition = new Vector2(2150, 1850);
         private Texture2D playerProjectileTexture;
         private List<PlayerProjectile> projectiles = new List<PlayerProjectile>();
+        private const int PlayerProjectileDamage = 25;
 
         //collectables info
         private const int CoinDropChancePercent = 25;
@@ -57,7 +57,7 @@ namespace _1_2D_Top_Down
 
         //spawner info
         private float spawnTimer;
-        private const float SpawnInterval = 0.5f;
+        private const float SpawnInterval = 1.0f;
 
         //camera info
         private Camera camera;
@@ -77,13 +77,27 @@ namespace _1_2D_Top_Down
         private List<Rectangle> solidCollisionRectangles;
 
         //ui info
+        private Texture2D inventoryPanelTexture;
+        private Texture2D questPanelTexture;
+        private Texture2D spellsPanelTexture;
 
         //sound effects
         private const float SoundEffectsVolume = 0.65f;
 
         //music
         private Song backgroundMusic;
-        private const float MusicVolume = 0.3f;
+        private const float MusicVolume = 0.4f;
+
+        //scene info
+        private GameScene currentScene = GameScene.MainMenu;
+        private const float SceneTransitionDuration = 1.0f;
+        private bool isSceneTransitioning;
+        private bool sceneChangedDuringTransition;
+        private float sceneTransitionTimer;
+        private GameScene nextScene;
+
+        //fonts info
+        private SpriteFont boldpixels;
 
         //others
         private Random random = new Random();
@@ -130,7 +144,11 @@ namespace _1_2D_Top_Down
             };
             evilEyeProjectileTexture = Content.Load<Texture2D>("projectiles/evilEye/evilEye_projectile_sphere");
             evilEyeTexture = Content.Load<Texture2D>("enemies/Evil Eye/Evil Eye Sprite sheet");
-            gamefont = Content.Load<SpriteFont>("Sprite fonts/GameFont");
+            backgroundMusic = Content.Load<Song>("Music/ambient_forest");
+            boldpixels = Content.Load<SpriteFont>("Sprite fonts/boldpixels");
+            inventoryPanelTexture = Content.Load<Texture2D>("UI/UI_InventoryPanel");
+            questPanelTexture = Content.Load<Texture2D>("UI/UI_QuestPanel");
+            spellsPanelTexture = Content.Load<Texture2D>("UI/UI_SpellsPanel");
 
 
             environmentGroundAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentGroundAtlas.xml");
@@ -160,7 +178,6 @@ namespace _1_2D_Top_Down
 
             player = new Player(playerTexture, playerStartPosition);
 
-            backgroundMusic = Content.Load<Song>("Music/ambient_forest");
 
             MediaPlayer.IsRepeating = true;
             MediaPlayer.Volume = MusicVolume;
@@ -179,7 +196,63 @@ namespace _1_2D_Top_Down
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
-            HandleExit(keyboard);
+            UpdateSceneTransition(gameTime);
+
+            if (isSceneTransitioning)
+            {
+                previousKeyboard = keyboard;
+                previousMouseState = mouse;
+
+                base.Update(gameTime);
+                return;
+            }
+
+            if (currentScene == GameScene.MainMenu)
+            {
+                HandleMainMenuInput(mouse);
+
+                previousKeyboard = keyboard;
+                previousMouseState = mouse;
+
+                base.Update(gameTime);
+                return;
+            }
+
+            if (currentScene == GameScene.Options)
+            {
+                HandleOptionsInput(mouse);
+
+                previousKeyboard = keyboard;
+                previousMouseState = mouse;
+
+                base.Update(gameTime);
+                return;
+            }
+            if (isExitConfirmationOpen)
+            {
+                HandleExitConfirmationInput(keyboard, mouse);
+
+                previousKeyboard = keyboard;
+                previousMouseState = mouse;
+
+                base.Update(gameTime);
+                return;
+            }
+
+            bool pressedEscape =
+                keyboard.IsKeyDown(Keys.Escape) &&
+                previousKeyboard.IsKeyUp(Keys.Escape);
+
+            if (pressedEscape)
+            {
+                isExitConfirmationOpen = true;
+
+                previousKeyboard = keyboard;
+                previousMouseState = mouse;
+
+                base.Update(gameTime);
+                return;
+            }
             HandleDeveloperMode(keyboard);
             Vector2 playerCenter = player.Position +
                        new Vector2(player.texture.Width / 2, player.texture.Height / 2);
@@ -188,9 +261,10 @@ namespace _1_2D_Top_Down
                 GraphicsDevice.Viewport.Width / 2,
                 GraphicsDevice.Viewport.Height / 2);
 
-            camera.Follow(playerCenter - screenCenter);
+            CenterCameraOnPlayer();
             if (!isGameOver)
             {
+                HandleGameplayUIInput(keyboard);
                 HandlePlayerShooting(mouse, keyboard);
                 UpdateGameObjects(gameTime);
             }
@@ -206,6 +280,23 @@ namespace _1_2D_Top_Down
         }
         protected override void Draw(GameTime gameTime)
         {
+            if (currentScene == GameScene.MainMenu)
+            {
+                DrawMainMenu();
+                DrawSceneTransition();
+                base.Draw(gameTime);
+                return;
+            }
+
+            if (currentScene == GameScene.Options)
+            {
+                DrawOptions();
+                DrawSceneTransition();
+
+                base.Draw(gameTime);
+                return;
+            }
+
             GraphicsDevice.Clear(
                 isDeveloperMode
                     ? Color.DimGray
@@ -226,6 +317,7 @@ namespace _1_2D_Top_Down
 
             _spriteBatch.End();
 
+            DrawSceneTransition();
             DrawUi();
 
             base.Draw(gameTime);

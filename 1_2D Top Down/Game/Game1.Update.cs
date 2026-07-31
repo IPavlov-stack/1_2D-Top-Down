@@ -20,7 +20,7 @@ namespace _1_2D_Top_Down
                 (int)worldMap.WorldWidth,
                 (int)worldMap.WorldHeight);
 
-            player.Update(gameTime, worldBounds, solidCollisionRectangles);
+            player.Update(gameTime, worldBounds, solidCollisionRectangles, !isInventoryOpen);
 
             if (isEnemySpawningEnabled)
             {
@@ -62,9 +62,8 @@ namespace _1_2D_Top_Down
 
                 if (player.Bounds.Intersects(demon.Bounds))
                 {
-                    player.TakeDamage(20);
-
-                    if (player.Health.IsDead)
+                    if (demon.TryDamagePlayer(player, 20) &&
+                        player.Health.IsDead)
                     {
                         isGameOver = true;
                     }
@@ -161,13 +160,19 @@ namespace _1_2D_Top_Down
                 {
                     if (projectile.Bounds.Intersects(demons[j].Bounds))
                     {
-                        Vector2 deathPosition = demons[j].Bounds.Center.ToVector2();
+                        Demon demon = demons[j];
+                        demon.Health.TakeDamage(PlayerProjectileDamage);
 
-                        demonDeathAnimations.Add(
-                            new DeathAnimation(demonDeathTexture, deathPosition));
+                        if (demon.Health.IsDead)
+                        {
+                            Vector2 deathPosition = demon.Bounds.Center.ToVector2();
 
-                        TryDropCoin(demons[j].Bounds.Center.ToVector2());
-                        demons.RemoveAt(j);
+                            demonDeathAnimations.Add(
+                                new DeathAnimation(demonDeathTexture, deathPosition));
+
+                            TryDropCoin(demon.Bounds.Center.ToVector2());
+                            demons.RemoveAt(j);
+                        }
 
                         projectileHitEnemy = true;
                         break;
@@ -180,8 +185,14 @@ namespace _1_2D_Top_Down
                     if (!evilEye.IsDead &&
                         projectile.Bounds.Intersects(evilEye.Bounds))
                     {
-                        TryDropCoin(evilEye.Bounds.Center.ToVector2());
-                        evilEye.Die();
+                        evilEye.Health.TakeDamage(PlayerProjectileDamage);
+
+                        if (evilEye.Health.IsDead)
+                        {
+                            TryDropCoin(evilEye.Bounds.Center.ToVector2());
+                            evilEye.Die();
+                        }
+
                         projectiles.RemoveAt(i);
                         break;
                     }
@@ -233,9 +244,6 @@ namespace _1_2D_Top_Down
                 }
             }
         }
-
-       
-
         private void PlayNextCoinPickupSound()
         {
             if (coinPickupSounds == null || coinPickupSounds.Length == 0)
@@ -290,8 +298,7 @@ namespace _1_2D_Top_Down
 
             Vector2 startPosition = player.Bounds.Center.ToVector2();
 
-            Vector2 mouseWorldPosition =
-                mouse.Position.ToVector2() + camera.Position;
+            Vector2 mouseWorldPosition = mouse.Position.ToVector2() + camera.Position;
 
             Vector2 direction = mouseWorldPosition - startPosition;
 
@@ -299,10 +306,13 @@ namespace _1_2D_Top_Down
             {
                 direction.Normalize();
 
-                projectiles.Add(new PlayerProjectile(
+                if (player.Mana.TrySpend(Player.BasicAttackManaCost))
+                {
+                    projectiles.Add(new PlayerProjectile(
                         playerProjectileTexture,
                         startPosition,
                         direction));
+                }
             }
         }
         private void HandleDeveloperMode(KeyboardState keyboard)

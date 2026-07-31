@@ -7,9 +7,10 @@ namespace _1_2D_Top_Down
     public class Evil_Eye : Enemy
     {
         private const float Speed = 100f;
-        private const float PreferredDistance = 650f;
-        private const float ShootCooldown = 1.0f;
+        private const float AttackRange = 600f;
+        private const float AttackSpeed = 1.0f;
 
+        //animations
         private const int FlyingRow = 0;
         private const int AttackRow = 1;
         private const int DeathRow = 2;
@@ -31,7 +32,8 @@ namespace _1_2D_Top_Down
                 frameCount: 6,
                 frameRows: 3,
                 frameDuration: 0.15f,
-                scale: 0.5f)
+                scale: 0.5f,
+                maxHealth: 40)
 
         {
             SetAnimation(FlyingRow, 4);
@@ -67,7 +69,7 @@ namespace _1_2D_Top_Down
             Vector2 direction = player.Bounds.Center.ToVector2() - SpriteCenter;
             float distance = direction.Length();
 
-            if (distance > PreferredDistance && !isAttacking)
+            if (distance > AttackRange && !isAttacking)
             {
                 if (direction != Vector2.Zero)
                 {
@@ -88,7 +90,7 @@ namespace _1_2D_Top_Down
 
                 shootTimer += deltaTime;
 
-                if (shootTimer >= ShootCooldown)
+                if (shootTimer >= AttackSpeed)
                 {
                     shootTimer = 0f;
                     attackTimer = 0f;

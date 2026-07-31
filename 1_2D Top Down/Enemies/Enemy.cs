@@ -28,6 +28,7 @@ namespace _1_2D_Top_Down
                 FrameHeight * scale / 2f);
 
         public Vector2 Position;
+        public Health Health { get; }
 
         public Rectangle Bounds
         {
@@ -56,7 +57,8 @@ namespace _1_2D_Top_Down
             int frameCount,
             int frameRows,
             float frameDuration,
-            float scale)
+            float scale,
+            int maxHealth)
         {
             this.texture = texture;
             Position = startPosition;
@@ -67,6 +69,7 @@ namespace _1_2D_Top_Down
             this.scale = scale;
 
             framesInCurrentAnimation = frameCount;
+            Health = new Health(maxHealth);
         }
 
         protected void SetAnimation(int row, int animationFrameCount)

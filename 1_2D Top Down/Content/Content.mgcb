@@ -129,6 +129,7 @@
 /processor:SongProcessor
 /processorParam:Quality=Best
 /build:Music/theme_forest.mp3
+
 #begin Objects/Portal_orange-sheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -201,6 +202,12 @@
 /processorParam:Quality=Best
 /build:Sounds/Coin/coin_3.wav
 
+#begin Sprite fonts/boldpixels.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Sprite fonts/boldpixels.spritefont
 
 #begin Sprite fonts/GameFont.spritefont
 /importer:FontDescriptionImporter
@@ -209,7 +216,14 @@
 /processorParam:TextureFormat=Compressed
 /build:Sprite fonts/GameFont.spritefont
 
-#begin UI/health_bar.png
+#begin Sprite fonts/Pixelosopher.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Sprite fonts/Pixelosopher.spritefont
+
+#begin UI/UI_InventoryPanel.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -219,5 +233,29 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:UI/health_bar.png
+/build:UI/UI_InventoryPanel.png
+
+#begin UI/UI_QuestPanel.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/UI_QuestPanel.png
+
+#begin UI/UI_SpellsPanel.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/UI_SpellsPanel.png
 
