@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
 
 namespace _1_2D_Top_Down
 {
@@ -22,6 +23,7 @@ namespace _1_2D_Top_Down
 
         public Vector2 Position;
         public Vector2 playerPosition = new Vector2(400, 500);
+
         public Rectangle Bounds
         {
             get
@@ -43,35 +45,41 @@ namespace _1_2D_Top_Down
             }
         }
 
-
         public Player(Texture2D texture, Vector2 startPosition)
         {
             this.texture = texture;
             Position = startPosition;
         }
-        public void Update(GameTime gameTime, Rectangle arena)
+
+        public void Update(
+            GameTime gameTime,
+            Rectangle arena,
+            IReadOnlyList<Rectangle> collisionRectangles)
         {
             KeyboardState keyboard = Keyboard.GetState();
-
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            Vector2 direction = Vector2.Zero;
+
             if (keyboard.IsKeyDown(Keys.Left) || keyboard.IsKeyDown(Keys.A))
-                Position.X -= Speed * deltaTime;
-
+                direction.X -= 1f;
             if (keyboard.IsKeyDown(Keys.Right) || keyboard.IsKeyDown(Keys.D))
-                Position.X += Speed * deltaTime;
-
+                direction.X += 1f;
             if (keyboard.IsKeyDown(Keys.Up) || keyboard.IsKeyDown(Keys.W))
-                Position.Y -= Speed * deltaTime;
-
+                direction.Y -= 1f;
             if (keyboard.IsKeyDown(Keys.Down) || keyboard.IsKeyDown(Keys.S))
-                Position.Y += Speed * deltaTime;
+                direction.Y += 1f;
 
-            float playerWidth = FrameWidth * Scale;
-            float playerHeight = FrameHeight * Scale;
+            if (direction != Vector2.Zero)
+                direction.Normalize();
 
-            Position.X = Math.Clamp(Position.X, 0, arena.Width - playerWidth);
-            Position.Y = Math.Clamp(Position.Y, 0, arena.Height - playerHeight);
+            float movementDistance = Speed * deltaTime;
+
+            // Each axis is tried independently. If X is blocked but Y is
+            // clear, the player still moves along the obstacle instead of
+            // getting stuck against its corner.
+            TryMoveHorizontally(direction.X * movementDistance, arena, collisionRectangles);
+            TryMoveVertically(direction.Y * movementDistance, arena, collisionRectangles);
 
             animationTimer += deltaTime;
 
@@ -84,6 +92,53 @@ namespace _1_2D_Top_Down
                     currentFrame = 0;
             }
         }
+
+        private void TryMoveHorizontally(
+            float distance,
+            Rectangle arena,
+            IReadOnlyList<Rectangle> collisionRectangles)
+        {
+            float previousX = Position.X;
+            Position.X += distance;
+            KeepInsideArena(arena);
+
+            if (IntersectsCollision(collisionRectangles))
+                Position.X = previousX;
+        }
+
+        private void TryMoveVertically(
+            float distance,
+            Rectangle arena,
+            IReadOnlyList<Rectangle> collisionRectangles)
+        {
+            float previousY = Position.Y;
+            Position.Y += distance;
+            KeepInsideArena(arena);
+
+            if (IntersectsCollision(collisionRectangles))
+                Position.Y = previousY;
+        }
+
+        private void KeepInsideArena(Rectangle arena)
+        {
+            float playerWidth = FrameWidth * Scale;
+            float playerHeight = FrameHeight * Scale;
+
+            Position.X = Math.Clamp(Position.X, arena.Left, arena.Right - playerWidth);
+            Position.Y = Math.Clamp(Position.Y, arena.Top, arena.Bottom - playerHeight);
+        }
+
+        private bool IntersectsCollision(IReadOnlyList<Rectangle> collisionRectangles)
+        {
+            foreach (Rectangle collisionRectangle in collisionRectangles)
+            {
+                if (Bounds.Intersects(collisionRectangle))
+                    return true;
+            }
+
+            return false;
+        }
+
         public void Draw(SpriteBatch spriteBatch)
         {
             Rectangle sourceRectangle = new Rectangle(

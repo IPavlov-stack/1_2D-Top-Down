@@ -14,7 +14,7 @@ namespace _1_2D_Top_Down
                 frameCount: 4,
                 frameRows: 1,
                 frameDuration: 0.15f,
-                scale: 1.1f)
+                scale: 1.25f)
         {
         }
 

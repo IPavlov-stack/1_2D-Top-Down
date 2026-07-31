@@ -14,7 +14,13 @@ namespace _1_2D_Top_Down
         }
         private void UpdateGameObjects(GameTime gameTime)
         {
-            player.Update(gameTime,new Rectangle(0,0,(int)worldMap.WorldWidth,(int)worldMap.WorldHeight));
+            Rectangle worldBounds = new Rectangle(
+                0,
+                0,
+                (int)worldMap.WorldWidth,
+                (int)worldMap.WorldHeight);
+
+            player.Update(gameTime, worldBounds, solidCollisionRectangles);
 
             if (isEnemySpawningEnabled)
             {
@@ -26,6 +32,7 @@ namespace _1_2D_Top_Down
             UpdateDemons(gameTime);
             UpdatePlayerProjectiles(gameTime);
             UpdateDemonDeathAnimations(gameTime);
+            UpdateCoins(gameTime);
         }
         private void RestartGame()
         {
@@ -36,6 +43,9 @@ namespace _1_2D_Top_Down
             evilEyes.Clear();
             enemyProjectiles.Clear();
             demonDeathAnimations.Clear();
+            coins.Clear();
+            coinsCollected = 0;
+            nextCoinPickupSoundIndex = 0;
 
             player.Position = playerStartPosition;
             spawnTimer = 0f;
@@ -113,7 +123,11 @@ namespace _1_2D_Top_Down
 
                 projectile.Update(gameTime);
 
-                Rectangle worldBounds = new Rectangle(0, 0, WorldWidth, WorldHeight);
+                Rectangle worldBounds = new Rectangle(
+                    0,
+                    0,
+                    (int)worldMap.WorldWidth,
+                    (int)worldMap.WorldHeight);
 
                 bool isOutsideWorld =
                     !worldBounds.Intersects(projectile.Bounds);
@@ -122,6 +136,13 @@ namespace _1_2D_Top_Down
                     projectiles.RemoveAt(i);
                     continue;
                 }
+
+                if (IntersectsMapCollision(projectile.Bounds))
+                {
+                    projectiles.RemoveAt(i);
+                    continue;
+                }
+
                 bool projectileHitEnemy = false;
 
                 for (int j = demons.Count - 1; j >= 0; j--)
@@ -133,6 +154,7 @@ namespace _1_2D_Top_Down
                         demonDeathAnimations.Add(
                             new DeathAnimation(demonDeathTexture, deathPosition));
 
+                        TryDropCoin(demons[j].Bounds.Center.ToVector2());
                         demons.RemoveAt(j);
 
                         projectileHitEnemy = true;
@@ -146,6 +168,7 @@ namespace _1_2D_Top_Down
                     if (!evilEye.IsDead &&
                         projectile.Bounds.Intersects(evilEye.Bounds))
                     {
+                        TryDropCoin(evilEye.Bounds.Center.ToVector2());
                         evilEye.Die();
                         projectiles.RemoveAt(i);
                         break;
@@ -163,6 +186,51 @@ namespace _1_2D_Top_Down
 
             }
         }
+
+        private bool IntersectsMapCollision(Rectangle bounds)
+        {
+            foreach (Rectangle collisionRectangle in solidCollisionRectangles)
+            {
+                if (bounds.Intersects(collisionRectangle))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private void TryDropCoin(Vector2 enemyCenter)
+        {
+            if (random.Next(100) < CoinDropChancePercent)
+            {
+                coins.Add(new Coin(coinTexture, enemyCenter));
+            }
+        }
+
+        private void UpdateCoins(GameTime gameTime)
+        {
+            for (int i = coins.Count - 1; i >= 0; i--)
+            {
+                Coin coin = coins[i];
+                coin.Update(gameTime);
+
+                if (player.Bounds.Intersects(coin.Bounds))
+                {
+                    coins.RemoveAt(i);
+                    coinsCollected++;
+                    PlayNextCoinPickupSound();
+                }
+            }
+        }
+
+        private void PlayNextCoinPickupSound()
+        {
+            if (coinPickupSounds == null || coinPickupSounds.Length == 0)
+                return;
+
+            coinPickupSounds[nextCoinPickupSoundIndex].Play();
+            nextCoinPickupSoundIndex = (nextCoinPickupSoundIndex + 1) % coinPickupSounds.Length;
+        }
+
         private void UpdateDemonDeathAnimations(GameTime gameTime)
         {
             for (int i = demonDeathAnimations.Count - 1; i >= 0; i--)
