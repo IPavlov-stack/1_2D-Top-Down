@@ -6,16 +6,13 @@ namespace _1_2D_Top_Down
     public partial class Game1
     {
         private bool isExitConfirmationOpen;
-
-
-
         private Rectangle GetPauseButtonBounds(int index)
         {
             const int buttonWidth = 280;
             const int buttonHeight = 52;
             const int spacing = 14;
 
-            int totalHeight = buttonHeight * 3 + spacing * 2;
+            int totalHeight = buttonHeight * 4 + spacing * 3;
             int startY = GraphicsDevice.Viewport.Height / 2 - totalHeight / 2 + 45;
 
             return new Rectangle(
@@ -49,19 +46,28 @@ namespace _1_2D_Top_Down
 
             if (GetPauseButtonBounds(0).Contains(mouse.Position))
             {
-                // Cancel
-                isExitConfirmationOpen = false;
-            }
-            else if (GetPauseButtonBounds(1).Contains(mouse.Position))
-            {
                 // Main Menu
                 isExitConfirmationOpen = false;
                 StartSceneTransition(GameScene.MainMenu);
+            }
+            else if (GetPauseButtonBounds(1).Contains(mouse.Position))
+            {
+                isExitConfirmationOpen = false;
+
+                optionsReturnScene = GameScene.Playing;
+                reopenPauseAfterOptions = true;
+
+                StartSceneTransition(GameScene.Options);
             }
             else if (GetPauseButtonBounds(2).Contains(mouse.Position))
             {
                 // Exit
                 Exit();
+            }
+            else if (GetPauseButtonBounds(3).Contains(mouse.Position))
+            {
+                // Cancel
+                isExitConfirmationOpen = false;
             }
         }
 
@@ -103,9 +109,10 @@ namespace _1_2D_Top_Down
                 Color.White,
                 1.1f);
 
-            DrawMenuButton(GetPauseButtonBounds(0), "Cancel");
-            DrawMenuButton(GetPauseButtonBounds(1), "Main Menu");
+            DrawMenuButton(GetPauseButtonBounds(0), "Main Menu");
+            DrawMenuButton(GetPauseButtonBounds(1), "Options");
             DrawMenuButton(GetPauseButtonBounds(2), "Exit");
+            DrawMenuButton(GetPauseButtonBounds(3), "Resume");
         }
     }
 }

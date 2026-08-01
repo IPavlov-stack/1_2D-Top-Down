@@ -25,6 +25,7 @@ namespace _1_2D_Top_Down
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             contactDamageTimer += deltaTime;
+            UpdateKnockback(gameTime);
 
             Vector2 direction = player.Bounds.Center.ToVector2() -
                                 Bounds.Center.ToVector2();

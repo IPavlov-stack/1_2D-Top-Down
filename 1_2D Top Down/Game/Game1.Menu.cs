@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace _1_2D_Top_Down
 {
@@ -9,6 +10,17 @@ namespace _1_2D_Top_Down
         private const int MenuButtonWidth = 400;
         private const int MenuButtonHeight = 85;
         private const int MenuButtonSpacing = 40;
+
+        // Options - Sound Effects slider
+        private const int SoundEffectsSliderWidth = 460;
+        private const int SoundEffectsSliderHeight = 14;
+        private const int MusicSliderTop = 390;
+        private const int SoundEffectsSliderTop = 480;
+        private bool isMusicSliderDragging; 
+        private const int SoundEffectsSliderThumbSize = 32;
+        private bool isSoundEffectsSliderDragging;
+        private GameScene optionsReturnScene = GameScene.MainMenu;
+        private bool reopenPauseAfterOptions;
 
         private Rectangle GetMenuButtonBounds(int index)
         {
@@ -46,6 +58,8 @@ namespace _1_2D_Top_Down
             }
             else if (GetMenuButtonBounds(1).Contains(mousePosition))
             {
+                optionsReturnScene = GameScene.MainMenu;
+                reopenPauseAfterOptions = false;
                 StartSceneTransition(GameScene.Options);
             }
             else if (GetMenuButtonBounds(2).Contains(mousePosition))
@@ -56,6 +70,41 @@ namespace _1_2D_Top_Down
 
         private void HandleOptionsInput(MouseState mouse)
         {
+            Rectangle musicSliderBounds = GetMusicSliderBounds();
+            Rectangle soundEffectsSliderBounds =
+                GetSoundEffectsSliderBounds();
+
+            Rectangle musicInteractionBounds = musicSliderBounds;
+            musicInteractionBounds.Inflate(
+                SoundEffectsSliderThumbSize / 2,
+                SoundEffectsSliderThumbSize / 2);
+
+            Rectangle soundEffectsInteractionBounds =
+                soundEffectsSliderBounds;
+
+            soundEffectsInteractionBounds.Inflate(
+                SoundEffectsSliderThumbSize / 2,
+                SoundEffectsSliderThumbSize / 2);
+
+            if (mouse.LeftButton == ButtonState.Released)
+            {
+                isMusicSliderDragging = false;
+                isSoundEffectsSliderDragging = false;
+            }
+            else if (isMusicSliderDragging ||
+                     musicInteractionBounds.Contains(mouse.Position))
+            {
+                isMusicSliderDragging = true;
+                SetMusicVolumeFromMouse(mouse.X);
+            }
+            else if (isSoundEffectsSliderDragging ||
+                     soundEffectsInteractionBounds.Contains(
+                         mouse.Position))
+            {
+                isSoundEffectsSliderDragging = true;
+                SetSoundEffectsVolumeFromMouse(mouse.X);
+            }
+
             bool clickedLeftButton =
                 mouse.LeftButton == ButtonState.Pressed &&
                 previousMouseState.LeftButton == ButtonState.Released;
@@ -63,7 +112,7 @@ namespace _1_2D_Top_Down
             if (clickedLeftButton &&
                 GetMenuButtonBounds(2).Contains(mouse.Position))
             {
-                StartSceneTransition(GameScene.MainMenu);
+                ReturnFromOptions();
             }
         }
 
@@ -89,17 +138,146 @@ namespace _1_2D_Top_Down
             _spriteBatch.Begin();
 
             DrawCenteredText("OPTIONS", 180, Color.Gold, 2.2f);
-            DrawCenteredText(
-                "Sound settings will be added here.",
-                300,
-                Color.White,
-                1f);
-
+            DrawMusicSlider();
+            DrawSoundEffectsSlider();
             DrawMenuButton(GetMenuButtonBounds(2), "Back");
 
             _spriteBatch.End();
         }
+        private void ReturnFromOptions()
+        {
+            StartSceneTransition(optionsReturnScene);
 
+            if (reopenPauseAfterOptions)
+            {
+                isExitConfirmationOpen = true;
+                reopenPauseAfterOptions = false;
+            }
+        }
+        private Rectangle GetSoundEffectsSliderBounds()
+        {
+            return new Rectangle(
+                GraphicsDevice.Viewport.Width / 2 -
+                SoundEffectsSliderWidth / 2,
+
+                SoundEffectsSliderTop,
+
+                SoundEffectsSliderWidth,
+                SoundEffectsSliderHeight);
+        }
+
+        private void SetSoundEffectsVolumeFromMouse(int mouseX)
+        {
+            Rectangle sliderBounds = GetSoundEffectsSliderBounds();
+
+            float percent =
+                (mouseX - sliderBounds.Left) /
+                (float)sliderBounds.Width;
+
+            SoundEffectsVolume = percent;
+        }
+
+        private void DrawMusicSlider()
+        {
+            DrawVolumeSlider(
+                GetMusicSliderBounds(),
+                "MUSIC",
+                MusicVolume,
+                isMusicSliderDragging);
+        }
+
+        private void DrawSoundEffectsSlider()
+        {
+            DrawVolumeSlider(
+                GetSoundEffectsSliderBounds(),
+                "SOUND EFFECTS",
+                SoundEffectsVolume,
+                isSoundEffectsSliderDragging);
+        }
+
+        private void DrawVolumeSlider(
+            Rectangle sliderBounds,
+            string label,
+            float volume,
+            bool isDragging)
+        {
+            int volumePercent =
+                (int)MathF.Round(volume * 100f);
+
+            DrawCenteredText(
+                $"{label}: {volumePercent}%",
+                sliderBounds.Y - 58,
+                Color.White,
+                1f);
+
+            Rectangle outerBounds = new Rectangle(
+                sliderBounds.X - 2,
+                sliderBounds.Y - 2,
+                sliderBounds.Width + 4,
+                sliderBounds.Height + 4);
+
+            _spriteBatch.Draw(pixelTexture, outerBounds, Color.Black);
+            _spriteBatch.Draw(pixelTexture, sliderBounds, Color.DarkSlateGray);
+
+            int filledWidth =
+                (int)(sliderBounds.Width * volume);
+
+            Rectangle filledBounds = new Rectangle(
+                sliderBounds.X,
+                sliderBounds.Y,
+                filledWidth,
+                sliderBounds.Height);
+
+            _spriteBatch.Draw(
+                pixelTexture,
+                filledBounds,
+                Color.DodgerBlue);
+
+            int thumbCenterX =
+                sliderBounds.X + filledWidth;
+
+            Rectangle thumbBounds = new Rectangle(
+                thumbCenterX - SoundEffectsSliderThumbSize / 2,
+                sliderBounds.Center.Y -
+                    SoundEffectsSliderThumbSize / 2,
+                SoundEffectsSliderThumbSize,
+                SoundEffectsSliderThumbSize);
+
+            _spriteBatch.Draw(pixelTexture, thumbBounds, Color.Black);
+
+            Rectangle thumbInnerBounds = new Rectangle(
+                thumbBounds.X + 3,
+                thumbBounds.Y + 3,
+                thumbBounds.Width - 6,
+                thumbBounds.Height - 6);
+
+            _spriteBatch.Draw(
+                pixelTexture,
+                thumbInnerBounds,
+                isDragging ? Color.Gold : Color.White);
+        }
+        private Rectangle GetMusicSliderBounds()
+        {
+            return new Rectangle(
+                GraphicsDevice.Viewport.Width / 2 -
+                SoundEffectsSliderWidth / 2,
+
+                MusicSliderTop,
+
+                SoundEffectsSliderWidth,
+                SoundEffectsSliderHeight);
+        }
+
+        private void SetMusicVolumeFromMouse(int mouseX)
+        {
+            Rectangle sliderBounds = GetMusicSliderBounds();
+
+            float percent =
+                (mouseX - sliderBounds.Left) /
+                (float)sliderBounds.Width;
+
+            MusicVolume = percent;
+        }
         private void DrawMenuButton(Rectangle bounds, string text)
         {
             bool isHovered = bounds.Contains(Mouse.GetState().Position);

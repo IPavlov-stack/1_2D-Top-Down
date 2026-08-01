@@ -14,7 +14,7 @@ namespace _1_2D_Top_Down
         // Hotbar
         private const int HotbarPanelWidth = 720;
         private const int HotbarPanelHeight = 240;
-        private const int HotbarBottomMargin = -50;
+        private const int HotbarBottomMargin = -77;
         private const int HotbarHorizontalOffset = 0;
 
         private const int HotbarSlotLeftPadding = 68;
@@ -33,6 +33,25 @@ namespace _1_2D_Top_Down
         private const int QuestPanelHeight = 540;
         private const int QuestPanelLeft = 25;
         private const int QuestPanelTop = 70;
+
+        private const float HealthMeterScale = 0.55f;
+        private const float ManaMeterScale = 0.55f;
+        // =================
+        // = X:  + right,  =
+        // =     - left    =
+        // = Y:  + down,   =
+        // =     - up      =
+        // =================
+        private static readonly Vector2 HealthMeterOffsetFromBottomCenter = new Vector2(-200f, -175);
+        private static readonly Vector2 ManaMeterOffsetFromBottomCenter = new Vector2(200f, -175f);
+
+        // Позиция на fill текстурата вътре в рамката
+        private static readonly Vector2 HealthFillOffset = new Vector2(85f, 44f);
+        private static readonly Vector2 ManaFillOffset =  new Vector2(85f, 44f);
+
+        // Bottom HUD panel
+        private const float BottomHudPanelScale = 0.55f;
+        private static readonly Vector2 BottomHudPanelOffsetFromBottomCenter = new Vector2(0f, -300f);
 
         private void HandleGameplayUIInput(KeyboardState keyboard)
         {
@@ -82,8 +101,14 @@ namespace _1_2D_Top_Down
 
         private void DrawGameplayUI()
         {
-            DrawSpellHotbar();
+            // Най-заден слой на долния HUD.
+            DrawBottomHudPanel();
 
+            // Елементи върху панела.
+            DrawSpellHotbar();
+            DrawPlayerResourceUi();
+
+            // Отделни прозорци, които са най-отпред.
             if (isInventoryOpen)
             {
                 DrawInventoryPanel();
@@ -231,6 +256,29 @@ namespace _1_2D_Top_Down
                 title,
                 new Vector2(bounds.X + 20, bounds.Y + 20),
                 Color.Gold);
+        }
+        private void DrawBottomHudPanel()
+        {
+            float scale = BottomHudPanelScale;
+
+            Vector2 panelPosition = new Vector2(
+                GraphicsDevice.Viewport.Width / 2f -
+                bottomHudPanelTexture.Width * scale / 2f +
+                BottomHudPanelOffsetFromBottomCenter.X,
+
+                GraphicsDevice.Viewport.Height +
+                BottomHudPanelOffsetFromBottomCenter.Y);
+
+            _spriteBatch.Draw(
+                bottomHudPanelTexture,
+                panelPosition,
+                null,
+                Color.White,
+                0f,
+                Vector2.Zero,
+                scale,
+                SpriteEffects.None,
+                0f);
         }
     }
 }

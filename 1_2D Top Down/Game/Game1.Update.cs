@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace _1_2D_Top_Down
 {
@@ -33,6 +34,7 @@ namespace _1_2D_Top_Down
             UpdatePlayerProjectiles(gameTime);
             UpdateDemonDeathAnimations(gameTime);
             UpdateCoins(gameTime);
+            UpdatePlayerResourceAnimations(gameTime);
         }
         private void RestartGame()
         {
@@ -163,12 +165,16 @@ namespace _1_2D_Top_Down
                         Demon demon = demons[j];
                         demon.Health.TakeDamage(PlayerProjectileDamage);
 
+                        demon.ApplyKnockback(projectile.Bounds.Center.ToVector2(), Player.BasicAttackKnockbackForce);
+
                         if (demon.Health.IsDead)
                         {
                             Vector2 deathPosition = demon.Bounds.Center.ToVector2();
 
                             demonDeathAnimations.Add(
                                 new DeathAnimation(demonDeathTexture, deathPosition));
+
+                            PlayRandomDemonDeathSound();
 
                             TryDropCoin(demon.Bounds.Center.ToVector2());
                             demons.RemoveAt(j);
@@ -186,11 +192,14 @@ namespace _1_2D_Top_Down
                         projectile.Bounds.Intersects(evilEye.Bounds))
                     {
                         evilEye.Health.TakeDamage(PlayerProjectileDamage);
+                        evilEye.ApplyKnockback(projectile.Bounds.Center.ToVector2(), Player.BasicAttackKnockbackForce);
 
                         if (evilEye.Health.IsDead)
                         {
                             TryDropCoin(evilEye.Bounds.Center.ToVector2());
+
                             evilEye.Die();
+                            PlayRandomEvilEyeDeathSound();
                         }
 
                         projectiles.RemoveAt(i);
@@ -208,6 +217,63 @@ namespace _1_2D_Top_Down
                 }
 
             }
+        }
+        private void UpdatePlayerResourceAnimations(GameTime gameTime)
+        {
+            float healthPercent =
+                player.Health.CurrentHealth / (float)player.Health.MaxHealth;
+
+            float manaPercent =
+                player.Mana.CurrentMana / player.Mana.MaxMana;
+
+            int targetHealthFrame = GetResourceFrame(healthPercent);
+            int targetManaFrame = GetResourceFrame(manaPercent);
+
+            AnimateResourceFrame(
+                ref displayedHealthFrame,
+                ref healthFrameTimer,
+                targetHealthFrame,
+                gameTime);
+
+            AnimateResourceFrame(
+                ref displayedManaFrame,
+                ref manaFrameTimer,
+                targetManaFrame,
+                gameTime);
+        }
+
+        private int GetResourceFrame(float percent)
+        {
+            percent = MathHelper.Clamp(percent, 0f, 1f);
+
+            int filledSteps = (int)MathF.Ceiling(
+                percent * ResourceFrameCount);
+
+            return Math.Clamp(
+                ResourceFrameCount - filledSteps,
+                0,
+                ResourceFrameCount - 1);
+        }
+
+        private void AnimateResourceFrame(
+            ref int displayedFrame,
+            ref float timer,
+            int targetFrame,
+            GameTime gameTime)
+        {
+            if (displayedFrame == targetFrame)
+            {
+                timer = 0f;
+                return;
+            }
+
+            timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (timer < ResourceFrameDuration)
+                return;
+
+            timer = 0f;
+            displayedFrame += Math.Sign(targetFrame - displayedFrame);
         }
 
         private bool IntersectsMapCollision(Rectangle bounds)
@@ -256,7 +322,54 @@ namespace _1_2D_Top_Down
                 0f,                 //pitch
                 0f);                //pan
         }
+        private void PlayRandomBasicAttackSound()
+        {
+            if (basicAttackSounds == null ||
+                basicAttackSounds.Length == 0)
+            {
+                return;
+            }
 
+            int randomSoundIndex =
+                random.Next(basicAttackSounds.Length);
+
+            basicAttackSounds[randomSoundIndex].Play(
+                SoundEffectsVolume,
+                0f,
+                0f);
+        }
+        private void PlayRandomDemonDeathSound()
+        {
+            if (demonDeathSounds == null ||
+                demonDeathSounds.Length == 0)
+            {
+                return;
+            }
+
+            int randomSoundIndex =
+                random.Next(demonDeathSounds.Length);
+
+            demonDeathSounds[randomSoundIndex].Play(
+                SoundEffectsVolume,
+                0f,
+                0f);
+        }
+        private void PlayRandomEvilEyeDeathSound()
+        {
+            if (evilEyeDeathSounds == null ||
+                evilEyeDeathSounds.Length == 0)
+            {
+                return;
+            }
+
+            int randomSoundIndex =
+                random.Next(evilEyeDeathSounds.Length);
+
+            evilEyeDeathSounds[randomSoundIndex].Play(
+                SoundEffectsVolume,
+                0f,
+                0f);
+        }
         private void UpdateDemonDeathAnimations(GameTime gameTime)
         {
             for (int i = demonDeathAnimations.Count - 1; i >= 0; i--)
@@ -312,6 +425,7 @@ namespace _1_2D_Top_Down
                         playerProjectileTexture,
                         startPosition,
                         direction));
+                    PlayRandomBasicAttackSound();
                 }
             }
         }

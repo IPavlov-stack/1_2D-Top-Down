@@ -36,12 +36,12 @@ namespace _1_2D_Top_Down
         private List<PlayerProjectile> projectiles = new List<PlayerProjectile>();
         private const int PlayerProjectileDamage = 25;
 
+
         //collectables info
         private const int CoinDropChancePercent = 25;
         private Texture2D coinTexture;
         private List<Coin> coins = new List<Coin>();
         private int coinsCollected;
-        private SoundEffect[] coinPickupSounds;
 
         //demon info
         private Texture2D demonTexture;
@@ -57,7 +57,7 @@ namespace _1_2D_Top_Down
 
         //spawner info
         private float spawnTimer;
-        private const float SpawnInterval = 1.0f;
+        private const float SpawnInterval = 1.25f;
 
         //camera info
         private Camera camera;
@@ -81,16 +81,53 @@ namespace _1_2D_Top_Down
         private Texture2D questPanelTexture;
         private Texture2D spellsPanelTexture;
 
+        private const int ResourceFrameCount = 9;
+        private const int ResourceFrameWidth = 63;
+        private const int ResourceFrameHeight = 10;
+        private const float ResourceFrameDuration = 0.08f;
+
+        private int displayedHealthFrame;
+        private int displayedManaFrame;
+
+        private float healthFrameTimer;
+        private float manaFrameTimer;
+
+        private Texture2D healthMeterFrameTexture;
+        private Texture2D healthMeterFillTexture;
+
+        private Texture2D manaMeterFrameTexture;
+        private Texture2D manaMeterFillTexture;
+        private Texture2D bottomHudPanelTexture;
+
         //sound effects
-        private const float SoundEffectsVolume = 0.65f;
+        private const float SoundEffectsVolumeStep = 0.05f;
+        private float soundEffectsVolume = 0.25f;
+        private float SoundEffectsVolume
+        {
+            get => soundEffectsVolume;
+            set => soundEffectsVolume =
+                MathHelper.Clamp(value, 0f, 1f);
+        }
+        private SoundEffect[] coinPickupSounds;
+        private SoundEffect[] basicAttackSounds;
+        private SoundEffect[] demonDeathSounds;
+        private SoundEffect[] evilEyeDeathSounds;
 
         //music
         private Song backgroundMusic;
-        private const float MusicVolume = 0.4f;
-
+        private float musicVolume = 0.3f;
+        private float MusicVolume
+        {
+            get => musicVolume;
+            set
+            {
+                musicVolume = MathHelper.Clamp(value, 0f, 1f);
+                MediaPlayer.Volume = musicVolume;
+            }
+        }
         //scene info
         private GameScene currentScene = GameScene.MainMenu;
-        private const float SceneTransitionDuration = 1.0f;
+        private const float SceneTransitionDuration = 0.8f;
         private bool isSceneTransitioning;
         private bool sceneChangedDuringTransition;
         private float sceneTransitionTimer;
@@ -142,32 +179,43 @@ namespace _1_2D_Top_Down
                 Content.Load<SoundEffect>("Sounds/Coin/coin_2"),
                 Content.Load<SoundEffect>("Sounds/Coin/coin_3"),
             };
+            basicAttackSounds = new[]
+            {
+                Content.Load<SoundEffect>("Sounds/Player/basic_attack1"),
+                Content.Load<SoundEffect>("Sounds/Player/basic_attack2"),
+                Content.Load<SoundEffect>("Sounds/Player/basic_attack3")
+            };
+            demonDeathSounds = new[]
+            {
+                Content.Load<SoundEffect>("Sounds/Enemies/Demon/demon_death1"),
+                Content.Load<SoundEffect>("Sounds/Enemies/Demon/demon_death2"),
+                Content.Load<SoundEffect>("Sounds/Enemies/Demon/demon_death3"),
+                Content.Load<SoundEffect>("Sounds/Enemies/Demon/demon_death4")
+            };
+            evilEyeDeathSounds = new[]
+            {
+                Content.Load<SoundEffect>("Sounds/Enemies/Evil_Eye/evil_eye_death1"),
+                Content.Load<SoundEffect>("Sounds/Enemies/Evil_Eye/evil_eye_death2"),
+                Content.Load<SoundEffect>("Sounds/Enemies/Evil_Eye/evil_eye_death3"),
+                Content.Load<SoundEffect>("Sounds/Enemies/Evil_Eye/evil_eye_death4")
+            };
             evilEyeProjectileTexture = Content.Load<Texture2D>("projectiles/evilEye/evilEye_projectile_sphere");
             evilEyeTexture = Content.Load<Texture2D>("enemies/Evil Eye/Evil Eye Sprite sheet");
-            backgroundMusic = Content.Load<Song>("Music/ambient_forest");
+            backgroundMusic = Content.Load<Song>("Music/boss_theme");
             boldpixels = Content.Load<SpriteFont>("Sprite fonts/boldpixels");
             inventoryPanelTexture = Content.Load<Texture2D>("UI/UI_InventoryPanel");
             questPanelTexture = Content.Load<Texture2D>("UI/UI_QuestPanel");
             spellsPanelTexture = Content.Load<Texture2D>("UI/UI_SpellsPanel");
-
+            bottomHudPanelTexture = Content.Load<Texture2D>("UI/bottom_hud_panel");
+            healthMeterFrameTexture = Content.Load<Texture2D>("UI/health_meter_frame");
+            healthMeterFillTexture = Content.Load<Texture2D>("UI/health_meter_fill");
+            manaMeterFrameTexture = Content.Load<Texture2D>("UI/mana_meter_frame");
+            manaMeterFillTexture = Content.Load<Texture2D>("UI/mana_meter_fill");
 
             environmentGroundAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentGroundAtlas.xml");
             environmentPropsAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentPropsAtlas.xml");
-            waterMap = TiledTileLayer.FromFile(
-                Content,
-                "Maps/ForestMap.tmx",
-                "Environment/Water/tileset_water256x256",
-                "tileset_water256x256.tsx",
-                EnvironmentScale,
-                "Water");
-
-            worldMap = TiledTileLayer.FromFile(
-                Content,
-                "Maps/ForestMap.tmx",
-                "Environment/EnvironmentGroundAtlas",
-                "EnvironmentGround.tsx",
-                EnvironmentScale,
-                "Ground");
+            waterMap = TiledTileLayer.FromFile(Content, "Maps/ForestMap.tmx", "Environment/Water/tileset_water256x256", "tileset_water256x256.tsx", EnvironmentScale, "Water");
+            worldMap = TiledTileLayer.FromFile(Content, "Maps/ForestMap.tmx", "Environment/EnvironmentGroundAtlas", "EnvironmentGround.tsx", EnvironmentScale, "Ground");
             propsLayer = TiledPropsLayer.FromFile(Content, "Maps/ForestMap.tmx", environmentPropsAtlas, EnvironmentScale);
             collisionLayer = TiledCollisionLayer.FromFile(Content, "Maps/ForestMap.tmx", EnvironmentScale);
             TiledWaterCollisionLayer waterCollisionLayer = TiledWaterCollisionLayer.FromFile(Content, "Maps/ForestMap.tmx", "tileset_water256x256.tsx", EnvironmentScale);

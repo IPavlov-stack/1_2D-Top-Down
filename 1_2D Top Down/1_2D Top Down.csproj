@@ -9,7 +9,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>favicon (4).ico</ApplicationIcon>
+    <ApplicationIcon>game.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Content\Maps\tileset_water256x256.tsx" />
@@ -18,7 +18,7 @@
     <Content Include="Content\Maps\tileset_water256x256.tsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="favicon (4).ico" />
+    <Content Include="game.ico" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.*" />

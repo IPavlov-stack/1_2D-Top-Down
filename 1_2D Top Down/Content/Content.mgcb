@@ -124,11 +124,11 @@
 /processorParam:Quality=Best
 /build:Music/AmbientForest.mp3;Music/ambient_forest.mp3
 
-#begin Music/theme_forest.mp3
+#begin Music/boss_theme.mp3
 /importer:Mp3Importer
 /processor:SongProcessor
 /processorParam:Quality=Best
-/build:Music/theme_forest.mp3
+/build:Music/boss_theme.mp3
 
 #begin Objects/Portal_orange-sheet.png
 /importer:TextureImporter
@@ -178,12 +178,6 @@
 /processorParam:TextureFormat=Color
 /build:projectiles/magic_projectile.png
 
-#begin Songs/theme_forest.mp3
-/importer:Mp3Importer
-/processor:SongProcessor
-/processorParam:Quality=Best
-/build:Songs/theme_forest.mp3
-
 #begin Sounds/Coin/coin_1.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -201,6 +195,72 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:Sounds/Coin/coin_3.wav
+
+#begin Sounds/Enemies/Demon/demon_death1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Enemies/Demon/demon_death1.wav
+
+#begin Sounds/Enemies/Demon/demon_death2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Enemies/Demon/demon_death2.wav
+
+#begin Sounds/Enemies/Demon/demon_death3.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Enemies/Demon/demon_death3.wav
+
+#begin Sounds/Enemies/Demon/demon_death4.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Enemies/Demon/demon_death4.wav
+
+#begin Sounds/Enemies/Evil_Eye/evil_eye_death1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Enemies/Evil_Eye/evil_eye_death1.wav
+
+#begin Sounds/Enemies/Evil_Eye/evil_eye_death2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Enemies/Evil_Eye/evil_eye_death2.wav
+
+#begin Sounds/Enemies/Evil_Eye/evil_eye_death3.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Enemies/Evil_Eye/evil_eye_death3.wav
+
+#begin Sounds/Enemies/Evil_Eye/evil_eye_death4.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Enemies/Evil_Eye/evil_eye_death4.wav
+
+#begin Sounds/Player/basic_attack1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Player/basic_attack1.wav
+
+#begin Sounds/Player/basic_attack2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Player/basic_attack2.wav
+
+#begin Sounds/Player/basic_attack3.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Player/basic_attack3.wav
 
 #begin Sprite fonts/boldpixels.spritefont
 /importer:FontDescriptionImporter
@@ -222,6 +282,66 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Compressed
 /build:Sprite fonts/Pixelosopher.spritefont
+
+#begin UI/bottom_hud_panel.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/bottom_hud_panel.png
+
+#begin UI/health_meter_fill.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/health_meter_fill.png
+
+#begin UI/health_meter_frame.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/health_meter_frame.png
+
+#begin UI/mana_meter_fill.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/mana_meter_fill.png
+
+#begin UI/mana_meter_frame.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/mana_meter_frame.png
 
 #begin UI/UI_InventoryPanel.png
 /importer:TextureImporter

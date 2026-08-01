@@ -30,6 +30,9 @@ namespace _1_2D_Top_Down
         public Vector2 Position;
         public Health Health { get; }
 
+        private const float KnockbackDeceleration = 9f;
+        private readonly Knockback knockback = new Knockback(KnockbackDeceleration);
+
         public Rectangle Bounds
         {
             get
@@ -133,6 +136,20 @@ namespace _1_2D_Top_Down
                  scale,
                  SpriteEffects.None,
                  0f);
+        }
+        public void ApplyKnockback(
+    Vector2 attackPosition,
+    float force)
+        {
+            Vector2 direction =
+                Bounds.Center.ToVector2() - attackPosition;
+
+            knockback.Apply(direction, force);
+        }
+
+        protected void UpdateKnockback(GameTime gameTime)
+        {
+            Position += knockback.Update(gameTime);
         }
     }
 }

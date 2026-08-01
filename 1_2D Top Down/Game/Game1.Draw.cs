@@ -33,8 +33,6 @@ namespace _1_2D_Top_Down
                 enemyProjectile.Draw(_spriteBatch);
 
             DrawEnemyHealthBars();
-            DrawPlayerHealthBar();
-            DrawPlayerManaBar();
         }
 
         private void DrawUi()
@@ -46,7 +44,9 @@ namespace _1_2D_Top_Down
                 $"Coins: {coinsCollected}",
                 new Vector2(20, 20),
                 Color.Gold);
+
             DrawGameplayUI();
+
             DrawExitConfirmation();
 
             if (isGameOver)
@@ -163,79 +163,91 @@ namespace _1_2D_Top_Down
             propsLayer.DrawBehindPlayer(_spriteBatch, player.Bounds.Bottom);
         }
 
-        private void DrawPlayerHealthBar()
+        private void DrawPlayerResourceUi()
         {
-            const int barWidth = 80;
-            const int barHeight = 11;
-            const int borderSize = 2;
-            const int distanceAbovePlayer = 30;
+            Vector2 screenBottomCenter = new Vector2(
+                GraphicsDevice.Viewport.Width / 2f,
+                GraphicsDevice.Viewport.Height);
+
             float healthPercent =
                 player.Health.CurrentHealth / (float)player.Health.MaxHealth;
-
-            int x = player.Bounds.Center.X - barWidth / 2;
-            int y = player.Bounds.Top - distanceAbovePlayer;
-
-            Rectangle borderRectangle = new Rectangle(x, y, barWidth, barHeight);
-
-            Rectangle backgroundRectangle = new Rectangle(
-                x + borderSize,
-                y + borderSize,
-                barWidth - borderSize * 2,
-                barHeight - borderSize * 2);
-
-            Rectangle healthRectangle = new Rectangle(
-                x + borderSize,
-                y + borderSize,
-                (int)(backgroundRectangle.Width * healthPercent),
-                backgroundRectangle.Height);
-
-            _spriteBatch.Draw(pixelTexture, borderRectangle, Color.Black);
-            _spriteBatch.Draw(pixelTexture, backgroundRectangle, Color.DarkRed);
-            _spriteBatch.Draw(pixelTexture, healthRectangle, Color.LimeGreen);
-        }
-
-        private void DrawPlayerManaBar()
-        {
-            const int barWidth = 80;
-            const int barHeight = 8;
-            const int borderSize = 2;
-
-            const int distanceAbovePlayer = 30;
-            const int healthBarHeight = 11;
-            const int spaceBetweenBars = 3;
 
             float manaPercent =
                 player.Mana.CurrentMana / player.Mana.MaxMana;
 
-            int x = player.Bounds.Center.X - barWidth / 2;
+            DrawResourceMeter(
+                healthMeterFrameTexture,
+                healthMeterFillTexture,
+                screenBottomCenter,
+                HealthMeterOffsetFromBottomCenter,
+                HealthFillOffset,
+                healthPercent,
+                HealthMeterScale);
 
-            int y =
-                player.Bounds.Top -
-                distanceAbovePlayer +
-                healthBarHeight +
-                spaceBetweenBars;
+            DrawResourceMeter(
+                manaMeterFrameTexture,
+                manaMeterFillTexture,
+                screenBottomCenter,
+                ManaMeterOffsetFromBottomCenter,
+                ManaFillOffset,
+                manaPercent,
+                ManaMeterScale);
+        }
 
-            Rectangle borderRectangle = new Rectangle(
-                x,
-                y,
-                barWidth,
-                barHeight);
+        private void DrawResourceMeter(
+            Texture2D frameTexture,
+            Texture2D fillTexture,
+            Vector2 screenBottomCenter,
+            Vector2 frameOffset,
+            Vector2 fillOffset,
+            float percent,
+            float scale)
+        {
+            percent = MathHelper.Clamp(percent, 0f, 1f);
 
-            Rectangle backgroundRectangle = new Rectangle(
-                x + borderSize,
-                y + borderSize,
-                barWidth - borderSize * 2,
-                barHeight - borderSize * 2);
+            Vector2 framePosition =
+                screenBottomCenter + frameOffset;
 
-            Rectangle manaRectangle = new Rectangle(
-                x + borderSize,
-                y + borderSize,
-                (int)(backgroundRectangle.Width * manaPercent),
-                backgroundRectangle.Height);
+            framePosition.X -= frameTexture.Width * scale / 2f;
 
-            _spriteBatch.Draw(pixelTexture, borderRectangle, Color.Black);
-            _spriteBatch.Draw(pixelTexture, backgroundRectangle, Color.DarkBlue);
-            _spriteBatch.Draw(pixelTexture, manaRectangle, Color.DodgerBlue);
+            // Рамката се рисува цяла.
+            _spriteBatch.Draw(
+                frameTexture,
+                framePosition,
+                null,
+                Color.White,
+                0f,
+                Vector2.Zero,
+                scale,
+                SpriteEffects.None,
+                0f);
+
+            int visibleFillWidth =
+                (int)(fillTexture.Width * percent);
+
+            if (visibleFillWidth <= 0)
+                return;
+
+            Rectangle fillSourceRectangle = new Rectangle(
+                0,
+                0,
+                visibleFillWidth,
+                fillTexture.Height);
+
+            Vector2 fillPosition =
+                framePosition + fillOffset * scale;
+
+            // Рисуваме само частта, отговаряща на health/mana процента.
+            _spriteBatch.Draw(
+                fillTexture,
+                fillPosition,
+                fillSourceRectangle,
+                Color.White,
+                0f,
+                Vector2.Zero,
+                scale,
+                SpriteEffects.None,
+                0f);
         }
         private void DrawDeveloperMode()
         {

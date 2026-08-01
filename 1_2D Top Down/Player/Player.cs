@@ -37,9 +37,13 @@ namespace _1_2D_Top_Down
         private const float DamageFlashDuration = 0.75f;
         private float damageFlashTimer;
 
+        public const float BasicAttackKnockbackForce = 360f;
+
+
 
         public Health Health { get; }
         public Mana Mana { get; }
+
 
 
 
