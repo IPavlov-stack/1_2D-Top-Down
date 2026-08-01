@@ -5,14 +5,22 @@ namespace _1_2D_Top_Down
 {
     public partial class Game1
     {
-        
-
         private void DrawNormalWorld()
         {
             DrawMap();
+            DrawEnemyShadows();
+            DrawEnemyShadow(
+                playerShadowTexture,
+                player.Bounds,
+                scale: 0.34f,
+                opacity: 0.70f,
+                bottomOffset: 3f);
 
             foreach (Coin coin in coins)
                 coin.Draw(_spriteBatch);
+
+            foreach (ManaCrystal manaCrystal in manaCrystals)
+                manaCrystal.Draw(_spriteBatch);
 
             player.Draw(_spriteBatch);
             propsLayer.DrawInFrontOfPlayer(_spriteBatch, player.Bounds.Bottom);
@@ -33,6 +41,58 @@ namespace _1_2D_Top_Down
                 enemyProjectile.Draw(_spriteBatch);
 
             DrawEnemyHealthBars();
+        }
+        private void DrawEnemyShadows()
+        {
+            foreach (Demon demon in demons)
+            {
+                DrawEnemyShadow(
+                    demonShadowTexture,
+                    demon.Bounds,
+                    0.40f,
+                    0.75f,
+                    4f);
+            }
+
+            foreach (Evil_Eye evilEye in evilEyes)
+            {
+                if (!evilEye.IsDead)
+                {
+                    DrawEnemyShadow(
+                        evilEyeShadowTexture,
+                        evilEye.Bounds,
+                        0.35f,
+                        0.65f,
+                        2f);
+                }
+            }
+        }
+
+        private void DrawEnemyShadow(
+            Texture2D shadowTexture,
+            Rectangle enemyBounds,
+            float scale,
+            float opacity,
+            float bottomOffset)
+        {
+            Vector2 shadowPosition = new Vector2(
+                enemyBounds.Center.X -
+                shadowTexture.Width * scale / 2f,
+
+                enemyBounds.Bottom +
+                bottomOffset -
+                shadowTexture.Height * scale / 2f);
+
+            _spriteBatch.Draw(
+                shadowTexture,
+                shadowPosition,
+                null,
+                Color.White * opacity,
+                0f,
+                Vector2.Zero,
+                scale,
+                SpriteEffects.None,
+                0f);
         }
 
         private void DrawUi()
@@ -182,7 +242,8 @@ namespace _1_2D_Top_Down
                 HealthMeterOffsetFromBottomCenter,
                 HealthFillOffset,
                 healthPercent,
-                HealthMeterScale);
+                HealthMeterScale,
+                player.IsHealthFlashingWhite);
 
             DrawResourceMeter(
                 manaMeterFrameTexture,
@@ -191,7 +252,8 @@ namespace _1_2D_Top_Down
                 ManaMeterOffsetFromBottomCenter,
                 ManaFillOffset,
                 manaPercent,
-                ManaMeterScale);
+                ManaMeterScale,
+                false);
         }
 
         private void DrawResourceMeter(
@@ -201,7 +263,8 @@ namespace _1_2D_Top_Down
             Vector2 frameOffset,
             Vector2 fillOffset,
             float percent,
-            float scale)
+            float scale,
+            bool flashWhite)
         {
             percent = MathHelper.Clamp(percent, 0f, 1f);
 
@@ -234,8 +297,7 @@ namespace _1_2D_Top_Down
                 visibleFillWidth,
                 fillTexture.Height);
 
-            Vector2 fillPosition =
-                framePosition + fillOffset * scale;
+            Vector2 fillPosition = framePosition + fillOffset * scale;
 
             // Рисуваме само частта, отговаряща на health/mana процента.
             _spriteBatch.Draw(
@@ -248,6 +310,20 @@ namespace _1_2D_Top_Down
                 scale,
                 SpriteEffects.None,
                 0f);
+
+            if (flashWhite)
+            {
+                Rectangle flashBounds = new Rectangle(
+                    (int)fillPosition.X,
+                    (int)fillPosition.Y,
+                    (int)(visibleFillWidth * scale),
+                    (int)(fillTexture.Height * scale));
+
+                _spriteBatch.Draw(
+                    pixelTexture,
+                    flashBounds,
+                    Color.White);
+            }
         }
         private void DrawDeveloperMode()
         {
@@ -258,6 +334,11 @@ namespace _1_2D_Top_Down
 
             foreach (Coin coin in coins)
                 DrawDebugRectangle(coin.Bounds, Color.Gold);
+
+            foreach (ManaCrystal manaCrystal in manaCrystals)
+            {
+                DrawDebugRectangle(manaCrystal.Bounds, Color.DarkSlateBlue);
+            }
 
             foreach (PlayerProjectile projectile in projectiles)
                 DrawDebugRectangle(projectile.Bounds, Color.LimeGreen);

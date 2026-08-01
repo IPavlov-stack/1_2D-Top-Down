@@ -34,6 +34,7 @@ namespace _1_2D_Top_Down
             UpdatePlayerProjectiles(gameTime);
             UpdateDemonDeathAnimations(gameTime);
             UpdateCoins(gameTime);
+            UpdateManaCrystals(gameTime);
             UpdatePlayerResourceAnimations(gameTime);
         }
         private void RestartGame()
@@ -46,6 +47,7 @@ namespace _1_2D_Top_Down
             enemyProjectiles.Clear();
             demonDeathAnimations.Clear();
             coins.Clear();
+            manaCrystals.Clear();
             coinsCollected = 0;
 
             player.Position = playerStartPosition;
@@ -177,6 +179,7 @@ namespace _1_2D_Top_Down
                             PlayRandomDemonDeathSound();
 
                             TryDropCoin(demon.Bounds.Center.ToVector2());
+                            TryDropManaCrystal(demon.Bounds.Center.ToVector2());
                             demons.RemoveAt(j);
                         }
 
@@ -197,6 +200,7 @@ namespace _1_2D_Top_Down
                         if (evilEye.Health.IsDead)
                         {
                             TryDropCoin(evilEye.Bounds.Center.ToVector2());
+                            TryDropManaCrystal(evilEye.Bounds.Center.ToVector2());
 
                             evilEye.Die();
                             PlayRandomEvilEyeDeathSound();
@@ -294,6 +298,14 @@ namespace _1_2D_Top_Down
                 coins.Add(new Coin(coinTexture, enemyCenter));
             }
         }
+        private void TryDropManaCrystal(Vector2 enemyCenter)
+        {
+            if (random.Next(100) < ManaCrystalDropChancePercent)
+            {
+                manaCrystals.Add(
+                    new ManaCrystal(manaCrystalTexture, enemyCenter));
+            }
+        }
 
         private void UpdateCoins(GameTime gameTime)
         {
@@ -310,6 +322,27 @@ namespace _1_2D_Top_Down
                 }
             }
         }
+        private void UpdateManaCrystals(GameTime gameTime)
+        {
+            for (int i = manaCrystals.Count - 1; i >= 0; i--)
+            {
+                ManaCrystal manaCrystal = manaCrystals[i];
+
+                manaCrystal.Update(gameTime);
+
+                bool playerCanReceiveMana =
+                    player.Mana.CurrentMana < player.Mana.MaxMana;
+
+                if (playerCanReceiveMana &&
+                    player.Bounds.Intersects(manaCrystal.Bounds))
+                {
+                    player.Mana.Restore(ManaCrystalRestoreAmount);
+                    manaCrystals.RemoveAt(i);
+
+                    PlayManaCrystalCollectSound();
+                }
+            }
+        }
         private void PlayNextCoinPickupSound()
         {
             if (coinPickupSounds == null || coinPickupSounds.Length == 0)
@@ -317,10 +350,22 @@ namespace _1_2D_Top_Down
 
             int randomSoundIndex = random.Next(coinPickupSounds.Length);
 
+            float coinVolume = MathHelper.Clamp(
+                SoundEffectsVolume * CoinPickupVolumeMultiplier,
+                0f,
+                1f);
+
             coinPickupSounds[randomSoundIndex].Play(
-                SoundEffectsVolume, //volume
-                0f,                 //pitch
-                0f);                //pan
+                coinVolume,
+                0f,
+                0f);
+        }
+        private void PlayManaCrystalCollectSound()
+        {
+            manaCrystalCollectSound.Play(
+                SoundEffectsVolume,
+                0f,
+                0f);
         }
         private void PlayRandomBasicAttackSound()
         {

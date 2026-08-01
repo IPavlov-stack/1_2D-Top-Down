@@ -25,6 +25,18 @@
 /processorParam:TextureFormat=Color
 /build:Collectables/coin.png
 
+#begin Collectables/mana_crystal_sheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Collectables/mana_crystal_sheet.png
+
 #begin Collectables/MonedaD.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -61,6 +73,18 @@
 /processorParam:TextureFormat=Color
 /build:enemies/Demon/FLYING.png
 
+#begin enemies/Demon/shadow_demon.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Demon/shadow_demon.png
+
 #begin enemies/Evil Eye/Evil Eye Sprite sheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -71,7 +95,19 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:enemies/Evil Eye/Evil Eye Sprite sheet.png
+/build:enemies/Evil Eye/Evil Eye Sprite sheet.png;enemies/Evil Eye/Evil Eye Sprite sheet
+
+#begin enemies/Evil Eye/shadow_eye.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Evil Eye/shadow_eye.png
 
 #begin Environment/EnvironmentGroundAtlas.png
 /importer:TextureImporter
@@ -130,6 +166,12 @@
 /processorParam:Quality=Best
 /build:Music/boss_theme.mp3
 
+#begin Music/Main Menu/main_menu.wav
+/importer:WavImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/Main Menu/main_menu.wav
+
 #begin Objects/Portal_orange-sheet.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -153,6 +195,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:player/Charcter.png;player/Character.png
+
+#begin player/shadow_player.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:player/shadow_player.png
 
 #begin projectiles/evilEye/sprite_sheet.png
 /importer:TextureImporter
@@ -243,6 +297,12 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:Sounds/Enemies/Evil_Eye/evil_eye_death4.wav
+
+#begin Sounds/Mana/mana_collect.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Mana/mana_collect.wav
 
 #begin Sounds/Player/basic_attack1.wav
 /importer:WavImporter
@@ -342,6 +402,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:UI/mana_meter_frame.png
+
+#begin UI/UI_coin.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/UI_coin.png
 
 #begin UI/UI_InventoryPanel.png
 /importer:TextureImporter

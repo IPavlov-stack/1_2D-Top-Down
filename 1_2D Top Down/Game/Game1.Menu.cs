@@ -122,7 +122,7 @@ namespace _1_2D_Top_Down
 
             _spriteBatch.Begin();
 
-            DrawCenteredText("2D TOP DOWN", 160, Color.Gold, 2.8f);
+            DrawCenteredText("A guy called Pesho", 160, Color.Gold, 2.8f);
 
             DrawMenuButton(GetMenuButtonBounds(0), "Start");
             DrawMenuButton(GetMenuButtonBounds(1), "Options");
@@ -360,6 +360,7 @@ namespace _1_2D_Top_Down
                 sceneTransitionTimer >= halfDuration)
             {
                 currentScene = nextScene;
+                UpdateMusicForCurrentScene();
 
                 if (currentScene == GameScene.Playing)
                 {

@@ -34,13 +34,19 @@ namespace _1_2D_Top_Down
 
         public void Restore(float amount)
         {
+            if (amount <= 0f)
+                return;
+
             CurrentMana += amount;
-            CurrentMana = MathHelper.Min(CurrentMana, MaxMana);
+
+            if (CurrentMana > MaxMana)
+                CurrentMana = MaxMana;
         }
 
         public void RestoreFull()
         {
             CurrentMana = MaxMana;
         }
+
     }
 }

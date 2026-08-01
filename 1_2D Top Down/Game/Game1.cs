@@ -35,6 +35,7 @@ namespace _1_2D_Top_Down
         private Texture2D playerProjectileTexture;
         private List<PlayerProjectile> projectiles = new List<PlayerProjectile>();
         private const int PlayerProjectileDamage = 25;
+        private Texture2D playerShadowTexture;
 
 
         //collectables info
@@ -42,18 +43,24 @@ namespace _1_2D_Top_Down
         private Texture2D coinTexture;
         private List<Coin> coins = new List<Coin>();
         private int coinsCollected;
+        private const int ManaCrystalDropChancePercent = 12;
+        private const float ManaCrystalRestoreAmount = 25f;
+        private Texture2D manaCrystalTexture;
+        private List<ManaCrystal> manaCrystals = new List<ManaCrystal>();
 
         //demon info
         private Texture2D demonTexture;
         private List<Demon> demons = new List<Demon>();
         private Texture2D demonDeathTexture;
         private List<DeathAnimation> demonDeathAnimations = new List<DeathAnimation>();
+        private Texture2D demonShadowTexture;
 
         //evil eye info
         private Texture2D evilEyeProjectileTexture;
         private Texture2D evilEyeTexture;
         private List<Evil_Eye> evilEyes = new List<Evil_Eye>();
         private List<EnemyProjectile> enemyProjectiles = new List<EnemyProjectile>();
+        private Texture2D evilEyeShadowTexture;
 
         //spawner info
         private float spawnTimer;
@@ -102,6 +109,7 @@ namespace _1_2D_Top_Down
         //sound effects
         private const float SoundEffectsVolumeStep = 0.05f;
         private float soundEffectsVolume = 0.25f;
+        private const float CoinPickupVolumeMultiplier = 1.8f;
         private float SoundEffectsVolume
         {
             get => soundEffectsVolume;
@@ -112,9 +120,12 @@ namespace _1_2D_Top_Down
         private SoundEffect[] basicAttackSounds;
         private SoundEffect[] demonDeathSounds;
         private SoundEffect[] evilEyeDeathSounds;
+        private SoundEffect manaCrystalCollectSound;
 
         //music
+        private Song currentMusic;
         private Song backgroundMusic;
+        private Song mainMenuMusic;
         private float musicVolume = 0.3f;
         private float MusicVolume
         {
@@ -169,10 +180,14 @@ namespace _1_2D_Top_Down
             pixelTexture = new Texture2D(GraphicsDevice, 1, 1);
             pixelTexture.SetData(new[] { Color.White });
             Texture2D playerTexture = Content.Load<Texture2D>("player/Character");
+            playerShadowTexture = Content.Load<Texture2D>("player/shadow_player");
             demonTexture = Content.Load<Texture2D>("enemies/Demon/FLYING");
             demonDeathTexture = Content.Load<Texture2D>("enemies/Demon/DEATH");
+            demonShadowTexture = Content.Load<Texture2D>("enemies/Demon/shadow_demon");
+            evilEyeShadowTexture = Content.Load<Texture2D>("enemies/Evil Eye/shadow_eye");
             playerProjectileTexture = Content.Load<Texture2D>("projectiles/magic_projectile");
             coinTexture = Content.Load<Texture2D>("Collectables/coin");
+            manaCrystalTexture = Content.Load<Texture2D>("Collectables/mana_crystal_sheet");
             coinPickupSounds = new[]
             {
                 Content.Load<SoundEffect>("Sounds/Coin/coin_1"),
@@ -199,9 +214,11 @@ namespace _1_2D_Top_Down
                 Content.Load<SoundEffect>("Sounds/Enemies/Evil_Eye/evil_eye_death3"),
                 Content.Load<SoundEffect>("Sounds/Enemies/Evil_Eye/evil_eye_death4")
             };
+            manaCrystalCollectSound = Content.Load<SoundEffect>("Sounds/Mana/mana_collect");
             evilEyeProjectileTexture = Content.Load<Texture2D>("projectiles/evilEye/evilEye_projectile_sphere");
             evilEyeTexture = Content.Load<Texture2D>("enemies/Evil Eye/Evil Eye Sprite sheet");
-            backgroundMusic = Content.Load<Song>("Music/boss_theme");
+            backgroundMusic = Content.Load<Song>("Music/ambient_forest");
+            mainMenuMusic = Content.Load<Song>("Music/Main Menu/main_menu");
             boldpixels = Content.Load<SpriteFont>("Sprite fonts/boldpixels");
             inventoryPanelTexture = Content.Load<Texture2D>("UI/UI_InventoryPanel");
             questPanelTexture = Content.Load<Texture2D>("UI/UI_QuestPanel");
@@ -235,7 +252,37 @@ namespace _1_2D_Top_Down
                 MediaPlayer.Stop();
             }
 
-            MediaPlayer.Play(backgroundMusic);
+            PlayMusic(mainMenuMusic);
+        }
+
+        private void PlayMusic(Song music)
+        {
+            if (currentMusic == music &&
+                MediaPlayer.State == MediaState.Playing)
+            {
+                return;
+            }
+
+            if (MediaPlayer.State != MediaState.Stopped)
+            {
+                MediaPlayer.Stop();
+            }
+
+            MediaPlayer.Play(music);
+            currentMusic = music;
+        }
+
+        private void UpdateMusicForCurrentScene()
+        {
+            if (currentScene == GameScene.Playing)
+            {
+                PlayMusic(backgroundMusic);
+            }
+            else
+            {
+                // Main Menu и Options.
+                PlayMusic(mainMenuMusic);
+            }
         }
         protected override void Update(GameTime gameTime)
         {
@@ -269,6 +316,26 @@ namespace _1_2D_Top_Down
             if (currentScene == GameScene.Options)
             {
                 HandleOptionsInput(mouse);
+
+                previousKeyboard = keyboard;
+                previousMouseState = mouse;
+
+                base.Update(gameTime);
+                return;
+            }
+            if (isGameOver)
+            {
+                //puase менюто не може да отвори при game over screen или да остане
+                isExitConfirmationOpen = false;
+
+                bool pressedRestart =
+                    keyboard.IsKeyDown(Keys.R) &&
+                    previousKeyboard.IsKeyUp(Keys.R);
+
+                if (pressedRestart)
+                {
+                    RestartGame();
+                }
 
                 previousKeyboard = keyboard;
                 previousMouseState = mouse;

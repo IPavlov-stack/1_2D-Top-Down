@@ -10,6 +10,7 @@ namespace _1_2D_Top_Down
     {
         // Health
         private const int PlayerMaxHealth = 100;
+        private const float PlayerHealthRegenPerSecond = 0.75f;
 
         // Mana
         private const float PlayerMaxMana = 100f;
@@ -36,17 +37,14 @@ namespace _1_2D_Top_Down
 
         private const float DamageFlashDuration = 0.75f;
         private float damageFlashTimer;
-
+        private const float HealthFlashDuration = 0.48f;
+        private const float HealthFlashInterval = 0.08f;
+        private float healthFlashTimeLeft;
+        public bool IsHealthFlashingWhite => healthFlashTimeLeft > 0f && (int)(healthFlashTimeLeft / HealthFlashInterval) % 2 == 0;
         public const float BasicAttackKnockbackForce = 360f;
-
-
 
         public Health Health { get; }
         public Mana Mana { get; }
-
-
-
-
 
         public Rectangle Bounds
         {
@@ -73,8 +71,8 @@ namespace _1_2D_Top_Down
         {
             this.texture = texture;
             Position = startPosition;
-            Health = new Health(PlayerMaxHealth);
-            Mana = new Mana( PlayerMaxMana, PlayerManaRegenPerSecond);
+            Health = new Health(PlayerMaxHealth, PlayerHealthRegenPerSecond); 
+            Mana = new Mana(PlayerMaxMana, PlayerManaRegenPerSecond);
         }
 
         public void Update(
@@ -83,6 +81,9 @@ namespace _1_2D_Top_Down
             IReadOnlyList<Rectangle> collisionRectangles,
             bool canMove)
         {
+
+            healthFlashTimeLeft = MathF.Max( 0f, healthFlashTimeLeft - (float)gameTime.ElapsedGameTime.TotalSeconds);
+            Health.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
             if (damageFlashTimer > 0f)
             {
                 damageFlashTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -200,13 +201,14 @@ namespace _1_2D_Top_Down
         }
         public void TakeDamage(int damage)
         {
-            if (damage <= 0 || Health.IsDead)
-            {
-                return;
-            }
+            float healthBeforeDamage = Health.CurrentHealth;
 
             Health.TakeDamage(damage);
-            damageFlashTimer = DamageFlashDuration;
+
+            if (Health.CurrentHealth < healthBeforeDamage)
+            {
+                healthFlashTimeLeft = HealthFlashDuration;
+            }
         }
     }
 }

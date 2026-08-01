@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="64" height="48" tilewidth="256" tileheight="256" infinite="0" nextlayerid="5" nextobjectid="221">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="64" height="48" tilewidth="256" tileheight="256" infinite="0" nextlayerid="5" nextobjectid="223">
  <tileset firstgid="1" source="EnvironmentGround.tsx"/>
  <tileset firstgid="57" source="EnvironmentProps.tsx"/>
  <tileset firstgid="117" source="../Objects/portal_orange-1.tsx"/>
@@ -299,5 +299,6 @@
   <object id="209" x="9406" y="4902" width="60" height="124"/>
   <object id="210" x="8762" y="7942" width="170" height="224"/>
   <object id="211" x="8562" y="6498" width="504" height="620"/>
+  <object id="222" x="6585" y="8366" width="50" height="67"/>
  </objectgroup>
 </map>

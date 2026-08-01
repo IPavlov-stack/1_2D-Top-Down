@@ -25,8 +25,8 @@ namespace _1_2D_Top_Down
         {
             get
             {
-                int width = (int)(FrameWidth * scale * 0.75f);
-                int height = (int)(FrameHeight * scale * 0.75f);
+                int width = (int)(FrameWidth * scale * 0.5f);
+                int height = (int)(FrameHeight * scale * 0.5f);
 
                 return new Rectangle(
                     (int)(Position.X - width / 2f),

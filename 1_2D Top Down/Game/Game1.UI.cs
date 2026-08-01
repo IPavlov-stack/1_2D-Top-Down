@@ -49,9 +49,9 @@ namespace _1_2D_Top_Down
         private static readonly Vector2 HealthFillOffset = new Vector2(85f, 44f);
         private static readonly Vector2 ManaFillOffset =  new Vector2(85f, 44f);
 
-        // Bottom HUD panel
+        // bottom HUD panel
         private const float BottomHudPanelScale = 0.55f;
-        private static readonly Vector2 BottomHudPanelOffsetFromBottomCenter = new Vector2(0f, -300f);
+        private static readonly Vector2 BottomHudPanelOffsetFromBottomCenter = new Vector2(0f, -280f);
 
         private void HandleGameplayUIInput(KeyboardState keyboard)
         {
