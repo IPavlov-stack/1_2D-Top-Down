@@ -97,13 +97,7 @@ namespace _1_2D_Top_Down
 
         private void DrawUi()
         {
-            _spriteBatch.Begin();
-
-            _spriteBatch.DrawString(
-                boldpixels,
-                $"Coins: {coinsCollected}",
-                new Vector2(20, 20),
-                Color.Gold);
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
             DrawGameplayUI();
 
@@ -385,6 +379,87 @@ namespace _1_2D_Top_Down
                 new Rectangle(rectangle.Right - outlineThickness, rectangle.Y,
                     outlineThickness, rectangle.Height),
                 color);
+        }
+
+        private void DrawNineSlicePanel(
+                    Texture2D texture,
+                    Rectangle destination,
+                    Color? tint = null)
+        {
+            const int sourceSliceSize = 74;
+            const int sourceGap = 17; // pixels between every slice 
+
+            // Ъглите остават с оригиналния си размер.
+            const int borderSize = sourceSliceSize;
+
+            if (destination.Width < borderSize * 2 ||
+                destination.Height < borderSize * 2)
+            {
+                return;
+            }
+
+            Color color = tint ?? Color.White;
+
+            // Начало на всяка от трите колони/редици в sprite sheet-а
+            int[] sourcePositions = {
+                                        0,
+                                        sourceSliceSize + sourceGap,
+                                        (sourceSliceSize + sourceGap) * 2
+                                    };
+
+            // Размери и позиции на деветте части в крайния panel
+            int[] destinationX =
+                                    {
+                                destination.Left,
+                                destination.Left + borderSize,
+                                destination.Right - borderSize
+                                    };
+
+            int[] destinationY =
+                                    {
+                                destination.Top,
+                                destination.Top + borderSize,
+                                destination.Bottom - borderSize
+                                    };
+
+            int[] destinationWidths =
+                                    {
+                                borderSize,
+                                destination.Width - borderSize * 2,
+                                borderSize
+                                    };
+
+            int[] destinationHeights =
+                                    {
+                                borderSize,
+                                destination.Height - borderSize * 2,
+                                borderSize
+                                    };
+
+            // Рисува деветте части.
+            for (int row = 0; row < 3; row++)
+            {
+                for (int column = 0; column < 3; column++)
+                {
+                    Rectangle sourceRectangle = new Rectangle(
+                        sourcePositions[column],
+                        sourcePositions[row],
+                        sourceSliceSize,
+                        sourceSliceSize);
+
+                    Rectangle destinationRectangle = new Rectangle(
+                        destinationX[column],
+                        destinationY[row],
+                        destinationWidths[column],
+                        destinationHeights[row]);
+
+                    _spriteBatch.Draw(
+                        texture,
+                        destinationRectangle,
+                        sourceRectangle,
+                        color);
+                }
+            }
         }
     }
 }

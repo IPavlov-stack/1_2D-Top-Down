@@ -379,6 +379,18 @@
 /processorParam:TextureFormat=Color
 /build:UI/health_meter_frame.png
 
+#begin UI/inventory icons/UI_coin.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/inventory icons/UI_coin.png
+
 #begin UI/mana_meter_fill.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -402,6 +414,30 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:UI/mana_meter_frame.png
+
+#begin UI/nine slice 256x256 17gap/panel_9slice.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/nine slice 256x256 17gap/panel_9slice.png
+
+#begin UI/panel_inventory_slot.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:UI/panel_inventory_slot.png
 
 #begin UI/UI_coin.png
 /importer:TextureImporter

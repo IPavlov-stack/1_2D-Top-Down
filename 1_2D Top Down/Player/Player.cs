@@ -36,6 +36,7 @@ namespace _1_2D_Top_Down
         public Vector2 playerPosition = new Vector2(400, 500);
 
         private const float DamageFlashDuration = 0.75f;
+        private const float DamageFlashInterval = 0.08f;
         private float damageFlashTimer;
         private const float HealthFlashDuration = 0.48f;
         private const float HealthFlashInterval = 0.08f;
@@ -88,6 +89,7 @@ namespace _1_2D_Top_Down
             {
                 damageFlashTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
+            damageFlashTimer = MathF.Max( 0f, damageFlashTimer - (float)gameTime.ElapsedGameTime.TotalSeconds);
             KeyboardState keyboard = Keyboard.GetState();
             if (canMove)
             {
@@ -137,6 +139,11 @@ namespace _1_2D_Top_Down
                 return;
             }
             //===
+
+            if (damageFlashTimer > 0f &&  (int)(damageFlashTimer / DamageFlashInterval) % 2 == 0)
+            {
+                return;
+            }
             Rectangle sourceRectangle = new Rectangle(
                 currentFrame * FrameWidth,
                 0,
@@ -203,12 +210,23 @@ namespace _1_2D_Top_Down
         {
             float healthBeforeDamage = Health.CurrentHealth;
 
+            // Damage винаги се нанася.
             Health.TakeDamage(damage);
 
             if (Health.CurrentHealth < healthBeforeDamage)
             {
-                healthFlashTimeLeft = HealthFlashDuration;
+                // Започваме blink само ако предишният вече е приключил.
+                if (damageFlashTimer <= 0f)
+                {
+                    damageFlashTimer = DamageFlashDuration;
+                    healthFlashTimeLeft = HealthFlashDuration;
+                }
             }
+        }
+        public void ResetDamageEffects()
+        {
+            damageFlashTimer = 0f;
+            healthFlashTimeLeft = 0f;
         }
     }
 }

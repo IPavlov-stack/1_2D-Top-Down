@@ -23,6 +23,7 @@ namespace _1_2D_Top_Down
         private bool isEnemySpawningEnabled = true;
         private const int WindowSizeX = 1920;
         private const int WindowSizeY = 1080;
+        private readonly StaticCollisionGrid mapCollisionGrid = new StaticCollisionGrid(128);
 
 
         //input info
@@ -37,7 +38,6 @@ namespace _1_2D_Top_Down
         private const int PlayerProjectileDamage = 25;
         private Texture2D playerShadowTexture;
 
-
         //collectables info
         private const int CoinDropChancePercent = 25;
         private Texture2D coinTexture;
@@ -47,6 +47,16 @@ namespace _1_2D_Top_Down
         private const float ManaCrystalRestoreAmount = 25f;
         private Texture2D manaCrystalTexture;
         private List<ManaCrystal> manaCrystals = new List<ManaCrystal>();
+        private readonly List<InventoryResource> inventoryResources = new();
+
+        //enemy info
+        private const int MaxActiveEnemies = 30;
+        private int ActiveEnemyCount => demons.Count + evilEyes.Count;
+        private const int EnemySpatialCellSize = 128;
+        private readonly SpatialGrid<Demon> demonSpatialGrid = new SpatialGrid<Demon>(EnemySpatialCellSize);
+        private readonly SpatialGrid<Evil_Eye> evilEyeSpatialGrid = new SpatialGrid<Evil_Eye>(EnemySpatialCellSize);
+        private readonly List<Demon> nearbyDemons = new();
+        private readonly List<Evil_Eye> nearbyEvilEyes = new();
 
         //demon info
         private Texture2D demonTexture;
@@ -105,6 +115,9 @@ namespace _1_2D_Top_Down
         private Texture2D manaMeterFrameTexture;
         private Texture2D manaMeterFillTexture;
         private Texture2D bottomHudPanelTexture;
+        private Texture2D panel9SliceTexture;
+        private Texture2D inventorySlotTexture;
+        private Texture2D uiCoinTexture;
 
         //sound effects
         private const float SoundEffectsVolumeStep = 0.05f;
@@ -228,6 +241,9 @@ namespace _1_2D_Top_Down
             healthMeterFillTexture = Content.Load<Texture2D>("UI/health_meter_fill");
             manaMeterFrameTexture = Content.Load<Texture2D>("UI/mana_meter_frame");
             manaMeterFillTexture = Content.Load<Texture2D>("UI/mana_meter_fill");
+            panel9SliceTexture = Content.Load<Texture2D>("UI/nine slice 256x256 17gap/panel_9slice");
+            inventorySlotTexture = Content.Load<Texture2D>("UI/panel_inventory_slot");
+            uiCoinTexture = Content.Load<Texture2D>("UI/inventory icons/UI_coin");
 
             environmentGroundAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentGroundAtlas.xml");
             environmentPropsAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentPropsAtlas.xml");
@@ -239,6 +255,7 @@ namespace _1_2D_Top_Down
 
             solidCollisionRectangles = new List<Rectangle>(collisionLayer.Rectangles);
             solidCollisionRectangles.AddRange(waterCollisionLayer.Rectangles);
+            mapCollisionGrid.Build(solidCollisionRectangles);
             LoadPortals();
 
             player = new Player(playerTexture, playerStartPosition);

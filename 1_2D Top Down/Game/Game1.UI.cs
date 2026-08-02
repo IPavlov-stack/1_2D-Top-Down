@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
 
 namespace _1_2D_Top_Down
 {
@@ -26,7 +28,15 @@ namespace _1_2D_Top_Down
         private const int InventoryPanelWidth = 950;
         private const int InventoryPanelHeight = 950;
         private const int InventoryPanelRightMargin = 485;
-        private const int InventoryPanelTop = 0;
+        private const int InventoryPanelTop = 50;
+
+        private const int InventorySlotCount = 25;
+        private const int InventorySlotSize = 128;
+        private const int InventorySlotSpacing = 12;
+
+        private const int NineSliceBorderSize = 74;
+        private const int InventoryContentPadding = 28;
+        private const int InventoryHeaderHeight = 64;
 
         // Quest log
         private const int QuestPanelWidth = 360;
@@ -101,14 +111,12 @@ namespace _1_2D_Top_Down
 
         private void DrawGameplayUI()
         {
-            // Най-заден слой на долния HUD.
-            DrawBottomHudPanel();
+            if (!isInventoryOpen)
+            {
+                DrawSpellHotbar();
+                DrawPlayerResourceUi();
+            }
 
-            // Елементи върху панела.
-            DrawSpellHotbar();
-            DrawPlayerResourceUi();
-
-            // Отделни прозорци, които са най-отпред.
             if (isInventoryOpen)
             {
                 DrawInventoryPanel();
@@ -177,26 +185,142 @@ namespace _1_2D_Top_Down
 
         private void DrawInventoryPanel()
         {
-
             Rectangle panelBounds = new Rectangle(
-                GraphicsDevice.Viewport.Width -
-                InventoryPanelWidth -
-                InventoryPanelRightMargin,
-
+                GraphicsDevice.Viewport.Width
+                    - InventoryPanelWidth
+                    - InventoryPanelRightMargin,
                 InventoryPanelTop,
-
                 InventoryPanelWidth,
                 InventoryPanelHeight);
+
+            //window bg
+            DrawNineSlicePanel(panel9SliceTexture, panelBounds);
+
+            //title
+            const string title = "Inventory";
+
+            Vector2 titleSize = boldpixels.MeasureString(title);
+            Vector2 titlePosition = new Vector2(
+                panelBounds.Center.X - titleSize.X / 2f,
+                panelBounds.Top + 28);
+
+            _spriteBatch.DrawString(
+                boldpixels,
+                title,
+                titlePosition,
+                Color.Gold);
+
+            //inventory slots
+            DrawInventorySlots(panelBounds);
+        }
+        private void DrawInventorySlots(Rectangle panelBounds)
+        {
+            int contentLeft =
+                panelBounds.Left +
+                NineSliceBorderSize +
+                InventoryContentPadding;
+
+            int contentTop =
+                panelBounds.Top +
+                NineSliceBorderSize +
+                InventoryHeaderHeight;
+
+            int contentWidth =
+                panelBounds.Width -
+                (NineSliceBorderSize + InventoryContentPadding) * 2;
+
+            int contentHeight =
+                panelBounds.Height -
+                NineSliceBorderSize -
+                InventoryHeaderHeight -
+                InventoryContentPadding * 2;
+
+            int columns = Math.Max(
+                1,
+                (contentWidth + InventorySlotSpacing) /
+                (InventorySlotSize + InventorySlotSpacing));
+
+            int rows = Math.Max(
+                1,
+                (contentHeight + InventorySlotSpacing) /
+                (InventorySlotSize + InventorySlotSpacing));
+
+            int slotsToDraw = Math.Min(
+                InventorySlotCount,
+                columns * rows);
+
+            int gridWidth =
+                columns * InventorySlotSize +
+                (columns - 1) * InventorySlotSpacing;
+
+            int startX =
+                contentLeft +
+                (contentWidth - gridWidth) / 2;
+
+            for (int slotIndex = 0; slotIndex < slotsToDraw; slotIndex++)
+            {
+                int column = slotIndex % columns;
+                int row = slotIndex / columns;
+
+                int x = startX +
+                        column * (InventorySlotSize + InventorySlotSpacing);
+
+                int y = contentTop +
+                        row * (InventorySlotSize + InventorySlotSpacing);
+
+                Rectangle slotBounds = new Rectangle(
+                    x,
+                    y,
+                    InventorySlotSize,
+                    InventorySlotSize);
+
+                _spriteBatch.Draw(
+                    inventorySlotTexture,
+                    slotBounds,
+                    Color.White);
+
+                if (slotIndex < inventoryResources.Count)
+                {
+                    DrawInventoryResource(
+                        inventoryResources[slotIndex],
+                        slotBounds);
+                }
+            }
+        }
+        private void DrawInventoryResource(
+    InventoryResource resource,
+    Rectangle slotBounds)
+        {
+            const int iconPadding = 18;
+
+            Rectangle iconBounds = new Rectangle(
+                slotBounds.X + iconPadding,
+                slotBounds.Y + iconPadding,
+                slotBounds.Width - iconPadding * 2,
+                slotBounds.Height - iconPadding * 2);
+
             _spriteBatch.Draw(
-                inventoryPanelTexture,
-                panelBounds,
+                resource.Icon,
+                iconBounds,
                 Color.White);
 
-            DrawCenteredPanelText(
-                "Inventory",
-                panelBounds,
-                85,
-                Color.Gold);
+            string amountText = resource.Amount.ToString();
+            Vector2 textSize = boldpixels.MeasureString(amountText);
+
+            int textX = slotBounds.Right - (int)textSize.X - 8;
+            int textY = slotBounds.Bottom - (int)textSize.Y - 6;
+
+            Rectangle countBackground = new Rectangle(
+                textX - 5,
+                textY - 3,
+                (int)textSize.X + 10,
+                (int)textSize.Y + 6);
+
+            _spriteBatch.DrawString(
+                boldpixels,
+                amountText,
+                new Vector2(textX, textY),
+                Color.White);
         }
 
         private void DrawQuestLogPanel()
@@ -279,6 +403,48 @@ namespace _1_2D_Top_Down
                 scale,
                 SpriteEffects.None,
                 0f);
+        }
+        private void AddInventoryResource(
+    string resourceId,
+    Texture2D icon,
+    int amount)
+        {
+            if (amount <= 0)
+                return;
+
+            foreach (InventoryResource resource in inventoryResources)
+            {
+                if (resource.Id == resourceId)
+                {
+                    resource.Add(amount);
+                    return;
+                }
+            }
+
+            inventoryResources.Add(
+                new InventoryResource(resourceId, icon, amount));
+        }
+
+        private bool TrySpendInventoryResource(string resourceId, int amount)
+        {
+            for (int i = 0; i < inventoryResources.Count; i++)
+            {
+                InventoryResource resource = inventoryResources[i];
+
+                if (resource.Id != resourceId)
+                    continue;
+
+                if (!resource.TryRemove(amount))
+                    return false;
+
+                // При количество 0 слотът се освобождава.
+                if (resource.Amount == 0)
+                    inventoryResources.RemoveAt(i);
+
+                return true;
+            }
+
+            return false;
         }
     }
 }
