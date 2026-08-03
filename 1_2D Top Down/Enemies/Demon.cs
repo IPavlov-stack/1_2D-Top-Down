@@ -5,6 +5,7 @@ namespace _1_2D_Top_Down
 {
     public class Demon : Enemy
     {
+        private const int DemonMaxHealth = 2;
         private const float Speed = 120f;
         private const float ContactDamageCooldown = 0.75f;
         private float contactDamageTimer = ContactDamageCooldown;
@@ -17,7 +18,7 @@ namespace _1_2D_Top_Down
                 frameRows: 1,
                 frameDuration: 0.15f,
                 scale: 1.25f,
-                maxHealth: 50)
+                maxHealth: DemonMaxHealth)
         {
         }
 

@@ -8,6 +8,9 @@ namespace _1_2D_Top_Down
     /// </summary>
     public sealed class Coin
     {
+        private const float LifetimeSeconds = 10f;
+        private float lifetime;
+        public bool IsExpired => lifetime >= LifetimeSeconds;
         private const int FrameCount = 6;
         private const float FrameDuration = 0.10f;
         private const float Scale = 0.6f;
@@ -45,6 +48,7 @@ namespace _1_2D_Top_Down
 
         public void Update(GameTime gameTime)
         {
+            lifetime += (float)gameTime.ElapsedGameTime.TotalSeconds;
             _animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (_animationTimer < FrameDuration)

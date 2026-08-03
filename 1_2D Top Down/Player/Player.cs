@@ -8,17 +8,10 @@ namespace _1_2D_Top_Down
 {
     public class Player
     {
-        // Health
-        private const int PlayerMaxHealth = 100;
-        private const float PlayerHealthRegenPerSecond = 0.75f;
-
-        // Mana
-        private const float PlayerMaxMana = 100f;
-        private const float PlayerManaRegenPerSecond = 12f;
-
         // Combat
         public const float BasicAttackManaCost = 8f;
 
+        public float MoveSpeed => Stats.MoveSpeed;
         public Texture2D texture;
 
         private const int FrameCount = 4;
@@ -30,7 +23,6 @@ namespace _1_2D_Top_Down
         private int FrameHeight => texture.Height;
 
         private const float Scale = 1.3f;
-        private const float PlayerMoveSpeed = 400f;
 
         public Vector2 Position;
         public Vector2 playerPosition = new Vector2(400, 500);
@@ -42,10 +34,11 @@ namespace _1_2D_Top_Down
         private const float HealthFlashInterval = 0.08f;
         private float healthFlashTimeLeft;
         public bool IsHealthFlashingWhite => healthFlashTimeLeft > 0f && (int)(healthFlashTimeLeft / HealthFlashInterval) % 2 == 0;
-        public const float BasicAttackKnockbackForce = 360f;
 
         public Health Health { get; }
         public Mana Mana { get; }
+
+        public PlayerStats Stats { get; }
 
         public Rectangle Bounds
         {
@@ -72,8 +65,9 @@ namespace _1_2D_Top_Down
         {
             this.texture = texture;
             Position = startPosition;
-            Health = new Health(PlayerMaxHealth, PlayerHealthRegenPerSecond); 
-            Mana = new Mana(PlayerMaxMana, PlayerManaRegenPerSecond);
+            Stats = new PlayerStats();
+            Health = new Health(Stats.MaxHealth, Stats.HealthRegen);
+            Mana = new Mana(Stats.MaxMana, Stats.ManaRegen);
         }
 
         public void Update(
@@ -109,8 +103,7 @@ namespace _1_2D_Top_Down
                 if (direction != Vector2.Zero)
                     direction.Normalize();
 
-                float movementDistance = PlayerMoveSpeed * deltaTime;
-
+                float movementDistance = Stats.MoveSpeed * deltaTime;
                 // Each axis is tried independently. If X is blocked but Y is
                 // clear, the player still moves along the obstacle instead of
                 // getting stuck against its corner.
@@ -227,6 +220,20 @@ namespace _1_2D_Top_Down
         {
             damageFlashTimer = 0f;
             healthFlashTimeLeft = 0f;
+        }
+        public void AddStatBonus(PlayerStatType stat, float amount)
+        {
+            Stats.Add(stat, amount);
+            RefreshStats();
+        }
+
+        private void RefreshStats()
+        {
+            Health.SetMaxHealth(Stats.MaxHealth);
+            Health.SetRegenPerSecond(Stats.HealthRegen);
+
+            Mana.SetMaxMana(Stats.MaxMana);
+            Mana.SetRegenPerSecond(Stats.ManaRegen);
         }
     }
 }

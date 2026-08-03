@@ -5,15 +5,17 @@ namespace _1_2D_Top_Down
 {
     public class PlayerProjectile : Projectile
     {
+
         public PlayerProjectile(
             Texture2D texture,
             Vector2 startPosition,
-            Vector2 direction)
+            Vector2 direction,
+            float speed)
             : base(
                 texture,
                 startPosition,
                 direction,
-                speed: 600f,
+                speed: speed,
                 scale: 0.9f,
                 frameCount: 3,
                 frameRows: 1,

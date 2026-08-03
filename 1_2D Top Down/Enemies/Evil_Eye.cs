@@ -9,6 +9,7 @@ namespace _1_2D_Top_Down
         private const float Speed = 100f;
         private const float AttackRange = 600f;
         private const float AttackSpeed = 1.0f;
+        private const int EyeMaxHealth = 2;
 
         //animations
         private const int FlyingRow = 0;
@@ -33,7 +34,7 @@ namespace _1_2D_Top_Down
                 frameRows: 3,
                 frameDuration: 0.15f,
                 scale: 0.5f,
-                maxHealth: 40)
+                maxHealth: EyeMaxHealth)
 
         {
             SetAnimation(FlyingRow, 4);

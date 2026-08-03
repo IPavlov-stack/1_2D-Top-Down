@@ -1,10 +1,12 @@
-﻿namespace _1_2D_Top_Down
+﻿using System;
+
+namespace _1_2D_Top_Down
 {
     public class Health
     {
-        public int MaxHealth { get; }
+        public int MaxHealth { get; private set; }
+        public float RegenPerSecond { get; private set; }
         public int CurrentHealth { get; private set; }
-        public float RegenPerSecond { get; }
 
         private float regenProgress;
 
@@ -17,6 +19,18 @@
             RegenPerSecond = regenPerSecond < 0f ? 0f : regenPerSecond;
         }
 
+        public void SetMaxHealth(int maxHealth)
+        {
+            MaxHealth = Math.Max(1, maxHealth);
+
+            if (CurrentHealth > MaxHealth)
+                CurrentHealth = MaxHealth;
+        }
+
+        public void SetRegenPerSecond(float regenPerSecond)
+        {
+            RegenPerSecond = Math.Max(0f, regenPerSecond);
+        }
         public void Update(float deltaTime)
         {
             if (deltaTime <= 0f ||

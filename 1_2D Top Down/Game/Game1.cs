@@ -35,14 +35,12 @@ namespace _1_2D_Top_Down
         private Vector2 playerStartPosition = new Vector2(2150, 1850);
         private Texture2D playerProjectileTexture;
         private List<PlayerProjectile> projectiles = new List<PlayerProjectile>();
-        private const int PlayerProjectileDamage = 25;
         private Texture2D playerShadowTexture;
 
         //collectables info
         private const int CoinDropChancePercent = 25;
         private Texture2D coinTexture;
         private List<Coin> coins = new List<Coin>();
-        private int coinsCollected;
         private const int ManaCrystalDropChancePercent = 12;
         private const float ManaCrystalRestoreAmount = 25f;
         private Texture2D manaCrystalTexture;
@@ -97,6 +95,7 @@ namespace _1_2D_Top_Down
         private Texture2D inventoryPanelTexture;
         private Texture2D questPanelTexture;
         private Texture2D spellsPanelTexture;
+        private readonly Dictionary<string, Texture2D>shopUpgradeIcons = new();
 
         private const int ResourceFrameCount = 9;
         private const int ResourceFrameWidth = 63;
@@ -118,6 +117,14 @@ namespace _1_2D_Top_Down
         private Texture2D panel9SliceTexture;
         private Texture2D inventorySlotTexture;
         private Texture2D uiCoinTexture;
+
+        private Texture2D inventoryButtonTexture;
+        private Texture2D statsButtonTexture;
+        private Texture2D shopButtonTexture;
+        private Texture2D mapButtonTexture;
+        private Texture2D skillTreeButtonTexture;
+        private Texture2D settingsButtonTexture;
+        private Texture2D soundVolumeButtonTexture;
 
         //sound effects
         private const float SoundEffectsVolumeStep = 0.05f;
@@ -244,6 +251,13 @@ namespace _1_2D_Top_Down
             panel9SliceTexture = Content.Load<Texture2D>("UI/nine slice 256x256 17gap/panel_9slice");
             inventorySlotTexture = Content.Load<Texture2D>("UI/panel_inventory_slot");
             uiCoinTexture = Content.Load<Texture2D>("UI/inventory icons/UI_coin");
+            inventoryButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/inventory-button");
+            statsButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/stats-button");
+            shopButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/shop-button");
+            mapButtonTexture =Content.Load<Texture2D>("UI/ingame buttons/map-button");
+            skillTreeButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/skill-tree-button");
+            settingsButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/settings-button");
+            soundVolumeButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/sound-volume-button");
 
             environmentGroundAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentGroundAtlas.xml");
             environmentPropsAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentPropsAtlas.xml");
@@ -259,7 +273,8 @@ namespace _1_2D_Top_Down
             LoadPortals();
 
             player = new Player(playerTexture, playerStartPosition);
-
+            LoadShopUpgradeIcons();
+            InitializeShopItems();
 
             MediaPlayer.IsRepeating = true;
             MediaPlayer.Volume = MusicVolume;
@@ -377,7 +392,12 @@ namespace _1_2D_Top_Down
 
             if (pressedEscape)
             {
-                isExitConfirmationOpen = true;
+                bool closedPanel = CloseOpenGameplayPanels();
+
+                if (!closedPanel)
+                {
+                    isExitConfirmationOpen = true;
+                }
 
                 previousKeyboard = keyboard;
                 previousMouseState = mouse;
@@ -396,8 +416,13 @@ namespace _1_2D_Top_Down
             CenterCameraOnPlayer();
             if (!isGameOver)
             {
-                HandleGameplayUIInput(keyboard);
-                HandlePlayerShooting(mouse, keyboard);
+                bool gameplayUiClickHandled =
+                    HandleGameplayUIInput(keyboard, mouse);
+
+                if (!gameplayUiClickHandled)
+                {
+                    HandlePlayerShooting(mouse, keyboard);
+                }
                 UpdateGameObjects(gameTime);
             }
             else if (keyboard.IsKeyDown(Keys.R))
@@ -454,6 +479,9 @@ namespace _1_2D_Top_Down
 
             base.Draw(gameTime);
         }
-
+        private static int ScaleUi(int value, float scale)
+        {
+            return Math.Max(1, (int)MathF.Round(value * scale));
+        }
     }
 }

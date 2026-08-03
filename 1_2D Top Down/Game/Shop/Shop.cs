@@ -5,6 +5,7 @@
         public string Name { get; }
         public ShopCategory[] Categories { get; }
 
+
         public Shop(string name, params ShopCategory[] categories)
         {
             Name = name;

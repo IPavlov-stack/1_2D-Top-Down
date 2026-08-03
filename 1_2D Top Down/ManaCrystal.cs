@@ -5,6 +5,10 @@ namespace _1_2D_Top_Down
 {
     public class ManaCrystal
     {
+        private const float LifetimeSeconds = 5f;
+        private float lifetime;
+        public bool IsExpired => lifetime >= LifetimeSeconds;
+
         private const int FrameCount = 6;
         private const int FrameWidth = 64;
         private const int FrameHeight = 64;
@@ -44,8 +48,8 @@ namespace _1_2D_Top_Down
 
         public void Update(GameTime gameTime)
         {
-            animationTimer +=
-                (float)gameTime.ElapsedGameTime.TotalSeconds;
+            lifetime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (animationTimer < FrameDuration)
                 return;

@@ -21,8 +21,7 @@ namespace _1_2D_Top_Down
                 (int)worldMap.WorldWidth,
                 (int)worldMap.WorldHeight);
 
-            player.Update(gameTime, worldBounds, solidCollisionRectangles, !isInventoryOpen);
-
+            player.Update( gameTime, worldBounds, solidCollisionRectangles, true);
             if (isEnemySpawningEnabled)
             {
                 UpdateEnemySpawning(gameTime);
@@ -49,8 +48,7 @@ namespace _1_2D_Top_Down
             demonDeathAnimations.Clear();
             coins.Clear();
             manaCrystals.Clear();
-            coinsCollected = 0;
-
+            inventoryResources.Clear();
             player.Position = playerStartPosition;
             player.Health.Reset();
             player.ResetDamageEffects();
@@ -190,11 +188,10 @@ namespace _1_2D_Top_Down
                     continue;
                 }
 
-                demon.Health.TakeDamage(PlayerProjectileDamage);
-
+                demon.Health.TakeDamage(player.Stats.Damage);
                 demon.ApplyKnockback(
                     projectile.Bounds.Center.ToVector2(),
-                    Player.BasicAttackKnockbackForce);
+                    player.Stats.Knockback);
 
                 if (demon.Health.IsDead)
                 {
@@ -236,11 +233,11 @@ namespace _1_2D_Top_Down
                     continue;
                 }
 
-                evilEye.Health.TakeDamage(PlayerProjectileDamage);
+                evilEye.Health.TakeDamage(player.Stats.Damage);
 
                 evilEye.ApplyKnockback(
                     projectile.Bounds.Center.ToVector2(),
-                    Player.BasicAttackKnockbackForce);
+                    player.Stats.Knockback);
 
                 if (evilEye.Health.IsDead)
                 {
@@ -344,11 +341,15 @@ namespace _1_2D_Top_Down
             {
                 Coin coin = coins[i];
                 coin.Update(gameTime);
+                if (coin.IsExpired)
+                {
+                    coins.RemoveAt(i);
+                    continue;
+                }
 
                 if (player.Bounds.Intersects(coin.Bounds))
                 {
                     coins.RemoveAt(i);
-                    coinsCollected++;
                     AddInventoryResource("coin", uiCoinTexture, 1);
                     PlayNextCoinPickupSound();
                 }
@@ -361,6 +362,11 @@ namespace _1_2D_Top_Down
                 ManaCrystal manaCrystal = manaCrystals[i];
 
                 manaCrystal.Update(gameTime);
+                if (manaCrystal.IsExpired)
+                {
+                    manaCrystals.RemoveAt(i);
+                    continue;
+                }
 
                 bool playerCanReceiveMana =
                     player.Mana.CurrentMana < player.Mana.MaxMana;
@@ -502,12 +508,40 @@ namespace _1_2D_Top_Down
 
                 if (player.Mana.TrySpend(Player.BasicAttackManaCost))
                 {
-                    projectiles.Add(new PlayerProjectile(
-                        playerProjectileTexture,
+                    SpawnPlayerProjectiles(
                         startPosition,
-                        direction));
+                        direction);
                     PlayRandomBasicAttackSound();
                 }
+            }
+        }
+        private void SpawnPlayerProjectiles( Vector2 startPosition,Vector2 baseDirection)
+        {
+            int projectileCount = Math.Max(
+                1,
+                player.Stats.ProjectileCount);
+
+            float spreadAngleRadians = MathHelper.ToRadians(
+                player.Stats.ProjectileSpreadAngleDegrees);
+
+            float middleProjectileIndex =
+                (projectileCount - 1) / 2f;
+
+            for (int i = 0; i < projectileCount; i++)
+            {
+                float angle =
+                    (i - middleProjectileIndex) *
+                    spreadAngleRadians;
+
+                Vector2 projectileDirection = Vector2.Transform(
+                    baseDirection,
+                    Matrix.CreateRotationZ(angle));
+
+                projectiles.Add(new PlayerProjectile(
+                    playerProjectileTexture,
+                    startPosition,
+                    projectileDirection,
+                    player.Stats.ProjectileSpeed));
             }
         }
         private void RebuildEnemySpatialGrids()

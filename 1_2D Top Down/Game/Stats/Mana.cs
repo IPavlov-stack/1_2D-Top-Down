@@ -1,12 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 
 namespace _1_2D_Top_Down
 {
     public class Mana
     {
-        public float MaxMana { get; }
+        public float MaxMana { get; private set; }
         public float CurrentMana { get; private set; }
-        public float RegenPerSecond { get; }
+        public float RegenPerSecond { get; private set; }
 
         public Mana(float maxMana, float regenPerSecond)
         {
@@ -14,7 +15,18 @@ namespace _1_2D_Top_Down
             CurrentMana = maxMana;
             RegenPerSecond = regenPerSecond;
         }
+        public void SetMaxMana(float maxMana)
+        {
+            MaxMana = Math.Max(1f, maxMana);
 
+            if (CurrentMana > MaxMana)
+                CurrentMana = MaxMana;
+        }
+
+        public void SetRegenPerSecond(float regenPerSecond)
+        {
+            RegenPerSecond = Math.Max(0f, regenPerSecond);
+        }
         public void Update(GameTime gameTime)
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
