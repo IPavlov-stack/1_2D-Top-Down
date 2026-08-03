@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace _1_2D_Top_Down
 {
@@ -9,6 +10,8 @@ namespace _1_2D_Top_Down
         private const float Speed = 120f;
         private const float ContactDamageCooldown = 0.75f;
         private float contactDamageTimer = ContactDamageCooldown;
+        private const float AttackStateDuration = 0.20f;
+        private float attackStateTimer;
 
         public Demon(Texture2D texture, Vector2 startPosition)
             : base(
@@ -24,17 +27,36 @@ namespace _1_2D_Top_Down
 
         public void Update(GameTime gameTime, Player player)
         {
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            float deltaTime =
+                (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             contactDamageTimer += deltaTime;
+
+            attackStateTimer = MathF.Max(
+                0f,
+                attackStateTimer - deltaTime);
+
+            if (attackStateTimer > 0f)
+            {
+                ChangeState(EnemyState.Attacking);
+            }
+            else
+            {
+                ChangeState(EnemyState.Chasing);
+            }
+
             UpdateKnockback(gameTime);
 
-            Vector2 direction = player.Bounds.Center.ToVector2() -
-                                Bounds.Center.ToVector2();
+            Vector2 direction =
+                player.Bounds.Center.ToVector2() -
+                Bounds.Center.ToVector2();
 
             if (direction != Vector2.Zero)
             {
                 direction.Normalize();
-                Position += direction * Speed * deltaTime;
+
+                Position +=
+                    direction * Speed * deltaTime;
             }
 
             UpdateAnimation(gameTime);
@@ -48,6 +70,8 @@ namespace _1_2D_Top_Down
 
             player.TakeDamage(damage);
             contactDamageTimer = 0f;
+            attackStateTimer = AttackStateDuration;
+            ChangeState(EnemyState.Attacking);
 
             return true;
         }

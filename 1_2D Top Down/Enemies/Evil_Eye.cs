@@ -19,13 +19,10 @@ namespace _1_2D_Top_Down
         private float shootTimer;
         private float attackTimer;
 
-        private bool isAttacking;
         private bool projectileFired;
-        private bool isDead;
 
         public bool IsDeathAnimationFinished { get; private set; }
-        public bool IsDead => isDead;
-
+        public bool IsDead => CurrentState == EnemyState.Dead;
         public Evil_Eye(Texture2D texture, Vector2 startPosition)
             : base(
                 texture,
@@ -37,46 +34,58 @@ namespace _1_2D_Top_Down
                 maxHealth: EyeMaxHealth)
 
         {
+
             SetAnimation(FlyingRow, 4);
+            ChangeState(EnemyState.Idle);
         }
 
         public void Die()
         {
-            if (isDead)
-            {
+            if (IsDead)
                 return;
-            }
 
-            isDead = true;
+            ChangeState(EnemyState.Dead);
             SetAnimation(DeathRow, 4);
         }
-
         public EnemyProjectile? Update(
             GameTime gameTime,
             Player player,
             Texture2D projectileTexture)
         {
-            if (isDead)
+            if (IsDead)
             {
-                IsDeathAnimationFinished = UpdateAnimation(
-                    gameTime,
-                    loop: false);
+                IsDeathAnimationFinished =
+                    UpdateAnimation(
+                        gameTime,
+                        loop: false);
 
                 return null;
             }
+
             UpdateKnockback(gameTime);
 
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            float deltaTime =
+                (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            Vector2 direction = player.Bounds.Center.ToVector2() - SpriteCenter;
+            Vector2 direction =
+                player.Bounds.Center.ToVector2() -
+                SpriteCenter;
+
             float distance = direction.Length();
 
-            if (distance > AttackRange && !isAttacking)
+            // Врагът преследва играча, докато
+            // влезе в обсега за атака.
+            if (distance > AttackRange &&
+                CurrentState != EnemyState.Attacking)
             {
+                ChangeState(EnemyState.Chasing);
+
                 if (direction != Vector2.Zero)
                 {
                     direction.Normalize();
-                    Position += direction * Speed * deltaTime;
+
+                    Position +=
+                                       direction * Speed * deltaTime;
                 }
 
                 SetAnimation(FlyingRow, 4);
@@ -85,8 +94,11 @@ namespace _1_2D_Top_Down
                 return null;
             }
 
-            if (!isAttacking)
+            // В обсег е, но още не атакува.
+            if (CurrentState != EnemyState.Attacking)
             {
+                ChangeState(EnemyState.Idle);
+
                 SetAnimation(FlyingRow, 4);
                 UpdateAnimation(gameTime);
 
@@ -97,32 +109,28 @@ namespace _1_2D_Top_Down
                     shootTimer = 0f;
                     attackTimer = 0f;
                     projectileFired = false;
-                    isAttacking = true;
+
+                    ChangeState(EnemyState.Attacking);
 
                     if (direction != Vector2.Zero)
                     {
                         direction.Normalize();
                         SetAttackRotation(direction);
                     }
-                    SetAnimation(AttackRow, 6);
-                    if (attackTimer >= 0.9f)
-                    {
-                        isAttacking = false;
-                        rotation = 0f;
 
-                        SetAnimation(FlyingRow, 4);
-                    }
+                    SetAnimation(AttackRow, 6);
                 }
 
                 return null;
             }
 
-
-            // Attack animation: projectile-ът излиза около третия кадър.
+            // Attack state.
             attackTimer += deltaTime;
             UpdateAnimation(gameTime);
 
-            if (!projectileFired && attackTimer >= 0.30f)
+            // Projectile се създава около третия кадър.
+            if (!projectileFired &&
+                attackTimer >= 0.30f)
             {
                 projectileFired = true;
 
@@ -137,10 +145,13 @@ namespace _1_2D_Top_Down
                     direction);
             }
 
-            // 6 кадъра × 0.15 s = 0.9 s
+            // 6 кадъра × 0.15 секунди = 0.9 секунди.
             if (attackTimer >= 0.9f)
             {
-                isAttacking = false;
+                attackTimer = 0f;
+                rotation = 0f;
+
+                ChangeState(EnemyState.Idle);
                 SetAnimation(FlyingRow, 4);
             }
 

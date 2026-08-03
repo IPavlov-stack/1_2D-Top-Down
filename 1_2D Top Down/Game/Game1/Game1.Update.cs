@@ -483,13 +483,10 @@ namespace _1_2D_Top_Down
             MouseState mouse,
             KeyboardState keyboard)
         {
-            bool clickedLeftButton =
-                mouse.LeftButton == ButtonState.Pressed &&
-                previousMouseState.LeftButton == ButtonState.Released;
+            bool clickedLeftButton = mouse.LeftButton == ButtonState.Pressed &&
+                        previousMouseState.LeftButton == ButtonState.Released;
 
-            bool pressedE =
-                keyboard.IsKeyDown(Keys.E) &&
-                previousKeyboard.IsKeyUp(Keys.E);
+            bool pressedE =  keyboard.IsKeyDown(Keys.E) && previousKeyboard.IsKeyUp(Keys.E);
 
             if (!clickedLeftButton && !pressedE)
             {
@@ -508,9 +505,14 @@ namespace _1_2D_Top_Down
 
                 if (player.Mana.TrySpend(Player.BasicAttackManaCost))
                 {
-                    SpawnPlayerProjectiles(
+                    player.EnterShootState();
+
+                    projectiles.Add(new PlayerProjectile(
+                        playerProjectileTexture,
                         startPosition,
-                        direction);
+                        direction,
+                        player.Stats.ProjectileSpeed));
+
                     PlayRandomBasicAttackSound();
                 }
             }

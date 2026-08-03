@@ -10,6 +10,10 @@ namespace _1_2D_Top_Down
     {
         // Combat
         public const float BasicAttackManaCost = 8f;
+        private const float ShootStateDuration = 0.20f;
+
+        private float shootStateTimer;
+        public PlayerState CurrentState { get; private set; } = PlayerState.Idle;
 
         public float MoveSpeed => Stats.MoveSpeed;
         public Texture2D texture;
@@ -76,7 +80,9 @@ namespace _1_2D_Top_Down
             IReadOnlyList<Rectangle> collisionRectangles,
             bool canMove)
         {
+            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            bool isMoving = false;
             healthFlashTimeLeft = MathF.Max( 0f, healthFlashTimeLeft - (float)gameTime.ElapsedGameTime.TotalSeconds);
             Health.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
             if (damageFlashTimer > 0f)
@@ -87,7 +93,6 @@ namespace _1_2D_Top_Down
             KeyboardState keyboard = Keyboard.GetState();
             if (canMove)
             {
-                float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
                 Vector2 direction = Vector2.Zero;
 
@@ -102,6 +107,7 @@ namespace _1_2D_Top_Down
 
                 if (direction != Vector2.Zero)
                     direction.Normalize();
+                isMoving = direction != Vector2.Zero;
 
                 float movementDistance = Stats.MoveSpeed * deltaTime;
                 // Each axis is tried independently. If X is blocked but Y is
@@ -122,6 +128,7 @@ namespace _1_2D_Top_Down
                 }
                 Mana.Update(gameTime);
             }
+            UpdateState(deltaTime, isMoving);
         }
         public void Draw(SpriteBatch spriteBatch)
         {
@@ -234,6 +241,38 @@ namespace _1_2D_Top_Down
 
             Mana.SetMaxMana(Stats.MaxMana);
             Mana.SetRegenPerSecond(Stats.ManaRegen);
+        }
+        private void ChangeState(PlayerState newState)
+        {
+            if (CurrentState == newState)
+                return;
+
+            CurrentState = newState;
+        }
+
+        private void UpdateState(
+            float deltaTime,
+            bool isMoving)
+        {
+            if (CurrentState == PlayerState.Shoot)
+            {
+                shootStateTimer -= deltaTime;
+
+                if (shootStateTimer > 0f)
+                    return;
+            }
+
+            ChangeState(
+                isMoving
+                    ? PlayerState.Walk
+                    : PlayerState.Idle);
+        }
+
+        public void EnterShootState()
+        {
+            shootStateTimer = ShootStateDuration;
+
+            ChangeState(PlayerState.Shoot);
         }
     }
 }

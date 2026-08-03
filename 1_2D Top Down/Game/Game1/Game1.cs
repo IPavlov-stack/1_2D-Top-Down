@@ -205,7 +205,7 @@ namespace _1_2D_Top_Down
             demonDeathTexture = Content.Load<Texture2D>("enemies/Demon/DEATH");
             demonShadowTexture = Content.Load<Texture2D>("enemies/Demon/shadow_demon");
             evilEyeShadowTexture = Content.Load<Texture2D>("enemies/Evil Eye/shadow_eye");
-            playerProjectileTexture = Content.Load<Texture2D>("projectiles/magic_projectile");
+            playerProjectileTexture =Content.Load<Texture2D>("projectiles/magic_projectile2");
             coinTexture = Content.Load<Texture2D>("Collectables/coin");
             manaCrystalTexture = Content.Load<Texture2D>("Collectables/mana_crystal_sheet");
             coinPickupSounds = new[]

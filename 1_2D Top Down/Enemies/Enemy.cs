@@ -29,6 +29,7 @@ namespace _1_2D_Top_Down
 
         public Vector2 Position;
         public Health Health { get; }
+        public EnemyState CurrentState { get; private set; } = EnemyState.Idle;
 
         private const float KnockbackDeceleration = 9f;
         private readonly Knockback knockback = new Knockback(KnockbackDeceleration);
@@ -73,6 +74,18 @@ namespace _1_2D_Top_Down
 
             framesInCurrentAnimation = frameCount;
             Health = new Health(maxHealth);
+        }
+        protected void ChangeState(EnemyState newState)
+        {
+            if (CurrentState == newState)
+                return;
+
+            CurrentState = newState;
+        }
+
+        protected bool IsInState(EnemyState state)
+        {
+            return CurrentState == state;
         }
 
         protected void SetAnimation(int row, int animationFrameCount)
