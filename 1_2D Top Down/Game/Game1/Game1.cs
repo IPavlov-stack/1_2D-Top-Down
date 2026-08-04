@@ -19,7 +19,6 @@ namespace _1_2D_Top_Down
         private SpriteBatch _spriteBatch;
         private Color BackgroundColor = new Color(119, 167, 255); // sky blue-ish
         private Texture2D pixelTexture;
-        private bool isEnemySpawningEnabled = true;
         private bool IsGameplayActive => gameFlowState == GameFlowState.Playing;
         private const int WindowSizeX = 1920;
         private const int WindowSizeY = 1080;
@@ -27,6 +26,9 @@ namespace _1_2D_Top_Down
         private GameFlowState gameFlowState = GameFlowState.MainMenu;
         private GameFlowState nextGameFlowState;
         private WaveManager waveManager;
+
+        //campaign info
+        private readonly MissionDefinition currentMission = CampaignMissions.ForestOutskirts;
 
 
         //input info
@@ -52,8 +54,6 @@ namespace _1_2D_Top_Down
         private readonly List<InventoryResource> inventoryResources = new();
 
         //enemy info
-        private const int MaxActiveEnemies = 30;
-        private int ActiveEnemyCount => demons.Count + evilEyes.Count;
         private const int EnemySpatialCellSize = 128;
         private readonly SpatialGrid<Demon> demonSpatialGrid = new SpatialGrid<Demon>(EnemySpatialCellSize);
         private readonly SpatialGrid<Evil_Eye> evilEyeSpatialGrid = new SpatialGrid<Evil_Eye>(EnemySpatialCellSize);
@@ -75,9 +75,15 @@ namespace _1_2D_Top_Down
         private Texture2D evilEyeShadowTexture;
 
         //spawner info
-        private float spawnTimer;
-        private const float SpawnInterval = 1.5f;
+        private readonly Queue<EnemySpawnGroup> spawnGroupQueue = new();
 
+        private EnemySpawnGroup? activeSpawnGroup;
+        private int remainingEnemiesInActiveGroup;
+
+        private float spawnTimer;
+        private float currentSpawnInterval;
+
+        private bool hasFinishedSpawningWave;
         //camera info
         private Camera camera;
 
@@ -130,6 +136,7 @@ namespace _1_2D_Top_Down
         private Texture2D skillTreeButtonTexture;
         private Texture2D settingsButtonTexture;
         private Texture2D soundVolumeButtonTexture;
+        private Texture2D wavePreviewPanelTexture;
 
         private Texture2D startNextWaveButtonTexture;
         private Rectangle startNextWaveButtonBounds;
@@ -197,6 +204,7 @@ namespace _1_2D_Top_Down
         protected override void Initialize()
         {
             camera = new Camera();
+            camera.Zoom = 1.2f;
             base.Initialize();
         }
 
@@ -265,6 +273,7 @@ namespace _1_2D_Top_Down
             settingsButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/settings-button");
             soundVolumeButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/sound-volume-button");
             startNextWaveButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/start_next_wave");
+            wavePreviewPanelTexture =  Content.Load<Texture2D>("UI/wave_preview_panel");
             int buttonWidth = (int)( startNextWaveButtonTexture.Width * StartNextWaveButtonScale);
             int buttonHeight = (int)(startNextWaveButtonTexture.Height * StartNextWaveButtonScale);
             const int rightMargin = 20;
@@ -293,7 +302,6 @@ namespace _1_2D_Top_Down
 
             LoadShopUpgradeIcons();
             InitializeShopItems();
-            gameFlowState = GameFlowState.WaveIntermission;
             MediaPlayer.IsRepeating = true;
             MediaPlayer.Volume = MusicVolume;
 
@@ -324,7 +332,8 @@ namespace _1_2D_Top_Down
 
         private void UpdateMusicForgameFlowState()
         {
-            if (gameFlowState == GameFlowState.Playing)
+            if (gameFlowState == GameFlowState.Playing ||
+                gameFlowState == GameFlowState.WaveIntermission)
             {
                 PlayMusic(backgroundMusic);
             }
@@ -341,8 +350,63 @@ namespace _1_2D_Top_Down
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
-            UpdateWaveIntermissionInput(mouse);
             UpdateSceneTransition(gameTime);
+
+            if (gameFlowState == GameFlowState.WaveIntermission)
+            {
+                if (isExitConfirmationOpen)
+                {
+                    HandleExitConfirmationInput(keyboard, mouse);
+
+                    previousKeyboard = keyboard;
+                    previousMouseState = mouse;
+
+                    base.Update(gameTime);
+                    return;
+                }
+
+                bool intermissionEscapePressed =
+                    keyboard.IsKeyDown(Keys.Escape) &&
+                    previousKeyboard.IsKeyUp(Keys.Escape);
+                if (intermissionEscapePressed)
+                {
+                    bool closedPanel = CloseOpenGameplayPanels();
+
+                    if (!closedPanel)
+                    {
+                        isExitConfirmationOpen = true;
+                    }
+
+                    previousKeyboard = keyboard;
+                    previousMouseState = mouse;
+
+                    base.Update(gameTime);
+                    return;
+                }
+
+                HandleGameplayUIInput(keyboard, mouse);
+                UpdatePlayerMovement(gameTime);
+                CenterCameraOnPlayer();
+
+                UpdateDeathAnimations(gameTime);
+                UpdateCollectibles(gameTime);
+
+                RebuildEnemySpatialGrids();
+                UpdatePlayerProjectiles(gameTime);
+                UpdateEnemyProjectiles(gameTime);
+
+                UpdatePlayerResourceAnimations(gameTime);
+
+                UpdateWaveIntermissionInput(mouse);
+                UpdateMusicForgameFlowState();
+
+                previousKeyboard = keyboard;
+                previousMouseState = mouse;
+
+                base.Update(gameTime);
+                return;
+            }
+            UpdateMusicForgameFlowState();
 
             if (isSceneTransitioning)
             {

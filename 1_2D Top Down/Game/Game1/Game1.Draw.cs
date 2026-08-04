@@ -101,6 +101,7 @@ namespace _1_2D_Top_Down
 
             DrawGameplayUI();
             DrawExitConfirmation();
+            DrawWaveProgressUi();
 
             if (gameFlowState == GameFlowState.GameOver)
                 DrawGameOverScreen();
@@ -385,9 +386,227 @@ namespace _1_2D_Top_Down
             if (gameFlowState != GameFlowState.WaveIntermission)
                 return;
 
+            DrawNextWavePreview();
+
             _spriteBatch.Draw(
                 startNextWaveButtonTexture,
                 startNextWaveButtonBounds,
+                Color.White);
+        }
+        private void DrawNextWavePreview()
+        {
+            int nextWaveIndex = waveManager.CurrentWave;
+
+            if (nextWaveIndex >= currentMission.Waves.Count)
+                return;
+
+            WaveDefinition nextWave = currentMission.Waves[nextWaveIndex];
+
+            const int panelWidth = 350;
+            const int panelHeight = 115;
+            const int gapToButton = 16;
+            const int iconSize = 52;
+            const int groupSpacing = 34;
+
+            Rectangle panelBounds = new Rectangle(
+                startNextWaveButtonBounds.Left - panelWidth - gapToButton,
+                startNextWaveButtonBounds.Bottom - panelHeight,
+                panelWidth,
+                panelHeight);
+
+            DrawWavePreviewPanel(panelBounds);
+            DrawCenteredPanelText(
+                $"NEXT WAVE: {nextWaveIndex + 1}",
+                panelBounds,
+                22,
+                Color.Gold);
+
+            int x = panelBounds.Left + 40;
+            int y = panelBounds.Top + 78;
+
+            foreach (EnemySpawnGroup group in nextWave.SpawnGroups)
+            {
+                string countText = $"{group.Count}x";
+
+                _spriteBatch.DrawString(
+                    boldpixels,
+                    countText,
+                    new Vector2(x, y),
+                    Color.White);
+
+                x += (int)boldpixels.MeasureString(countText).X + 12;
+
+                if (TryGetEnemyPreviewSprite(
+                        group.EnemyType,
+                        out Texture2D texture,
+                        out Rectangle sourceRectangle))
+                {
+                    Rectangle iconBounds = new Rectangle(
+                        x,
+                        y - 14,
+                        iconSize,
+                        iconSize);
+
+                    _spriteBatch.Draw(
+                        texture,
+                        iconBounds,
+                        sourceRectangle,
+                        Color.White);
+
+                    x += iconSize + groupSpacing;
+                }
+            }
+        }
+        private void DrawWavePreviewPanel(Rectangle destinationBounds)
+        {
+            const int borderSize = 8;
+
+            int sourceCenterWidth =
+                wavePreviewPanelTexture.Width - borderSize * 2;
+
+            int sourceCenterHeight =
+                wavePreviewPanelTexture.Height - borderSize * 2;
+
+            int destinationCenterWidth =
+                destinationBounds.Width - borderSize * 2;
+
+            int destinationCenterHeight =
+                destinationBounds.Height - borderSize * 2;
+
+            // Corners
+            _spriteBatch.Draw(
+                wavePreviewPanelTexture,
+                new Rectangle(destinationBounds.Left, destinationBounds.Top,
+                    borderSize, borderSize),
+                new Rectangle(0, 0, borderSize, borderSize),
+                Color.White);
+
+            _spriteBatch.Draw(
+                wavePreviewPanelTexture,
+                new Rectangle(destinationBounds.Right - borderSize,
+                    destinationBounds.Top, borderSize, borderSize),
+                new Rectangle(wavePreviewPanelTexture.Width - borderSize,
+                    0, borderSize, borderSize),
+                Color.White);
+
+            _spriteBatch.Draw(
+                wavePreviewPanelTexture,
+                new Rectangle(destinationBounds.Left,
+                    destinationBounds.Bottom - borderSize,
+                    borderSize, borderSize),
+                new Rectangle(0,
+                    wavePreviewPanelTexture.Height - borderSize,
+                    borderSize, borderSize),
+                Color.White);
+
+            _spriteBatch.Draw(
+                wavePreviewPanelTexture,
+                new Rectangle(destinationBounds.Right - borderSize,
+                    destinationBounds.Bottom - borderSize,
+                    borderSize, borderSize),
+                new Rectangle(wavePreviewPanelTexture.Width - borderSize,
+                    wavePreviewPanelTexture.Height - borderSize,
+                    borderSize, borderSize),
+                Color.White);
+
+            // Edges
+            _spriteBatch.Draw(
+                wavePreviewPanelTexture,
+                new Rectangle(destinationBounds.Left + borderSize,
+                    destinationBounds.Top,
+                    destinationCenterWidth, borderSize),
+                new Rectangle(borderSize, 0,
+                    sourceCenterWidth, borderSize),
+                Color.White);
+
+            _spriteBatch.Draw(
+                wavePreviewPanelTexture,
+                new Rectangle(destinationBounds.Left + borderSize,
+                    destinationBounds.Bottom - borderSize,
+                    destinationCenterWidth, borderSize),
+                new Rectangle(borderSize,
+                    wavePreviewPanelTexture.Height - borderSize,
+                    sourceCenterWidth, borderSize),
+                Color.White);
+
+            _spriteBatch.Draw(
+                wavePreviewPanelTexture,
+                new Rectangle(destinationBounds.Left,
+                    destinationBounds.Top + borderSize,
+                    borderSize, destinationCenterHeight),
+                new Rectangle(0, borderSize,
+                    borderSize, sourceCenterHeight),
+                Color.White);
+
+            _spriteBatch.Draw(
+                wavePreviewPanelTexture,
+                new Rectangle(destinationBounds.Right - borderSize,
+                    destinationBounds.Top + borderSize,
+                    borderSize, destinationCenterHeight),
+                new Rectangle(wavePreviewPanelTexture.Width - borderSize,
+                    borderSize, borderSize, sourceCenterHeight),
+                Color.White);
+
+            // Center
+            _spriteBatch.Draw(
+                wavePreviewPanelTexture,
+                new Rectangle(destinationBounds.Left + borderSize,
+                    destinationBounds.Top + borderSize,
+                    destinationCenterWidth, destinationCenterHeight),
+                new Rectangle(borderSize, borderSize,
+                    sourceCenterWidth, sourceCenterHeight),
+                Color.White);
+        }
+        private bool TryGetEnemyPreviewSprite(
+            EnemyType enemyType,
+            out Texture2D texture,
+            out Rectangle sourceRectangle)
+        {
+            switch (enemyType)
+            {
+                case EnemyType.Demon:
+                    texture = demonTexture;
+
+                    // Demon FLYING sheet: 1 row, 4 frames
+                    sourceRectangle = new Rectangle(
+                        0,
+                        0,
+                        demonTexture.Width / 4,
+                        demonTexture.Height);
+
+                    return true;
+
+                case EnemyType.EvilEye:
+                    texture = evilEyeTexture;
+
+                    // Evil Eye: 6 колони и 3 реда
+                    // flying row, frame 1
+                    sourceRectangle = new Rectangle(
+                        0,
+                        0,
+                        evilEyeTexture.Width / 6,
+                        evilEyeTexture.Height / 3);
+
+                    return true;
+
+                default:
+                    texture = null;
+                    sourceRectangle = Rectangle.Empty;
+                    return false;
+            }
+        }
+        private void DrawWaveProgressUi()
+        {
+            if (currentMission == null)
+                return;
+
+            string waveText =
+                $"WAVE {waveManager.CurrentWave}/{currentMission.Waves.Count}";
+
+            _spriteBatch.DrawString(
+                boldpixels,
+                waveText,
+                new Vector2(24, 24),
                 Color.White);
         }
         private void DrawNineSlicePanel(
@@ -398,7 +617,7 @@ namespace _1_2D_Top_Down
             const int sourceSliceSize = 74;
             const int sourceGap = 17; // pixels between every slice 
 
-            // Ъглите остават с оригиналния си размер.
+            // Ъглите остават с оригиналния си размер
             const int borderSize = sourceSliceSize;
 
             if (destination.Width < borderSize * 2 ||
@@ -409,7 +628,7 @@ namespace _1_2D_Top_Down
 
             Color color = tint ?? Color.White;
 
-            // Начало на всяка от трите колони/редици в sprite sheet-а
+            // Начало на всяка от трите колони/редици в sprite sheet
             int[] sourcePositions = {
                                         0,
                                         sourceSliceSize + sourceGap,
@@ -445,7 +664,7 @@ namespace _1_2D_Top_Down
                                 borderSize
                                     };
 
-            // Рисува деветте части.
+            // Рисува деветте части
             for (int row = 0; row < 3; row++)
             {
                 for (int column = 0; column < 3; column++)

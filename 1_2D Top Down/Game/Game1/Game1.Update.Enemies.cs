@@ -10,8 +10,16 @@ namespace _1_2D_Top_Down
 
             Vector2 deathPosition = enemy.Bounds.Center.ToVector2();
             SpawnEnemyDrops(deathPosition);
-        }
 
+            bool allWaveEnemiesDefeated =
+                waveManager.RegisterEnemyDefeated();
+
+            if (hasFinishedSpawningWave &&
+                allWaveEnemiesDefeated)
+            {
+                gameFlowState = GameFlowState.WaveIntermission;
+            }
+        }
         private void SpawnEnemyDrops(Vector2 enemyCenter)
         {
             TryDropCoin(enemyCenter);

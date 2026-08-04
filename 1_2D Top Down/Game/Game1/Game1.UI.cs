@@ -143,6 +143,15 @@ namespace _1_2D_Top_Down
         private const float BottomHudPanelScale = 0.55f;
         private static readonly Vector2 BottomHudPanelOffsetFromBottomCenter = new Vector2(0f, -280f);
 
+        // options panel
+        private bool isSoundOptionsPanelOpen;
+        private const int SoundOptionsPanelWidth = 700;
+        private const int SoundOptionsPanelHeight = 430;
+        private const int SoundOptionsSliderTopOffset = 165;
+        private const int SoundOptionsSliderSpacing = 100;
+        private const int SoundOptionsCloseButtonWidth = 180;
+        private const int SoundOptionsCloseButtonHeight = 52;
+
         private bool HandleGameplayUIInput( KeyboardState keyboard, MouseState mouse)
         {
             if (WasSpellKeyPressed(keyboard, Keys.D1, Keys.NumPad1))
@@ -163,6 +172,11 @@ namespace _1_2D_Top_Down
             if (WasSpellKeyPressed(keyboard, Keys.D6, Keys.NumPad6))
                 selectedSpellSlot = 5;
 
+            if (isSoundOptionsPanelOpen)
+            {
+                HandleSoundOptionsPanelInput(keyboard, mouse);
+                return true;
+            }
             if (keyboard.IsKeyDown(Keys.I) &&
                 previousKeyboard.IsKeyUp(Keys.I))
             {
@@ -226,6 +240,10 @@ namespace _1_2D_Top_Down
                 DrawShopPanel();
             }
             DrawQuickMenuButtons();
+            if (isSoundOptionsPanelOpen)
+            {
+                DrawSoundOptionsPanel();
+            }
         }
 
         private void DrawSpellHotbar()
@@ -668,13 +686,11 @@ namespace _1_2D_Top_Down
 
             if (GetQuickMenuButtonBounds(SoundVolumeButtonIndex).Contains(mousePosition))
             {
-                optionsReturnScene = GameFlowState.Playing;
-                reopenPauseAfterOptions = false;
-
-                StartSceneTransition(GameFlowState.Options);
+                isSoundOptionsPanelOpen = !isSoundOptionsPanelOpen;
+                isMusicSliderDragging = false;
+                isSoundEffectsSliderDragging = false;
                 return true;
             }
-
             if (GetQuickMenuButtonBounds(ShopButtonIndex).Contains(mousePosition))
             {
                 isShopOpen = !isShopOpen;
@@ -833,6 +849,7 @@ namespace _1_2D_Top_Down
             isStatsOpen = false;
             isQuestLogOpen = false;
             isShopOpen = false;
+            isSoundOptionsPanelOpen = false;
 
             return hadOpenPanel;
         }
@@ -1336,6 +1353,116 @@ namespace _1_2D_Top_Down
 
             return true;
         }
+        private Rectangle GetSoundOptionsPanelBounds()
+        {
+            return new Rectangle(
+                GraphicsDevice.Viewport.Width / 2 - SoundOptionsPanelWidth / 2,
+                GraphicsDevice.Viewport.Height / 2 - SoundOptionsPanelHeight / 2,
+                SoundOptionsPanelWidth,
+                SoundOptionsPanelHeight);
+        }
 
+        private Rectangle GetInGameMusicSliderBounds()
+        {
+            Rectangle panelBounds = GetSoundOptionsPanelBounds();
+
+            return new Rectangle(
+                panelBounds.Center.X - SoundEffectsSliderWidth / 2,
+                panelBounds.Top + SoundOptionsSliderTopOffset,
+                SoundEffectsSliderWidth,
+                SoundEffectsSliderHeight);
+        }
+
+        private Rectangle GetInGameSoundEffectsSliderBounds()
+        {
+            Rectangle musicSliderBounds = GetInGameMusicSliderBounds();
+
+            return new Rectangle(
+                musicSliderBounds.X,
+                musicSliderBounds.Y + SoundOptionsSliderSpacing,
+                musicSliderBounds.Width,
+                musicSliderBounds.Height);
+        }
+
+        private Rectangle GetSoundOptionsCloseButtonBounds()
+        {
+            Rectangle panelBounds = GetSoundOptionsPanelBounds();
+
+            return new Rectangle(
+                panelBounds.Center.X - SoundOptionsCloseButtonWidth / 2,
+                panelBounds.Bottom - SoundOptionsCloseButtonHeight - 38,
+                SoundOptionsCloseButtonWidth,
+                SoundOptionsCloseButtonHeight);
+        }
+
+        private void DrawSoundOptionsPanel()
+        {
+            Rectangle panelBounds = GetSoundOptionsPanelBounds();
+            Rectangle closeButtonBounds = GetSoundOptionsCloseButtonBounds();
+
+            DrawNineSlicePanel(panel9SliceTexture, panelBounds);
+
+            DrawCenteredPanelText(
+                "SOUND OPTIONS",
+                panelBounds,
+                38,
+                Color.Gold);
+
+            DrawMusicSlider(GetInGameMusicSliderBounds());
+            DrawSoundEffectsSlider(GetInGameSoundEffectsSliderBounds());
+
+            bool isCloseHovered =
+                closeButtonBounds.Contains(Mouse.GetState().Position);
+
+            _spriteBatch.Draw(
+                pixelTexture,
+                closeButtonBounds,
+                Color.Black);
+
+            Rectangle closeButtonInnerBounds = new Rectangle(
+                closeButtonBounds.X + 3,
+                closeButtonBounds.Y + 3,
+                closeButtonBounds.Width - 6,
+                closeButtonBounds.Height - 6);
+
+            _spriteBatch.Draw(
+                pixelTexture,
+                closeButtonInnerBounds,
+                isCloseHovered ? Color.SlateGray : Color.DimGray);
+
+            DrawCenteredPanelText(
+                "CLOSE",
+                closeButtonBounds,
+                12,
+                Color.White);
+        }
+
+        private void HandleSoundOptionsPanelInput(
+            KeyboardState keyboard,
+            MouseState mouse)
+        {
+            bool escapePressed =
+                keyboard.IsKeyDown(Keys.Escape) &&
+                previousKeyboard.IsKeyUp(Keys.Escape);
+
+            bool clickedLeftButton =
+                mouse.LeftButton == ButtonState.Pressed &&
+                previousMouseState.LeftButton == ButtonState.Released;
+
+            if (escapePressed ||
+                (clickedLeftButton &&
+                 GetSoundOptionsCloseButtonBounds().Contains(mouse.Position)))
+            {
+                isSoundOptionsPanelOpen = false;
+                isMusicSliderDragging = false;
+                isSoundEffectsSliderDragging = false;
+                return;
+            }
+
+            UpdateVolumeSliders(
+                mouse,
+                GetInGameMusicSliderBounds(),
+                GetInGameSoundEffectsSliderBounds());
+        }
     }
 }
