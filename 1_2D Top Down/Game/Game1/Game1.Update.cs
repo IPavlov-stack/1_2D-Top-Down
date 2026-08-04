@@ -21,12 +21,10 @@ namespace _1_2D_Top_Down
                 (int)worldMap.WorldWidth,
                 (int)worldMap.WorldHeight);
 
-            player.Update( gameTime, worldBounds, solidCollisionRectangles, true);
-            if (isEnemySpawningEnabled)
-            {
-                UpdateEnemySpawning(gameTime);
+            UpdatePlayerMovement(gameTime);
 
-            }
+            UpdateWaveSpawnQueue(gameTime);
+
             UpdateEvilEyes(gameTime);
             UpdateEnemyProjectiles(gameTime);
             UpdateDemons(gameTime);
@@ -39,7 +37,7 @@ namespace _1_2D_Top_Down
         }
         private void RestartGame()
         {
-            gameFlowState = GameFlowState.Playing;
+            gameFlowState = GameFlowState.WaveIntermission;
             projectiles.Clear();
             demons.Clear();
             evilEyes.Clear();
@@ -51,10 +49,22 @@ namespace _1_2D_Top_Down
             player.Position = playerStartPosition;
             player.Health.Reset();
             player.ResetDamageEffects();
-            spawnTimer = 0f;
             waveManager.Reset();
 
-            SpawnEnemy();
+        }
+        private void UpdatePlayerMovement(GameTime gameTime)
+        {
+            Rectangle worldBounds = new Rectangle(
+                0,
+                0,
+                (int)worldMap.WorldWidth,
+                (int)worldMap.WorldHeight);
+
+            player.Update(
+                gameTime,
+                worldBounds,
+                solidCollisionRectangles,
+                true);
         }
         private void UpdateDemons(GameTime gameTime)
         {
@@ -458,17 +468,25 @@ namespace _1_2D_Top_Down
                 }
             }
         }
-        private void UpdateEnemySpawning(GameTime gameTime)
+        private void UpdateEvilEyeDeathAnimations(GameTime gameTime)
         {
-            spawnTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            if (spawnTimer >= SpawnInterval)
+            for (int i = evilEyes.Count - 1; i >= 0; i--)
             {
-                spawnTimer = 0f;
+                Evil_Eye evilEye = evilEyes[i];
 
-                if (ActiveEnemyCount < MaxActiveEnemies)
+                if (!evilEye.IsDead)
                 {
-                    SpawnEnemy();
+                    continue;
+                }
+
+                evilEye.Update(
+                    gameTime,
+                    player,
+                    evilEyeProjectileTexture);
+
+                if (evilEye.IsDeathAnimationFinished)
+                {
+                    evilEyes.RemoveAt(i);
                 }
             }
         }
@@ -488,8 +506,7 @@ namespace _1_2D_Top_Down
 
             Vector2 startPosition = player.Bounds.Center.ToVector2();
 
-            Vector2 mouseWorldPosition = mouse.Position.ToVector2() + camera.Position;
-
+            Vector2 mouseWorldPosition =mouse.Position.ToVector2() / camera.Zoom + camera.Position;
             Vector2 direction = mouseWorldPosition - startPosition;
 
             if (direction != Vector2.Zero)
@@ -562,9 +579,19 @@ namespace _1_2D_Top_Down
             if (!clickedStartButton)
                 return;
 
-            waveManager.StartNextWave();
+            StartNextWave();
             gameFlowState = GameFlowState.Playing;
         }
+        private void UpdateDeathAnimations(GameTime gameTime)
+        {
+            UpdateDemonDeathAnimations(gameTime);
+            UpdateEvilEyeDeathAnimations(gameTime);
+        }
 
+        private void UpdateCollectibles(GameTime gameTime)
+        {
+            UpdateCoins(gameTime);
+            UpdateManaCrystals(gameTime);
+        }
     }
 }

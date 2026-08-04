@@ -52,26 +52,16 @@ namespace _1_2D_Top_Down
             }
             else if (GetPauseButtonBounds(1).Contains(mouse.Position))
             {
-                // Options
-                isExitConfirmationOpen = false;
-
-                optionsReturnScene = GameFlowState.Playing;
-                reopenPauseAfterOptions = true;
-
-                StartSceneTransition(GameFlowState.Options);
-            }
-            else if (GetPauseButtonBounds(2).Contains(mouse.Position))
-            {
                 // Restart
                 RestartGame();
                 isExitConfirmationOpen = false;
             }
-            else if (GetPauseButtonBounds(3).Contains(mouse.Position))
+            else if (GetPauseButtonBounds(2).Contains(mouse.Position))
             {
                 // Exit
                 Exit();
             }
-            else if (GetPauseButtonBounds(4).Contains(mouse.Position))
+            else if (GetPauseButtonBounds(3).Contains(mouse.Position))
             {
                 // Cancel
                 isExitConfirmationOpen = false;
@@ -117,10 +107,9 @@ namespace _1_2D_Top_Down
                 1.1f);
 
             DrawMenuButton(GetPauseButtonBounds(0), "Main Menu");
-            DrawMenuButton(GetPauseButtonBounds(1), "Options");
-            DrawMenuButton(GetPauseButtonBounds(2), "Restart");
-            DrawMenuButton(GetPauseButtonBounds(3), "Exit");
-            DrawMenuButton(GetPauseButtonBounds(4), "Cancel");
+            DrawMenuButton(GetPauseButtonBounds(1), "Restart");
+            DrawMenuButton(GetPauseButtonBounds(2), "Exit");
+            DrawMenuButton(GetPauseButtonBounds(3), "Cancel");
         }
     }
 }

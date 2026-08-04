@@ -12,11 +12,11 @@ namespace _1_2D_Top_Down
         private const int EyeMaxHealth = 2;
         private const int EyeExperienceReward = 15;
 
-        //animations
+        //animations from the spritesheet
         private const int FlyingRow = 0;
         private const int AttackRow = 1;
         private const int DeathRow = 2;
-
+        //=
         private float shootTimer;
         private float attackTimer;
 
@@ -49,10 +49,7 @@ namespace _1_2D_Top_Down
             ChangeState(EnemyState.Dead);
             SetAnimation(DeathRow, 4);
         }
-        public EnemyProjectile? Update(
-            GameTime gameTime,
-            Player player,
-            Texture2D projectileTexture)
+        public EnemyProjectile? Update(GameTime gameTime, Player player, Texture2D projectileTexture)
         {
             if (IsDead)
             {
