@@ -12,7 +12,7 @@ namespace _1_2D_Top_Down
         private float contactDamageTimer = ContactDamageCooldown;
         private const float AttackStateDuration = 0.20f;
         private float attackStateTimer;
-
+        private const int DemonExperienceReward = 10;
         public Demon(Texture2D texture, Vector2 startPosition)
             : base(
                 texture,
@@ -21,7 +21,8 @@ namespace _1_2D_Top_Down
                 frameRows: 1,
                 frameDuration: 0.15f,
                 scale: 1.25f,
-                maxHealth: DemonMaxHealth)
+                maxHealth: DemonMaxHealth,
+                experienceReward: DemonExperienceReward)
         {
         }
 

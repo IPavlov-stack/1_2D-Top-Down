@@ -36,9 +36,9 @@ namespace _1_2D_Top_Down
         public float ProjectileSpeed { get; private set; } = 600f;
         public int ProjectileCount { get; private set; } = 1;
 
-        // Разстоянието в градуси
+        // Разстоянието  градуси
         public float ProjectileSpreadAngleDegrees { get; } = 20f;
-        // Ще се използват по-късно
+        //по късно
         public float AttackSpeed { get; private set; } = 1f;
         public float CritRate { get; private set; } = 0f;
         public float CritDamage { get; private set; } = 1.5f;

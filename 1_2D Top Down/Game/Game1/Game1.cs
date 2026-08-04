@@ -21,9 +21,11 @@ namespace _1_2D_Top_Down
         private Texture2D pixelTexture;
         private bool isGameOver;
         private bool isEnemySpawningEnabled = true;
+        private bool IsGameplayActive => gameFlowState == GameFlowState.Playing;
         private const int WindowSizeX = 1920;
         private const int WindowSizeY = 1080;
         private readonly StaticCollisionGrid mapCollisionGrid = new StaticCollisionGrid(128);
+        private GameFlowState gameFlowState = GameFlowState.MainMenu;
 
 
         //input info
@@ -36,9 +38,10 @@ namespace _1_2D_Top_Down
         private Texture2D playerProjectileTexture;
         private List<PlayerProjectile> projectiles = new List<PlayerProjectile>();
         private Texture2D playerShadowTexture;
+        private PlayerProfile playerProfile;
 
         //collectables info
-        private const int CoinDropChancePercent = 25;
+        private const int CoinDropChancePercent = 35;
         private Texture2D coinTexture;
         private List<Coin> coins = new List<Coin>();
         private const int ManaCrystalDropChancePercent = 12;
@@ -72,7 +75,7 @@ namespace _1_2D_Top_Down
 
         //spawner info
         private float spawnTimer;
-        private const float SpawnInterval = 1.25f;
+        private const float SpawnInterval = 1.5f;
 
         //camera info
         private Camera camera;
@@ -272,7 +275,8 @@ namespace _1_2D_Top_Down
             mapCollisionGrid.Build(solidCollisionRectangles);
             LoadPortals();
 
-            player = new Player(playerTexture, playerStartPosition);
+            playerProfile = new PlayerProfile();
+            player = new Player(playerTexture, playerStartPosition, playerProfile);
             LoadShopUpgradeIcons();
             InitializeShopItems();
 

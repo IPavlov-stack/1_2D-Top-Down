@@ -41,7 +41,7 @@ namespace _1_2D_Top_Down
 
         public Health Health { get; }
         public Mana Mana { get; }
-
+        public PlayerProfile Profile { get; }
         public PlayerStats Stats { get; }
 
         public Rectangle Bounds
@@ -65,15 +65,20 @@ namespace _1_2D_Top_Down
             }
         }
 
-        public Player(Texture2D texture, Vector2 startPosition)
+        public Player(Texture2D texture, Vector2 startPosition, PlayerProfile profile)
         {
             this.texture = texture;
             Position = startPosition;
+            Profile = profile ?? throw new ArgumentNullException(nameof(profile));
+
             Stats = new PlayerStats();
             Health = new Health(Stats.MaxHealth, Stats.HealthRegen);
             Mana = new Mana(Stats.MaxMana, Stats.ManaRegen);
         }
-
+        public void GainExperience(int amount)
+        {
+            Profile.Experience.AddExperience(amount);
+        }
         public void Update(
             GameTime gameTime,
             Rectangle arena,

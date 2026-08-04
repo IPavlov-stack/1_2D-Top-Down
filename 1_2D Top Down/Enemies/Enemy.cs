@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace _1_2D_Top_Down
 {
@@ -29,6 +30,8 @@ namespace _1_2D_Top_Down
 
         public Vector2 Position;
         public Health Health { get; }
+        public int ExperienceReward { get; }
+
         public EnemyState CurrentState { get; private set; } = EnemyState.Idle;
 
         private const float KnockbackDeceleration = 9f;
@@ -62,7 +65,8 @@ namespace _1_2D_Top_Down
             int frameRows,
             float frameDuration,
             float scale,
-            int maxHealth)
+            int maxHealth,
+            int experienceReward)
         {
             this.texture = texture;
             Position = startPosition;
@@ -74,6 +78,7 @@ namespace _1_2D_Top_Down
 
             framesInCurrentAnimation = frameCount;
             Health = new Health(maxHealth);
+            ExperienceReward = Math.Max(0, experienceReward);
         }
         protected void ChangeState(EnemyState newState)
         {

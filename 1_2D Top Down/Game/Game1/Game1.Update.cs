@@ -204,7 +204,7 @@ namespace _1_2D_Top_Down
                             deathPosition));
 
                     PlayRandomDemonDeathSound();
-
+                    RewardEnemyKill(demon);
                     TryDropCoin(deathPosition);
                     TryDropManaCrystal(deathPosition);
 
@@ -246,6 +246,7 @@ namespace _1_2D_Top_Down
 
                     TryDropCoin(deathPosition);
                     TryDropManaCrystal(deathPosition);
+                    RewardEnemyKill(evilEye);
 
                     evilEye.Die();
                     PlayRandomEvilEyeDeathSound();
@@ -507,12 +508,9 @@ namespace _1_2D_Top_Down
                 {
                     player.EnterShootState();
 
-                    projectiles.Add(new PlayerProjectile(
-                        playerProjectileTexture,
+                    SpawnPlayerProjectiles(
                         startPosition,
-                        direction,
-                        player.Stats.ProjectileSpeed));
-
+                        direction);
                     PlayRandomBasicAttackSound();
                 }
             }
@@ -558,6 +556,10 @@ namespace _1_2D_Top_Down
             {
                 isDeveloperMode = !isDeveloperMode;
             }
+        }
+        private void RewardEnemyKill(Enemy enemy)
+        {
+            player.GainExperience(enemy.ExperienceReward);
         }
     }
 }
