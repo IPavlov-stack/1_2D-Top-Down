@@ -74,6 +74,7 @@ namespace _1_2D_Top_Down
             Stats = new PlayerStats();
             Health = new Health(Stats.MaxHealth, Stats.HealthRegen);
             Mana = new Mana(Stats.MaxMana, Stats.ManaRegen);
+            Experience = new Experience();
         }
         public void GainExperience(int amount)
         {
