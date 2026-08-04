@@ -100,15 +100,15 @@ namespace _1_2D_Top_Down
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
             DrawGameplayUI();
-
             DrawExitConfirmation();
 
             if (gameFlowState == GameFlowState.GameOver)
                 DrawGameOverScreen();
 
+            DrawWaveIntermissionUi();
+
             _spriteBatch.End();
         }
-
         private void DrawEnemyHealthBars()
         {
             foreach (Demon demon in demons)
@@ -380,7 +380,16 @@ namespace _1_2D_Top_Down
                     outlineThickness, rectangle.Height),
                 color);
         }
+        private void DrawWaveIntermissionUi()
+        {
+            if (gameFlowState != GameFlowState.WaveIntermission)
+                return;
 
+            _spriteBatch.Draw(
+                startNextWaveButtonTexture,
+                startNextWaveButtonBounds,
+                Color.White);
+        }
         private void DrawNineSlicePanel(
                     Texture2D texture,
                     Rectangle destination,

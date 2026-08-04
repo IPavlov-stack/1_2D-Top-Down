@@ -26,6 +26,7 @@ namespace _1_2D_Top_Down
         private readonly StaticCollisionGrid mapCollisionGrid = new StaticCollisionGrid(128);
         private GameFlowState gameFlowState = GameFlowState.MainMenu;
         private GameFlowState nextGameFlowState;
+        private WaveManager waveManager;
 
 
         //input info
@@ -116,6 +117,7 @@ namespace _1_2D_Top_Down
 
         private Texture2D manaMeterFrameTexture;
         private Texture2D manaMeterFillTexture;
+
         private Texture2D bottomHudPanelTexture;
         private Texture2D panel9SliceTexture;
         private Texture2D inventorySlotTexture;
@@ -128,6 +130,10 @@ namespace _1_2D_Top_Down
         private Texture2D skillTreeButtonTexture;
         private Texture2D settingsButtonTexture;
         private Texture2D soundVolumeButtonTexture;
+
+        private Texture2D startNextWaveButtonTexture;
+        private Rectangle startNextWaveButtonBounds;
+        private const float StartNextWaveButtonScale = 0.45f;
 
         //sound effects
         private const float SoundEffectsVolumeStep = 0.05f;
@@ -258,7 +264,16 @@ namespace _1_2D_Top_Down
             skillTreeButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/skill-tree-button");
             settingsButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/settings-button");
             soundVolumeButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/sound-volume-button");
-
+            startNextWaveButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/start_next_wave");
+            int buttonWidth = (int)( startNextWaveButtonTexture.Width * StartNextWaveButtonScale);
+            int buttonHeight = (int)(startNextWaveButtonTexture.Height * StartNextWaveButtonScale);
+            const int rightMargin = 20;
+            const int bottomMargin = 20;
+            startNextWaveButtonBounds = new Rectangle(
+                GraphicsDevice.Viewport.Width - buttonWidth - rightMargin,
+                GraphicsDevice.Viewport.Height - buttonHeight - bottomMargin,
+                buttonWidth,
+                buttonHeight);
             environmentGroundAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentGroundAtlas.xml");
             environmentPropsAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentPropsAtlas.xml");
             waterMap = TiledTileLayer.FromFile(Content, "Maps/ForestMap.tmx", "Environment/Water/tileset_water256x256", "tileset_water256x256.tsx", EnvironmentScale, "Water");
@@ -274,9 +289,11 @@ namespace _1_2D_Top_Down
 
             playerProfile = new PlayerProfile();
             player = new Player(playerTexture, playerStartPosition, playerProfile);
+            waveManager = new WaveManager();
+
             LoadShopUpgradeIcons();
             InitializeShopItems();
-
+            gameFlowState = GameFlowState.WaveIntermission;
             MediaPlayer.IsRepeating = true;
             MediaPlayer.Volume = MusicVolume;
 
@@ -324,6 +341,7 @@ namespace _1_2D_Top_Down
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
+            UpdateWaveIntermissionInput(mouse);
             UpdateSceneTransition(gameTime);
 
             if (isSceneTransitioning)

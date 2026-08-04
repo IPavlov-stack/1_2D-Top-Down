@@ -39,7 +39,7 @@ namespace _1_2D_Top_Down
         }
         private void RestartGame()
         {
-            gameFlowState = GameFlowState.GameOver;
+            gameFlowState = GameFlowState.Playing;
             projectiles.Clear();
             demons.Clear();
             evilEyes.Clear();
@@ -52,6 +52,7 @@ namespace _1_2D_Top_Down
             player.Health.Reset();
             player.ResetDamageEffects();
             spawnTimer = 0f;
+            waveManager.Reset();
 
             SpawnEnemy();
         }
@@ -194,8 +195,8 @@ namespace _1_2D_Top_Down
 
                 if (demon.Health.IsDead)
                 {
-                    Vector2 deathPosition =
-                        demon.Bounds.Center.ToVector2();
+                    HandleEnemyDeath(demon);
+                    Vector2 deathPosition = demon.Bounds.Center.ToVector2();
 
                     demonDeathAnimations.Add(
                         new DeathAnimation(
@@ -203,9 +204,6 @@ namespace _1_2D_Top_Down
                             deathPosition));
 
                     PlayRandomDemonDeathSound();
-                    RewardEnemyKill(demon);
-                    TryDropCoin(deathPosition);
-                    TryDropManaCrystal(deathPosition);
 
                     demons.Remove(demon);
                 }
@@ -226,8 +224,7 @@ namespace _1_2D_Top_Down
             {
                 Evil_Eye evilEye = nearbyEvilEyes[i];
 
-                if (evilEye.IsDead ||
-                    !projectile.Bounds.Intersects(evilEye.Bounds))
+                if (evilEye.IsDead || !projectile.Bounds.Intersects(evilEye.Bounds))
                 {
                     continue;
                 }
@@ -240,12 +237,8 @@ namespace _1_2D_Top_Down
 
                 if (evilEye.Health.IsDead)
                 {
-                    Vector2 deathPosition =
-                        evilEye.Bounds.Center.ToVector2();
-
-                    TryDropCoin(deathPosition);
-                    TryDropManaCrystal(deathPosition);
-                    RewardEnemyKill(evilEye);
+                    HandleEnemyDeath(evilEye);
+                    Vector2 deathPosition = evilEye.Bounds.Center.ToVector2();
 
                     evilEye.Die();
                     PlayRandomEvilEyeDeathSound();
@@ -556,9 +549,22 @@ namespace _1_2D_Top_Down
                 isDeveloperMode = !isDeveloperMode;
             }
         }
-        private void RewardEnemyKill(Enemy enemy)
+        private void UpdateWaveIntermissionInput(MouseState mouse)
         {
-            player.GainExperience(enemy.ExperienceReward);
+            if (gameFlowState != GameFlowState.WaveIntermission)
+                return;
+
+            bool clickedStartButton =
+                mouse.LeftButton == ButtonState.Pressed &&
+                previousMouseState.LeftButton == ButtonState.Released &&
+                startNextWaveButtonBounds.Contains(mouse.Position);
+
+            if (!clickedStartButton)
+                return;
+
+            waveManager.StartNextWave();
+            gameFlowState = GameFlowState.Playing;
         }
+
     }
 }
