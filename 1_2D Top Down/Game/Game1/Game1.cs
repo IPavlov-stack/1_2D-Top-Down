@@ -38,7 +38,7 @@ namespace _1_2D_Top_Down
         private Texture2D playerShadowTexture;
 
         //collectables info
-        private const int CoinDropChancePercent = 25;
+        private const int CoinDropChancePercent = 35;
         private Texture2D coinTexture;
         private List<Coin> coins = new List<Coin>();
         private const int ManaCrystalDropChancePercent = 12;
@@ -72,7 +72,7 @@ namespace _1_2D_Top_Down
 
         //spawner info
         private float spawnTimer;
-        private const float SpawnInterval = 1.25f;
+        private const float SpawnInterval = 1.5f;
 
         //camera info
         private Camera camera;

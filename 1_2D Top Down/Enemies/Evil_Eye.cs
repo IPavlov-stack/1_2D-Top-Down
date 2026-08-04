@@ -10,6 +10,7 @@ namespace _1_2D_Top_Down
         private const float AttackRange = 600f;
         private const float AttackSpeed = 1.0f;
         private const int EyeMaxHealth = 2;
+        private const int EyeExperienceReward = 15;
 
         //animations
         private const int FlyingRow = 0;
@@ -31,7 +32,8 @@ namespace _1_2D_Top_Down
                 frameRows: 3,
                 frameDuration: 0.15f,
                 scale: 0.5f,
-                maxHealth: EyeMaxHealth)
+                maxHealth: EyeMaxHealth,
+                experienceReward: EyeExperienceReward)
 
         {
 

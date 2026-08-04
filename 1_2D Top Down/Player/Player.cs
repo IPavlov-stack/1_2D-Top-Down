@@ -41,6 +41,7 @@ namespace _1_2D_Top_Down
 
         public Health Health { get; }
         public Mana Mana { get; }
+        public Experience Experience { get; }
 
         public PlayerStats Stats { get; }
 
@@ -72,8 +73,12 @@ namespace _1_2D_Top_Down
             Stats = new PlayerStats();
             Health = new Health(Stats.MaxHealth, Stats.HealthRegen);
             Mana = new Mana(Stats.MaxMana, Stats.ManaRegen);
+            Experience = new Experience();
         }
-
+        public void GainExperience(int amount)
+        {
+            Experience.AddExperience(amount);
+        }
         public void Update(
             GameTime gameTime,
             Rectangle arena,
