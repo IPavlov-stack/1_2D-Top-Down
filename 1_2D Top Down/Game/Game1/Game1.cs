@@ -19,13 +19,13 @@ namespace _1_2D_Top_Down
         private SpriteBatch _spriteBatch;
         private Color BackgroundColor = new Color(119, 167, 255); // sky blue-ish
         private Texture2D pixelTexture;
-        private bool isGameOver;
         private bool isEnemySpawningEnabled = true;
         private bool IsGameplayActive => gameFlowState == GameFlowState.Playing;
         private const int WindowSizeX = 1920;
         private const int WindowSizeY = 1080;
         private readonly StaticCollisionGrid mapCollisionGrid = new StaticCollisionGrid(128);
         private GameFlowState gameFlowState = GameFlowState.MainMenu;
+        private GameFlowState nextGameFlowState;
 
 
         //input info
@@ -160,13 +160,10 @@ namespace _1_2D_Top_Down
             }
         }
         //scene info
-        private GameScene currentScene = GameScene.MainMenu;
         private const float SceneTransitionDuration = 0.8f;
         private bool isSceneTransitioning;
         private bool sceneChangedDuringTransition;
         private float sceneTransitionTimer;
-        private GameScene nextScene;
-
         //fonts info
         private SpriteFont boldpixels;
 
@@ -308,9 +305,9 @@ namespace _1_2D_Top_Down
             currentMusic = music;
         }
 
-        private void UpdateMusicForCurrentScene()
+        private void UpdateMusicForgameFlowState()
         {
-            if (currentScene == GameScene.Playing)
+            if (gameFlowState == GameFlowState.Playing)
             {
                 PlayMusic(backgroundMusic);
             }
@@ -338,7 +335,7 @@ namespace _1_2D_Top_Down
                 return;
             }
 
-            if (currentScene == GameScene.MainMenu)
+            if (gameFlowState == GameFlowState.MainMenu)
             {
                 HandleMainMenuInput(mouse);
 
@@ -349,7 +346,7 @@ namespace _1_2D_Top_Down
                 return;
             }
 
-            if (currentScene == GameScene.Options)
+            if (gameFlowState == GameFlowState.Options)
             {
                 HandleOptionsInput(mouse);
 
@@ -359,7 +356,7 @@ namespace _1_2D_Top_Down
                 base.Update(gameTime);
                 return;
             }
-            if (isGameOver)
+            if (gameFlowState == GameFlowState.GameOver)
             {
                 //puase менюто не може да отвори при game over screen или да остане
                 isExitConfirmationOpen = false;
@@ -418,7 +415,7 @@ namespace _1_2D_Top_Down
                 GraphicsDevice.Viewport.Height / 2);
 
             CenterCameraOnPlayer();
-            if (!isGameOver)
+            if (gameFlowState != GameFlowState.GameOver)
             {
                 bool gameplayUiClickHandled =
                     HandleGameplayUIInput(keyboard, mouse);
@@ -429,10 +426,7 @@ namespace _1_2D_Top_Down
                 }
                 UpdateGameObjects(gameTime);
             }
-            else if (keyboard.IsKeyDown(Keys.R))
-            {
-                RestartGame();
-            }
+
 
             previousKeyboard = keyboard;
             previousMouseState = mouse;
@@ -441,7 +435,7 @@ namespace _1_2D_Top_Down
         }
         protected override void Draw(GameTime gameTime)
         {
-            if (currentScene == GameScene.MainMenu)
+            if (gameFlowState == GameFlowState.MainMenu)
             {
                 DrawMainMenu();
                 DrawSceneTransition();
@@ -449,7 +443,7 @@ namespace _1_2D_Top_Down
                 return;
             }
 
-            if (currentScene == GameScene.Options)
+            if (gameFlowState == GameFlowState.Options)
             {
                 DrawOptions();
                 DrawSceneTransition();
@@ -461,7 +455,7 @@ namespace _1_2D_Top_Down
             GraphicsDevice.Clear(
                 isDeveloperMode
                     ? Color.DimGray
-                    : isGameOver ? Color.Black : BackgroundColor);
+                    : gameFlowState == GameFlowState.GameOver ? Color.Black : BackgroundColor);
 
             _spriteBatch.Begin(
                 transformMatrix: camera.Transform,

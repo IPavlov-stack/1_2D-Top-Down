@@ -668,10 +668,10 @@ namespace _1_2D_Top_Down
 
             if (GetQuickMenuButtonBounds(SoundVolumeButtonIndex).Contains(mousePosition))
             {
-                optionsReturnScene = GameScene.Playing;
+                optionsReturnScene = GameFlowState.Playing;
                 reopenPauseAfterOptions = false;
 
-                StartSceneTransition(GameScene.Options);
+                StartSceneTransition(GameFlowState.Options);
                 return true;
             }
 

@@ -19,7 +19,7 @@ namespace _1_2D_Top_Down
         private bool isMusicSliderDragging; 
         private const int SoundEffectsSliderThumbSize = 32;
         private bool isSoundEffectsSliderDragging;
-        private GameScene optionsReturnScene = GameScene.MainMenu;
+        private GameFlowState optionsReturnScene = GameFlowState.MainMenu;
         private bool reopenPauseAfterOptions;
 
         private Rectangle GetMenuButtonBounds(int index)
@@ -54,13 +54,13 @@ namespace _1_2D_Top_Down
 
             if (GetMenuButtonBounds(0).Contains(mousePosition))
             {
-                StartSceneTransition(GameScene.Playing);
+                StartSceneTransition(GameFlowState.Playing);
             }
             else if (GetMenuButtonBounds(1).Contains(mousePosition))
             {
-                optionsReturnScene = GameScene.MainMenu;
+                optionsReturnScene = GameFlowState.MainMenu;
                 reopenPauseAfterOptions = false;
-                StartSceneTransition(GameScene.Options);
+                StartSceneTransition(GameFlowState.Options);
             }
             else if (GetMenuButtonBounds(2).Contains(mousePosition))
             {
@@ -330,14 +330,14 @@ namespace _1_2D_Top_Down
                 SpriteEffects.None,
                 0f);
         }
-        private void StartSceneTransition(GameScene scene)
+        private void StartSceneTransition(GameFlowState scene)
         {
             if (isSceneTransitioning)
             {
                 return;
             }
 
-            nextScene = scene;
+            nextGameFlowState = scene;
             sceneTransitionTimer = 0f;
             sceneChangedDuringTransition = false;
             isSceneTransitioning = true;
@@ -359,10 +359,10 @@ namespace _1_2D_Top_Down
             if (!sceneChangedDuringTransition &&
                 sceneTransitionTimer >= halfDuration)
             {
-                currentScene = nextScene;
-                UpdateMusicForCurrentScene();
+                gameFlowState = nextGameFlowState;
+                UpdateMusicForgameFlowState();
 
-                if (currentScene == GameScene.Playing)
+                if (gameFlowState == GameFlowState.Playing)
                 {
                     CenterCameraOnPlayer();
                 }

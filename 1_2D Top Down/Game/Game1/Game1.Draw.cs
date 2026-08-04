@@ -103,7 +103,7 @@ namespace _1_2D_Top_Down
 
             DrawExitConfirmation();
 
-            if (isGameOver)
+            if (gameFlowState == GameFlowState.GameOver)
                 DrawGameOverScreen();
 
             _spriteBatch.End();

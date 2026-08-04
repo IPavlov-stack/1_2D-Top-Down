@@ -39,8 +39,7 @@ namespace _1_2D_Top_Down
         }
         private void RestartGame()
         {
-            isGameOver = false;
-
+            gameFlowState = GameFlowState.GameOver;
             projectiles.Clear();
             demons.Clear();
             evilEyes.Clear();
@@ -69,7 +68,7 @@ namespace _1_2D_Top_Down
                     if (demon.TryDamagePlayer(player, 20) &&
                         player.Health.IsDead)
                     {
-                        isGameOver = true;
+                        gameFlowState = GameFlowState.GameOver;
                     }
                 }
             }
@@ -129,7 +128,7 @@ namespace _1_2D_Top_Down
 
                     if (player.Health.IsDead)
                     {
-                        isGameOver = true;
+                        gameFlowState = GameFlowState.GameOver;
                     }
 
                     continue;

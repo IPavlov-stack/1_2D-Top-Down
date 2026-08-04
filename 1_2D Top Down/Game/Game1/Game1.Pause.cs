@@ -48,17 +48,17 @@ namespace _1_2D_Top_Down
             {
                 // Main Menu
                 isExitConfirmationOpen = false;
-                StartSceneTransition(GameScene.MainMenu);
+                StartSceneTransition(GameFlowState.MainMenu);
             }
             else if (GetPauseButtonBounds(1).Contains(mouse.Position))
             {
                 // Options
                 isExitConfirmationOpen = false;
 
-                optionsReturnScene = GameScene.Playing;
+                optionsReturnScene = GameFlowState.Playing;
                 reopenPauseAfterOptions = true;
 
-                StartSceneTransition(GameScene.Options);
+                StartSceneTransition(GameFlowState.Options);
             }
             else if (GetPauseButtonBounds(2).Contains(mouse.Position))
             {
