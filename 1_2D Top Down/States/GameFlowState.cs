@@ -3,6 +3,7 @@
     public enum GameFlowState
     {
         MainMenu,
+        Campaign,
         Options,
         Playing,
         Paused,
