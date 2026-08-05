@@ -403,6 +403,7 @@ namespace _1_2D_Top_Down
                 UpdateEnemyProjectiles(gameTime);
 
                 UpdatePlayerResourceAnimations(gameTime);
+                HandleDeveloperMode(keyboard);
 
                 UpdateWaveIntermissionInput(mouse);
                 UpdateMusicForgameFlowState();
@@ -516,14 +517,7 @@ namespace _1_2D_Top_Down
                 return;
             }
             HandleDeveloperMode(keyboard);
-            Vector2 playerCenter = player.Position +
-                       new Vector2(player.texture.Width / 2, player.texture.Height / 2);
 
-            Vector2 screenCenter = new Vector2(
-                GraphicsDevice.Viewport.Width / 2,
-                GraphicsDevice.Viewport.Height / 2);
-
-            CenterCameraOnPlayer();
             if (gameFlowState != GameFlowState.GameOver)
             {
                 bool gameplayUiClickHandled =
@@ -533,7 +527,9 @@ namespace _1_2D_Top_Down
                 {
                     HandlePlayerShooting(mouse, keyboard);
                 }
+                CenterCameraOnPlayer();
                 UpdateGameObjects(gameTime);
+
             }
 
 

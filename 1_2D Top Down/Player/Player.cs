@@ -167,16 +167,29 @@ namespace _1_2D_Top_Down
                 0f);
         }
         private void TryMoveHorizontally(
-           float distance,
-           Rectangle arena,
-           IReadOnlyList<Rectangle> collisionRectangles)
+            float distance,
+            Rectangle arena,
+            IReadOnlyList<Rectangle> collisionRectangles)
         {
-            float previousX = Position.X;
             Position.X += distance;
             KeepInsideArena(arena);
 
-            if (IntersectsCollision(collisionRectangles))
-                Position.X = previousX;
+            foreach (Rectangle collisionRectangle in collisionRectangles)
+            {
+                if (!Bounds.Intersects(collisionRectangle))
+                    continue;
+
+                if (distance > 0f)
+                {
+                    Position.X -= Bounds.Right - collisionRectangle.Left;
+                }
+                else if (distance < 0f)
+                {
+                    Position.X += collisionRectangle.Right - Bounds.Left;
+                }
+
+                break;
+            }
         }
 
         private void TryMoveVertically(
@@ -184,14 +197,26 @@ namespace _1_2D_Top_Down
             Rectangle arena,
             IReadOnlyList<Rectangle> collisionRectangles)
         {
-            float previousY = Position.Y;
             Position.Y += distance;
             KeepInsideArena(arena);
 
-            if (IntersectsCollision(collisionRectangles))
-                Position.Y = previousY;
-        }
+            foreach (Rectangle collisionRectangle in collisionRectangles)
+            {
+                if (!Bounds.Intersects(collisionRectangle))
+                    continue;
 
+                if (distance > 0f)
+                {
+                    Position.Y -= Bounds.Bottom - collisionRectangle.Top;
+                }
+                else if (distance < 0f)
+                {
+                    Position.Y += collisionRectangle.Bottom - Bounds.Top;
+                }
+
+                break;
+            }
+        }
         private void KeepInsideArena(Rectangle arena)
         {
             float playerWidth = FrameWidth * Scale;
