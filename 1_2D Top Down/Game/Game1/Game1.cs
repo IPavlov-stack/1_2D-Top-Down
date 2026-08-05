@@ -458,7 +458,7 @@ namespace _1_2D_Top_Down
             if (gameFlowState == GameFlowState.MissionComplete)
             {
                 isExitConfirmationOpen = false;
-
+                HandleVictoryInput(mouse);
                 previousKeyboard = keyboard;
                 previousMouseState = mouse;
 

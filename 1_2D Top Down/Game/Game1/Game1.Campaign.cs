@@ -83,10 +83,8 @@ namespace _1_2D_Top_Down
 
             if (clickedMission1)
             {
-                gameFlowState = GameFlowState.WaveIntermission;
-                StartSceneTransition(GameFlowState.Playing);
+                StartSceneTransition(GameFlowState.WaveIntermission);
             }
-
             if (clickedBackButton)
             {
                 StartSceneTransition(GameFlowState.MainMenu);

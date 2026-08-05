@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace _1_2D_Top_Down
 {
@@ -7,9 +8,8 @@ namespace _1_2D_Top_Down
     {
         private Rectangle GetVictoryCampaignButtonBounds()
         {
-            const int buttonWidth = 280;
-            const int buttonHeight = 52;
-
+            const int buttonWidth = 420;
+            const int buttonHeight = 68;
             return new Rectangle(
                 GraphicsDevice.Viewport.Width / 2 - buttonWidth / 2,
                 GraphicsDevice.Viewport.Height / 2 + 65,
@@ -48,6 +48,19 @@ namespace _1_2D_Top_Down
             DrawMenuButton(
                 GetVictoryCampaignButtonBounds(),
                 "GO TO CAMPAIGN MAP");
+        }
+
+        private void HandleVictoryInput(MouseState mouse)
+        {
+            bool clickedCampaignButton =
+                mouse.LeftButton == ButtonState.Pressed &&
+                previousMouseState.LeftButton == ButtonState.Released &&
+                GetVictoryCampaignButtonBounds().Contains(mouse.Position);
+
+            if (clickedCampaignButton)
+            {
+                StartSceneTransition(GameFlowState.Campaign);
+            }
         }
     }
 }
