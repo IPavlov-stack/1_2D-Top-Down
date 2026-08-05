@@ -106,6 +106,9 @@ namespace _1_2D_Top_Down
             if (gameFlowState == GameFlowState.GameOver)
                 DrawGameOverScreen();
 
+            if (gameFlowState == GameFlowState.MissionComplete)
+                DrawVictoryScreen();
+
             DrawWaveIntermissionUi();
 
             _spriteBatch.End();

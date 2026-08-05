@@ -54,7 +54,7 @@ namespace _1_2D_Top_Down
 
             if (GetMenuButtonBounds(0).Contains(mousePosition))
             {
-                StartSceneTransition(GameFlowState.WaveIntermission);
+                StartSceneTransition(GameFlowState.Campaign);
             }
             else if (GetMenuButtonBounds(1).Contains(mousePosition))
             {

@@ -29,6 +29,9 @@ namespace _1_2D_Top_Down
 
         //campaign info
         private readonly MissionDefinition currentMission = CampaignMissions.ForestOutskirts;
+        private MissionObjective? currentMissionObjective;
+        private Texture2D campaignMapTexture;
+        private Texture2D missionNodeTexture;
 
 
         //input info
@@ -186,6 +189,8 @@ namespace _1_2D_Top_Down
 
         public Game1()
         {
+            currentMissionObjective = MissionObjectiveFactory.Create(currentMission);
+
             _graphics = new GraphicsDeviceManager(this);
             _graphics.PreferredBackBufferWidth = WindowSizeX;
             _graphics.PreferredBackBufferHeight = WindowSizeY;
@@ -253,6 +258,8 @@ namespace _1_2D_Top_Down
             evilEyeTexture = Content.Load<Texture2D>("enemies/Evil Eye/Evil Eye Sprite sheet");
             backgroundMusic = Content.Load<Song>("Music/ambient_forest");
             mainMenuMusic = Content.Load<Song>("Music/Main Menu/main_menu");
+            campaignMapTexture = Content.Load<Texture2D>("Campaign/campaign_map1");
+            missionNodeTexture = CreateCircleTexture(72);
             boldpixels = Content.Load<SpriteFont>("Sprite fonts/boldpixels");
             inventoryPanelTexture = Content.Load<Texture2D>("UI/UI_InventoryPanel");
             questPanelTexture = Content.Load<Texture2D>("UI/UI_QuestPanel");
@@ -438,6 +445,26 @@ namespace _1_2D_Top_Down
                 base.Update(gameTime);
                 return;
             }
+            if (gameFlowState == GameFlowState.Campaign)
+            {
+                HandleCampaignInput(keyboard, mouse);
+
+                previousKeyboard = keyboard;
+                previousMouseState = mouse;
+
+                base.Update(gameTime);
+                return;
+            }
+            if (gameFlowState == GameFlowState.MissionComplete)
+            {
+                isExitConfirmationOpen = false;
+
+                previousKeyboard = keyboard;
+                previousMouseState = mouse;
+
+                base.Update(gameTime);
+                return;
+            }
             if (gameFlowState == GameFlowState.GameOver)
             {
                 //puase менюто не може да отвори при game over screen или да остане
@@ -533,7 +560,14 @@ namespace _1_2D_Top_Down
                 base.Draw(gameTime);
                 return;
             }
+            if (gameFlowState == GameFlowState.Campaign)
+            {
+                DrawCampaign();
+                DrawSceneTransition();
 
+                base.Draw(gameTime);
+                return;
+            }
             GraphicsDevice.Clear(
                 isDeveloperMode
                     ? Color.DimGray

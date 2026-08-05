@@ -17,7 +17,16 @@ namespace _1_2D_Top_Down
             if (hasFinishedSpawningWave &&
                 allWaveEnemiesDefeated)
             {
-                gameFlowState = GameFlowState.WaveIntermission;
+                currentMissionObjective.OnWaveCompleted();
+
+                if (currentMissionObjective.IsCompleted)
+                {
+                    gameFlowState = GameFlowState.MissionComplete;
+                }
+                else
+                {
+                    gameFlowState = GameFlowState.WaveIntermission;
+                }
             }
         }
         private void SpawnEnemyDrops(Vector2 enemyCenter)
