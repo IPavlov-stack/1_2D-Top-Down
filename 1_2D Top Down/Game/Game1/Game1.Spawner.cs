@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
+using Tiled;
 
 namespace _1_2D_Top_Down
 {
@@ -27,13 +27,56 @@ namespace _1_2D_Top_Down
                     break;
             }
         }
+        private void SpawnEnemy(
+    EnemyType enemyType,
+    Vector2 spawnPosition)
+        {
+            switch (enemyType)
+            {
+                case EnemyType.Demon:
+                    demons.Add(new Demon(demonTexture, spawnPosition));
+                    break;
+
+                case EnemyType.EvilEye:
+                    evilEyes.Add(new Evil_Eye(
+                        evilEyeTexture,
+                        spawnPosition));
+                    break;
+            }
+        }
+
+        private void LoadPreplacedMissionEnemies(string mapFileName)
+        {
+            TiledMissionObjects missionObjects = TiledMissionObjects.FromFile(
+                Content,
+                mapFileName,
+                EnvironmentScale);
+
+            playerStartPosition = missionObjects.PlayerSpawnPosition;
+            player.Position = playerStartPosition;
+            adventureExitPosition = missionObjects.ExitPosition;
+
+            foreach (EnemySpawnPoint spawnPoint in missionObjects.EnemySpawnPoints)
+            {
+                if (!Enum.TryParse(
+                        spawnPoint.EnemyType,
+                        ignoreCase: true,
+                        out EnemyType enemyType))
+                {
+                    throw new InvalidOperationException(
+                        $"Unknown EnemyType '{spawnPoint.EnemyType}' in {mapFileName}.");
+                }
+
+                SpawnEnemy(enemyType, spawnPoint.Position);
+            }
+        }
         private void StartNextWave()
         {
             int waveIndex = waveManager.CurrentWave;
 
             if (waveIndex >= currentMission.Waves.Count)
             {
-                // По-късно: Mission Complete.
+                // По-късно: Mission Complete
                 return;
             }
 

@@ -166,6 +166,9 @@
 #begin Maps/ForestMap.tmx
 /copy:Maps/ForestMap.tmx
 
+#begin Maps/Mission_2.tmx
+/copy:Maps/Mission_2.tmx
+
 #begin Music/AmbientForest.mp3
 /importer:Mp3Importer
 /processor:SongProcessor
