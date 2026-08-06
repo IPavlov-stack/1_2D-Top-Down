@@ -28,7 +28,7 @@ namespace _1_2D_Top_Down
         private WaveManager waveManager;
 
         //campaign info
-        private readonly MissionDefinition currentMission = CampaignMissions.ForestOutskirts;
+        private MissionDefinition currentMission = CampaignMissions.ForestOutskirts; 
         private MissionObjective? currentMissionObjective;
         private Texture2D campaignMapTexture;
         private Texture2D missionNodeTexture;
@@ -292,17 +292,8 @@ namespace _1_2D_Top_Down
                 buttonHeight);
             environmentGroundAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentGroundAtlas.xml");
             environmentPropsAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentPropsAtlas.xml");
-            waterMap = TiledTileLayer.FromFile(Content, "Maps/ForestMap.tmx", "Environment/Water/tileset_water256x256", "tileset_water256x256.tsx", EnvironmentScale, "Water");
-            worldMap = TiledTileLayer.FromFile(Content, "Maps/ForestMap.tmx", "Environment/EnvironmentGroundAtlas", "EnvironmentGround.tsx", EnvironmentScale, "Ground");
-            propsLayer = TiledPropsLayer.FromFile(Content, "Maps/ForestMap.tmx", environmentPropsAtlas, EnvironmentScale);
-            collisionLayer = TiledCollisionLayer.FromFile(Content, "Maps/ForestMap.tmx", EnvironmentScale);
-            TiledWaterCollisionLayer waterCollisionLayer = TiledWaterCollisionLayer.FromFile(Content, "Maps/ForestMap.tmx", "tileset_water256x256.tsx", EnvironmentScale);
 
-            solidCollisionRectangles = new List<Rectangle>(collisionLayer.Rectangles);
-            solidCollisionRectangles.AddRange(waterCollisionLayer.Rectangles);
-            mapCollisionGrid.Build(solidCollisionRectangles);
-            LoadPortals();
-
+            LoadMissionMap(DefaultMapFileName, loadPortals: true);
             playerProfile = new PlayerProfile();
             player = new Player(playerTexture, playerStartPosition, playerProfile);
             waveManager = new WaveManager();
@@ -352,8 +343,10 @@ namespace _1_2D_Top_Down
         }
         protected override void Update(GameTime gameTime)
         {
-            portalLayer.Update(gameTime);
-
+            if (arePortalsActive)
+            {
+                portalLayer.Update(gameTime);
+            }
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
@@ -372,9 +365,7 @@ namespace _1_2D_Top_Down
                     return;
                 }
 
-                bool intermissionEscapePressed =
-                    keyboard.IsKeyDown(Keys.Escape) &&
-                    previousKeyboard.IsKeyUp(Keys.Escape);
+                bool intermissionEscapePressed = keyboard.IsKeyDown(Keys.Escape) && previousKeyboard.IsKeyUp(Keys.Escape);
                 if (intermissionEscapePressed)
                 {
                     bool closedPanel = CloseOpenGameplayPanels();
@@ -527,9 +518,8 @@ namespace _1_2D_Top_Down
                 {
                     HandlePlayerShooting(mouse, keyboard);
                 }
-                CenterCameraOnPlayer();
                 UpdateGameObjects(gameTime);
-
+                CenterCameraOnPlayer();
             }
 
 

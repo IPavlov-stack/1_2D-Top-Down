@@ -217,7 +217,10 @@ namespace _1_2D_Top_Down
         {
             waterMap.Draw(_spriteBatch);
             worldMap.Draw(_spriteBatch);
-            portalLayer.Draw(_spriteBatch);
+            if (arePortalsActive)
+            {
+                portalLayer.Draw(_spriteBatch);
+            }
             propsLayer.DrawBehindPlayer(_spriteBatch, player.Bounds.Bottom);
         }
 

@@ -52,5 +52,8 @@
                         delayAfterGroupSeconds: 2.5f),
 
                     new EnemySpawnGroup(EnemyType.EvilEye, 5)));
+
+        public static MissionDefinition ForestPath { get; } =
+            new MissionDefinition("Forest Path", MissionType.Adventure, "Maps/Mission_2.tmx");
     }
 }

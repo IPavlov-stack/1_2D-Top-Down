@@ -7,14 +7,14 @@ namespace _1_2D_Top_Down
 {
     public partial class Game1
     {
+
+        private Vector2? adventureExitPosition;
         private Rectangle GetCampaignMapBounds()
         {
             float scale = MathF.Min(
-                GraphicsDevice.Viewport.Width /
-                    (float)campaignMapTexture.Width,
+                GraphicsDevice.Viewport.Width / (float)campaignMapTexture.Width,
 
-                GraphicsDevice.Viewport.Height /
-                    (float)campaignMapTexture.Height);
+                GraphicsDevice.Viewport.Height / (float)campaignMapTexture.Height);
 
             int width = (int)(campaignMapTexture.Width * scale);
             int height = (int)(campaignMapTexture.Height * scale);
@@ -60,11 +60,72 @@ namespace _1_2D_Top_Down
                     mission1Bounds.Center.Y - numberSize.Y / 2f),
                 Color.Black);
 
+            Rectangle mission2Bounds = GetMission2NodeBounds();
+
+            bool isMission2Hovered =
+                mission2Bounds.Contains(Mouse.GetState().Position);
+
+            Color mission2Color = isMission2Hovered
+                ? Color.Gold
+                : new Color(210, 170, 85);
+
+            _spriteBatch.Draw(
+                missionNodeTexture,
+                mission2Bounds,
+                mission2Color);
+
+            const string mission2Number = "2";
+            Vector2 mission2NumberSize =
+                boldpixels.MeasureString(mission2Number);
+
+            _spriteBatch.DrawString(
+                boldpixels,
+                mission2Number,
+                new Vector2(
+                    mission2Bounds.Center.X - mission2NumberSize.X / 2f,
+                    mission2Bounds.Center.Y - mission2NumberSize.Y / 2f),
+                Color.Black);
+
             DrawMenuButton( GetCampaignBackButtonBounds(),"BACK");
 
             _spriteBatch.End();
         }
+        private void StartMission(MissionDefinition mission)
+        {
+            currentMission = mission;
+            adventureExitPosition = null;
+            projectiles.Clear();
+            demons.Clear();
+            evilEyes.Clear();
+            enemyProjectiles.Clear();
+            demonDeathAnimations.Clear();
+            coins.Clear();
+            manaCrystals.Clear();
 
+            player.Health.Reset();
+            player.ResetDamageEffects();
+            waveManager.Reset();
+
+            string mapFileName = mission.MapFileName ?? DefaultMapFileName;
+
+            LoadMissionMap(mapFileName, loadPortals: mission.Type == MissionType.Survival);
+            UpdateAdventureExit();
+            if (mission.Type == MissionType.Adventure)
+            {
+                if (string.IsNullOrWhiteSpace(mission.MapFileName))
+                {
+                    throw new InvalidOperationException(
+                        $"Adventure mission '{mission.Name}' has no map file.");
+                }
+
+                LoadPreplacedMissionEnemies(mission.MapFileName);
+                StartSceneTransition(GameFlowState.Playing);
+                return;
+            }
+
+            player.Position = playerStartPosition;
+            StartSceneTransition(GameFlowState.WaveIntermission);
+        }
         private void HandleCampaignInput( KeyboardState keyboard, MouseState mouse)
         {
             bool pressedEscape = keyboard.IsKeyDown(Keys.Escape) && previousKeyboard.IsKeyUp(Keys.Escape);
@@ -81,9 +142,17 @@ namespace _1_2D_Top_Down
                                     previousMouseState.LeftButton == ButtonState.Released &&
                                     GetMission1NodeBounds().Contains(mouse.Position);
 
+            bool clickedMission2 = mouse.LeftButton == ButtonState.Pressed &&
+                                   previousMouseState.LeftButton == ButtonState.Released &&
+                                   GetMission2NodeBounds().Contains(mouse.Position);
+
             if (clickedMission1)
             {
-                StartSceneTransition(GameFlowState.WaveIntermission);
+                StartMission(CampaignMissions.ForestOutskirts);
+            }
+            if (clickedMission2)
+            {
+                StartMission(CampaignMissions.ForestPath);
             }
             if (clickedBackButton)
             {
@@ -111,6 +180,21 @@ namespace _1_2D_Top_Down
             // Position of the node 0.135; 0.515
             int centerX = mapBounds.X + (int)(mapBounds.Width * 0.135f);
             int centerY = mapBounds.Y + (int)(mapBounds.Height * 0.546f);
+
+            return new Rectangle(
+                centerX - nodeSize / 2,
+                centerY - nodeSize / 2,
+                nodeSize,
+                nodeSize);
+        }
+        private Rectangle GetMission2NodeBounds()
+        {
+            const int nodeSize = 72;
+
+            Rectangle mapBounds = GetCampaignMapBounds();
+
+            int centerX = mapBounds.X + (int)(mapBounds.Width * 0.285f);
+            int centerY = mapBounds.Y + (int)(mapBounds.Height * 0.475f);
 
             return new Rectangle(
                 centerX - nodeSize / 2,
@@ -148,6 +232,26 @@ namespace _1_2D_Top_Down
             texture.SetData(pixels);
 
             return texture;
+        }
+
+        private void UpdateAdventureExit()
+        {
+            if (gameFlowState != GameFlowState.Playing ||
+                currentMission.Type != MissionType.Adventure ||
+                adventureExitPosition is null)
+            {
+                return;
+            }
+
+            const float exitReachDistance = 48f;
+
+            if (Vector2.DistanceSquared(
+                    player.Position,
+                    adventureExitPosition.Value) <=
+                exitReachDistance * exitReachDistance)
+            {
+                StartSceneTransition(GameFlowState.MissionComplete);
+            }
         }
     }
 }
