@@ -8,6 +8,7 @@
         Playing,
         Paused,
         GameOver,
+        Victory,
         WaveIntermission,
         MissionComplete
     }
