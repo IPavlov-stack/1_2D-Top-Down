@@ -2,13 +2,15 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
+using Tiled;
 
 namespace _1_2D_Top_Down
 {
     public partial class Game1
     {
+        private readonly List<MissionTrigger> missionTriggers = new();
 
-        private Vector2? adventureExitPosition;
         private Rectangle GetCampaignMapBounds()
         {
             float scale = MathF.Min(
@@ -93,7 +95,7 @@ namespace _1_2D_Top_Down
         private void StartMission(MissionDefinition mission)
         {
             currentMission = mission;
-            adventureExitPosition = null;
+            missionTriggers.Clear();
             projectiles.Clear();
             demons.Clear();
             evilEyes.Clear();
@@ -109,7 +111,6 @@ namespace _1_2D_Top_Down
             string mapFileName = mission.MapFileName ?? DefaultMapFileName;
 
             LoadMissionMap(mapFileName, loadPortals: mission.Type == MissionType.Survival);
-            UpdateAdventureExit();
             if (mission.Type == MissionType.Adventure)
             {
                 if (string.IsNullOrWhiteSpace(mission.MapFileName))
@@ -119,6 +120,7 @@ namespace _1_2D_Top_Down
                 }
 
                 LoadPreplacedMissionEnemies(mission.MapFileName);
+                LoadMissionTriggers(mission.MapFileName);
                 StartSceneTransition(GameFlowState.Playing);
                 return;
             }
@@ -193,9 +195,8 @@ namespace _1_2D_Top_Down
 
             Rectangle mapBounds = GetCampaignMapBounds();
 
-            int centerX = mapBounds.X + (int)(mapBounds.Width * 0.285f);
-            int centerY = mapBounds.Y + (int)(mapBounds.Height * 0.475f);
-
+            int centerX = mapBounds.X + (int)(mapBounds.Width * 0.112f);
+            int centerY = mapBounds.Y + (int)(mapBounds.Height * 0.786f);
             return new Rectangle(
                 centerX - nodeSize / 2,
                 centerY - nodeSize / 2,
@@ -234,23 +235,42 @@ namespace _1_2D_Top_Down
             return texture;
         }
 
-        private void UpdateAdventureExit()
+        private void LoadMissionTriggers(string mapFileName)
+        {
+            TiledMissionTriggers tiledTriggers =
+                TiledMissionTriggers.FromFile(
+                    Content,
+                    mapFileName,
+                    EnvironmentScale);
+
+            missionTriggers.AddRange(tiledTriggers.Triggers);
+        }
+
+        private void UpdateMissionTriggers()
         {
             if (gameFlowState != GameFlowState.Playing ||
-                currentMission.Type != MissionType.Adventure ||
-                adventureExitPosition is null)
+                currentMission.Type != MissionType.Adventure)
             {
                 return;
             }
 
-            const float exitReachDistance = 48f;
-
-            if (Vector2.DistanceSquared(
-                    player.Position,
-                    adventureExitPosition.Value) <=
-                exitReachDistance * exitReachDistance)
+            foreach (MissionTrigger trigger in missionTriggers)
             {
-                StartSceneTransition(GameFlowState.MissionComplete);
+                if (trigger.IsActivated ||
+                    !player.Bounds.Intersects(trigger.Bounds))
+                {
+                    continue;
+                }
+
+                if (trigger.Name.Equals(
+                        "Exit",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    trigger.Activate();
+                    gameFlowState = GameFlowState.MissionComplete;
+                    
+                    return;
+                }
             }
         }
     }

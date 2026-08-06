@@ -13,13 +13,11 @@ namespace Tiled
     {
         public Vector2 PlayerSpawnPosition { get; }
         public IReadOnlyList<EnemySpawnPoint> EnemySpawnPoints { get; }
-        public Vector2? ExitPosition { get; }
 
-        private TiledMissionObjects(Vector2 playerSpawnPosition, List<EnemySpawnPoint> enemySpawnPoints, Vector2? exitPosition)
+        private TiledMissionObjects(Vector2 playerSpawnPosition, List<EnemySpawnPoint> enemySpawnPoints)
         {
             PlayerSpawnPosition = playerSpawnPosition;
             EnemySpawnPoints = enemySpawnPoints;
-            ExitPosition = exitPosition;
         }
         public static TiledMissionObjects FromFile(
             ContentManager content,
@@ -28,7 +26,6 @@ namespace Tiled
             string layerName = "MissionObjects")
         {
             string path = Path.Combine(content.RootDirectory, tmxFileName);
-            Vector2? exitPosition = null;
 
             using Stream stream = TitleContainer.OpenStream(path);
             XDocument document = XDocument.Load(stream);
@@ -60,11 +57,6 @@ namespace Tiled
                 {
                     playerSpawnPosition = position;
                 }
-                else if (name.Equals("Exit",
-                    StringComparison.OrdinalIgnoreCase))
-                {
-                    exitPosition = position;
-                }
                 else if (name.Equals("EnemySpawn",
                     StringComparison.OrdinalIgnoreCase))
                 {
@@ -89,10 +81,7 @@ namespace Tiled
                     "MissionObjects must contain one PlayerSpawn.");
             }
 
-            return new TiledMissionObjects(
-                            playerSpawnPosition.Value,
-                            enemySpawnPoints,
-                            exitPosition);
+            return new TiledMissionObjects( playerSpawnPosition.Value, enemySpawnPoints );
         }
 
         private static string ReadProperty(

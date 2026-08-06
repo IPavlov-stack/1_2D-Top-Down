@@ -54,7 +54,6 @@ namespace _1_2D_Top_Down
 
             playerStartPosition = missionObjects.PlayerSpawnPosition;
             player.Position = playerStartPosition;
-            adventureExitPosition = missionObjects.ExitPosition;
 
             foreach (EnemySpawnPoint spawnPoint in missionObjects.EnemySpawnPoints)
             {

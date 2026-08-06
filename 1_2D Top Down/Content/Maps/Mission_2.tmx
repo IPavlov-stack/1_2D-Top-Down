@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="200" height="200" tilewidth="256" tileheight="256" infinite="0" nextlayerid="7" nextobjectid="23">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="200" height="200" tilewidth="256" tileheight="256" infinite="0" nextlayerid="8" nextobjectid="25">
  <tileset firstgid="1" source="EnvironmentProps.tsx"/>
  <tileset firstgid="61" source="tileset_water256x256.tsx"/>
  <tileset firstgid="109" source="EnvironmentGround.tsx"/>
@@ -421,6 +421,9 @@
   <object id="21" x="4352" y="43008" width="256" height="3328"/>
   <object id="22" x="6720" y="43942" width="30" height="80"/>
  </objectgroup>
+ <objectgroup id="7" name="MissionTriggers">
+  <object id="23" name="Exit" x="7936" y="43264" width="512" height="512"/>
+ </objectgroup>
  <objectgroup id="2" name="MissionObjects">
   <object id="9" name="PlayerSpawn" x="5512.17" y="45752.3">
    <point/>
@@ -435,9 +438,6 @@
    <properties>
     <property name="EnemyType" value="EvilEye"/>
    </properties>
-   <point/>
-  </object>
-  <object id="13" name="Exit" x="8192" y="43520">
    <point/>
   </object>
  </objectgroup>

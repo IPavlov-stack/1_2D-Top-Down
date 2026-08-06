@@ -22,9 +22,9 @@ namespace _1_2D_Top_Down
                 (int)worldMap.WorldHeight);
 
             UpdatePlayerMovement(gameTime);
+            UpdateMissionTriggers();
 
             UpdateWaveSpawnQueue(gameTime);
-
             UpdateEvilEyes(gameTime);
             UpdateEnemyProjectiles(gameTime);
             UpdateDemons(gameTime);
