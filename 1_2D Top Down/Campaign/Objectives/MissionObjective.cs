@@ -16,5 +16,9 @@
             IsCompleted = false;
             IsFailed = false;
         }
+        public void MarkCompleted()
+        {
+            IsCompleted = true;
+        }
     }
 }

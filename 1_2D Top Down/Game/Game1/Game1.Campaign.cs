@@ -32,7 +32,7 @@ namespace _1_2D_Top_Down
         {
             GraphicsDevice.Clear(Color.Black);
 
-            _spriteBatch.Begin( samplerState: SamplerState.PointClamp);
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
             _spriteBatch.Draw(
                 campaignMapTexture,
@@ -88,13 +88,13 @@ namespace _1_2D_Top_Down
                     mission2Bounds.Center.Y - mission2NumberSize.Y / 2f),
                 Color.Black);
 
-            DrawMenuButton( GetCampaignBackButtonBounds(),"BACK");
+            DrawMenuButton(GetCampaignBackButtonBounds(), "BACK");
 
             _spriteBatch.End();
         }
         private void StartMission(MissionDefinition mission)
         {
-            currentMission = mission;
+            missionRuntime.Start(mission);
             missionTriggers.Clear();
             projectiles.Clear();
             demons.Clear();
@@ -106,8 +106,6 @@ namespace _1_2D_Top_Down
 
             player.Health.Reset();
             player.ResetDamageEffects();
-            waveManager.Reset();
-
             string mapFileName = mission.MapFileName ?? DefaultMapFileName;
 
             LoadMissionMap(mapFileName, loadPortals: mission.Type == MissionType.Survival);
@@ -128,7 +126,7 @@ namespace _1_2D_Top_Down
             player.Position = playerStartPosition;
             StartSceneTransition(GameFlowState.WaveIntermission);
         }
-        private void HandleCampaignInput( KeyboardState keyboard, MouseState mouse)
+        private void HandleCampaignInput(KeyboardState keyboard, MouseState mouse)
         {
             bool pressedEscape = keyboard.IsKeyDown(Keys.Escape) && previousKeyboard.IsKeyUp(Keys.Escape);
 
@@ -249,7 +247,7 @@ namespace _1_2D_Top_Down
         private void UpdateMissionTriggers()
         {
             if (gameFlowState != GameFlowState.Playing ||
-                currentMission.Type != MissionType.Adventure)
+                missionRuntime.Definition.Type != MissionType.Adventure)
             {
                 return;
             }
@@ -267,8 +265,9 @@ namespace _1_2D_Top_Down
                         StringComparison.OrdinalIgnoreCase))
                 {
                     trigger.Activate();
+                    missionRuntime.Complete();
                     gameFlowState = GameFlowState.MissionComplete;
-                    
+
                     return;
                 }
             }

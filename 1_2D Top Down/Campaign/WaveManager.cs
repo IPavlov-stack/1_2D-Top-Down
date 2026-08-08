@@ -18,7 +18,8 @@ namespace _1_2D_Top_Down
             IsWaveActive = true;
         }
 
-        // Връща true само когато е убит последният враг от wave-а.
+        // Реалният край на вълната се потвърждава от MissionRuntime,
+        // след като спаунерът е приключил и няма активни врагове
         public bool RegisterEnemyDefeated()
         {
             if (!IsWaveActive || EnemiesRemaining <= 0)
@@ -29,6 +30,18 @@ namespace _1_2D_Top_Down
             if (EnemiesRemaining > 0)
                 return false;
 
+            IsWaveActive = false;
+            return true;
+        }
+
+        public bool TryFinishActiveWave()
+        {
+            if (!IsWaveActive)
+            {
+                return false;
+            }
+
+            EnemiesRemaining = 0;
             IsWaveActive = false;
             return true;
         }

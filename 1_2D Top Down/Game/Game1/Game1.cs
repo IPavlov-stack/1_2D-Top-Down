@@ -27,11 +27,13 @@ namespace _1_2D_Top_Down
         private GameFlowState nextGameFlowState;
         private WaveManager waveManager;
 
+
         //campaign info
         private MissionDefinition currentMission = CampaignMissions.ForestOutskirts; 
         private MissionObjective? currentMissionObjective;
         private Texture2D campaignMapTexture;
         private Texture2D missionNodeTexture;
+        private readonly MissionRuntime missionRuntime = new MissionRuntime(CampaignMissions.ForestOutskirts);
 
 
         //input info

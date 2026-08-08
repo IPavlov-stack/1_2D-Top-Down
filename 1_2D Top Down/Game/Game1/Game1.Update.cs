@@ -25,6 +25,7 @@ namespace _1_2D_Top_Down
             UpdateMissionTriggers();
 
             UpdateWaveSpawnQueue(gameTime);
+            TryFinishCurrentWave();
             UpdateEvilEyes(gameTime);
             UpdateEnemyProjectiles(gameTime);
             UpdateDemons(gameTime);
@@ -49,7 +50,7 @@ namespace _1_2D_Top_Down
             player.Position = playerStartPosition;
             player.Health.Reset();
             player.ResetDamageEffects();
-            waveManager.Reset();
+            missionRuntime.Restart();
 
         }
         private void UpdatePlayerMovement(GameTime gameTime)
@@ -497,7 +498,7 @@ namespace _1_2D_Top_Down
             bool clickedLeftButton = mouse.LeftButton == ButtonState.Pressed &&
                         previousMouseState.LeftButton == ButtonState.Released;
 
-            bool pressedE =  keyboard.IsKeyDown(Keys.E) && previousKeyboard.IsKeyUp(Keys.E);
+            bool pressedE = keyboard.IsKeyDown(Keys.E) && previousKeyboard.IsKeyUp(Keys.E);
 
             if (!clickedLeftButton && !pressedE)
             {
@@ -506,7 +507,7 @@ namespace _1_2D_Top_Down
 
             Vector2 startPosition = player.Bounds.Center.ToVector2();
 
-            Vector2 mouseWorldPosition =mouse.Position.ToVector2() / camera.Zoom + camera.Position;
+            Vector2 mouseWorldPosition = mouse.Position.ToVector2() / camera.Zoom + camera.Position;
             Vector2 direction = mouseWorldPosition - startPosition;
 
             if (direction != Vector2.Zero)
@@ -524,7 +525,7 @@ namespace _1_2D_Top_Down
                 }
             }
         }
-        private void SpawnPlayerProjectiles( Vector2 startPosition,Vector2 baseDirection)
+        private void SpawnPlayerProjectiles(Vector2 startPosition, Vector2 baseDirection)
         {
             int projectileCount = Math.Max(
                 1,

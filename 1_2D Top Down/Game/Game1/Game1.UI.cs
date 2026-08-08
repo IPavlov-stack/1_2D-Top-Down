@@ -135,7 +135,7 @@ namespace _1_2D_Top_Down
         private static readonly Vector2 HealthMeterOffsetFromBottomCenter = new Vector2(-200f, -175);
         private static readonly Vector2 ManaMeterOffsetFromBottomCenter = new Vector2(200f, -175f);
 
-        // Позиция на fill текстурата вътре в рамката
+        // Позиция на филл текстурата вътре в рамката
         private static readonly Vector2 HealthFillOffset = new Vector2(85f, 44f);
         private static readonly Vector2 ManaFillOffset =  new Vector2(85f, 44f);
 

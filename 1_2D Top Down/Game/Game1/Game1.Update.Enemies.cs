@@ -11,15 +11,9 @@ namespace _1_2D_Top_Down
             Vector2 deathPosition = enemy.Bounds.Center.ToVector2();
             SpawnEnemyDrops(deathPosition);
 
-            bool allWaveEnemiesDefeated =
-                waveManager.RegisterEnemyDefeated();
-
-            if (hasFinishedSpawningWave &&
-                allWaveEnemiesDefeated)
+            if (missionRuntime.TryCompleteWave(hasFinishedSpawningWave))
             {
-                currentMissionObjective.OnWaveCompleted();
-
-                if (currentMissionObjective.IsCompleted)
+                if (missionRuntime.IsCompleted)
                 {
                     gameFlowState = GameFlowState.MissionComplete;
                 }
@@ -34,6 +28,20 @@ namespace _1_2D_Top_Down
             TryDropCoin(enemyCenter);
             TryDropManaCrystal(enemyCenter);
         }
+        private void TryFinishCurrentWave()
+        {
+            if (missionRuntime.TryCompleteWave(hasFinishedSpawningWave))
+            {
+                if (missionRuntime.IsCompleted)
+                {
+                    gameFlowState = GameFlowState.MissionComplete;
+                }
+                else
+                {
+                    gameFlowState = GameFlowState.WaveIntermission;
+                }
+            }
+        }
     }
-    
+
 }
