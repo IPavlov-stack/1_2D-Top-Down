@@ -35,11 +35,14 @@
             isCompleted = false;
         }
 
-        public bool TryCompleteWave(bool hasFinishedSpawningWave)
+        public bool TryCompleteWave( bool hasFinishedSpawningWave, int activeEnemyCount)
         {
-            bool isLastEnemyDefeated = Waves.RegisterEnemyDefeated();
+            if (!hasFinishedSpawningWave || activeEnemyCount > 0)
+            {
+                return false;
+            }
 
-            if (!hasFinishedSpawningWave || !isLastEnemyDefeated)
+            if (!Waves.TryFinishActiveWave())
             {
                 return false;
             }
@@ -48,7 +51,6 @@
             isCompleted = Objective?.IsCompleted ?? false;
             return true;
         }
-
         public void Complete()
         {
             Objective?.MarkCompleted();

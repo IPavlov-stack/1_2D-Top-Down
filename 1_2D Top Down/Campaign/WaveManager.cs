@@ -18,8 +18,9 @@ namespace _1_2D_Top_Down
             IsWaveActive = true;
         }
 
-        // Реалният край на вълната се потвърждава от MissionRuntime,
-        // след като спаунерът е приключил и няма активни врагове
+
+        // Реалният край на даден wave се потвърждава от MissionRuntime,
+        // след като spawnerът е приключил и няма активни enemies в света
         public bool RegisterEnemyDefeated()
         {
             if (!IsWaveActive || EnemiesRemaining <= 0)

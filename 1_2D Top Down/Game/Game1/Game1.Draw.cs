@@ -401,12 +401,12 @@ namespace _1_2D_Top_Down
         }
         private void DrawNextWavePreview()
         {
-            int nextWaveIndex = waveManager.CurrentWave;
+            int nextWaveIndex = missionRuntime.Waves.CurrentWave;
 
-            if (nextWaveIndex >= currentMission.Waves.Count)
+            if (nextWaveIndex >= missionRuntime.Definition.Waves.Count)
                 return;
 
-            WaveDefinition nextWave = currentMission.Waves[nextWaveIndex];
+            WaveDefinition nextWave = missionRuntime.Definition.Waves[nextWaveIndex];
 
             const int panelWidth = 350;
             const int panelHeight = 115;
@@ -603,11 +603,9 @@ namespace _1_2D_Top_Down
         }
         private void DrawWaveProgressUi()
         {
-            if (currentMission == null)
-                return;
-
             string waveText =
-                $"WAVE {waveManager.CurrentWave}/{currentMission.Waves.Count}";
+                $"WAVE {missionRuntime.Waves.CurrentWave}/" +
+                $"{missionRuntime.Definition.Waves.Count}";
 
             _spriteBatch.DrawString(
                 boldpixels,

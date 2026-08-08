@@ -10,17 +10,18 @@ namespace _1_2D_Top_Down
 
             Vector2 deathPosition = enemy.Bounds.Center.ToVector2();
             SpawnEnemyDrops(deathPosition);
+        }
+        private void TryFinishCurrentWave()
+        {
+            int activeEnemyCount = demons.Count + evilEyes.Count;
 
-            if (missionRuntime.TryCompleteWave(hasFinishedSpawningWave))
+            if (missionRuntime.TryCompleteWave(
+                    hasFinishedSpawningWave,
+                    activeEnemyCount))
             {
-                if (missionRuntime.IsCompleted)
-                {
-                    gameFlowState = GameFlowState.MissionComplete;
-                }
-                else
-                {
-                    gameFlowState = GameFlowState.WaveIntermission;
-                }
+                gameFlowState = missionRuntime.IsCompleted
+                    ? GameFlowState.MissionComplete
+                    : GameFlowState.WaveIntermission;
             }
         }
         private void SpawnEnemyDrops(Vector2 enemyCenter)
@@ -28,20 +29,7 @@ namespace _1_2D_Top_Down
             TryDropCoin(enemyCenter);
             TryDropManaCrystal(enemyCenter);
         }
-        private void TryFinishCurrentWave()
-        {
-            if (missionRuntime.TryCompleteWave(hasFinishedSpawningWave))
-            {
-                if (missionRuntime.IsCompleted)
-                {
-                    gameFlowState = GameFlowState.MissionComplete;
-                }
-                else
-                {
-                    gameFlowState = GameFlowState.WaveIntermission;
-                }
-            }
-        }
+
     }
 
 }

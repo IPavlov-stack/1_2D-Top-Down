@@ -71,17 +71,17 @@ namespace _1_2D_Top_Down
         }
         private void StartNextWave()
         {
-            int waveIndex = waveManager.CurrentWave;
+            int waveIndex = missionRuntime.Waves.CurrentWave;
 
-            if (waveIndex >= currentMission.Waves.Count)
+            if (waveIndex >= missionRuntime.Definition.Waves.Count)
             {
                 // По-късно: Mission Complete
                 return;
             }
 
-            WaveDefinition wave = currentMission.Waves[waveIndex];
+            WaveDefinition wave = missionRuntime.Definition.Waves[waveIndex];
 
-            waveManager.StartNextWave(wave.TotalEnemyCount);
+            missionRuntime.Waves.StartNextWave(wave.TotalEnemyCount);
 
             spawnGroupQueue.Clear();
 

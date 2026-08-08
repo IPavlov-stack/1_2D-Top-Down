@@ -109,22 +109,24 @@ namespace _1_2D_Top_Down
             string mapFileName = mission.MapFileName ?? DefaultMapFileName;
 
             LoadMissionMap(mapFileName, loadPortals: mission.Type == MissionType.Survival);
-            if (mission.Type == MissionType.Adventure)
-            {
-                if (string.IsNullOrWhiteSpace(mission.MapFileName))
-                {
-                    throw new InvalidOperationException(
-                        $"Adventure mission '{mission.Name}' has no map file.");
-                }
+            System.Diagnostics.Debug.WriteLine($"Mission: {mission.Name}, map: {mapFileName}, " + 
+                                               $"spawn: {playerStartPosition}");
+            LoadMissionMap(
+                mapFileName,
+                loadPortals: mission.Type == MissionType.Survival);
 
-                LoadPreplacedMissionEnemies(mission.MapFileName);
-                LoadMissionTriggers(mission.MapFileName);
-                StartSceneTransition(GameFlowState.Playing);
+            if (mission.Type == MissionType.Survival)
+            {
+                playerStartPosition = DefaultPlayerStartPosition;
+                player.Position = playerStartPosition;
+
+                StartSceneTransition(GameFlowState.WaveIntermission);
                 return;
             }
 
-            player.Position = playerStartPosition;
-            StartSceneTransition(GameFlowState.WaveIntermission);
+            LoadPreplacedMissionEnemies(mission.MapFileName);
+            LoadMissionTriggers(mission.MapFileName);
+            StartSceneTransition(GameFlowState.Playing);
         }
         private void HandleCampaignInput(KeyboardState keyboard, MouseState mouse)
         {

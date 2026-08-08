@@ -25,15 +25,12 @@ namespace _1_2D_Top_Down
         private readonly StaticCollisionGrid mapCollisionGrid = new StaticCollisionGrid(128);
         private GameFlowState gameFlowState = GameFlowState.MainMenu;
         private GameFlowState nextGameFlowState;
-        private WaveManager waveManager;
-
 
         //campaign info
-        private MissionDefinition currentMission = CampaignMissions.ForestOutskirts; 
-        private MissionObjective? currentMissionObjective;
+        private readonly MissionRuntime missionRuntime =
+            new MissionRuntime(CampaignMissions.ForestOutskirts);
         private Texture2D campaignMapTexture;
         private Texture2D missionNodeTexture;
-        private readonly MissionRuntime missionRuntime = new MissionRuntime(CampaignMissions.ForestOutskirts);
 
 
         //input info
@@ -43,6 +40,7 @@ namespace _1_2D_Top_Down
         //player info
         private Player player;
         private Vector2 playerStartPosition = new Vector2(2150, 1850);
+        private static readonly Vector2 DefaultPlayerStartPosition = new Vector2(2150, 1850);
         private Texture2D playerProjectileTexture;
         private List<PlayerProjectile> projectiles = new List<PlayerProjectile>();
         private Texture2D playerShadowTexture;
@@ -110,7 +108,7 @@ namespace _1_2D_Top_Down
         private Texture2D inventoryPanelTexture;
         private Texture2D questPanelTexture;
         private Texture2D spellsPanelTexture;
-        private readonly Dictionary<string, Texture2D>shopUpgradeIcons = new();
+        private readonly Dictionary<string, Texture2D> shopUpgradeIcons = new();
 
         private const int ResourceFrameCount = 9;
         private const int ResourceFrameWidth = 63;
@@ -191,8 +189,6 @@ namespace _1_2D_Top_Down
 
         public Game1()
         {
-            currentMissionObjective = MissionObjectiveFactory.Create(currentMission);
-
             _graphics = new GraphicsDeviceManager(this);
             _graphics.PreferredBackBufferWidth = WindowSizeX;
             _graphics.PreferredBackBufferHeight = WindowSizeY;
@@ -226,7 +222,7 @@ namespace _1_2D_Top_Down
             demonDeathTexture = Content.Load<Texture2D>("enemies/Demon/DEATH");
             demonShadowTexture = Content.Load<Texture2D>("enemies/Demon/shadow_demon");
             evilEyeShadowTexture = Content.Load<Texture2D>("enemies/Evil Eye/shadow_eye");
-            playerProjectileTexture =Content.Load<Texture2D>("projectiles/magic_projectile2");
+            playerProjectileTexture = Content.Load<Texture2D>("projectiles/magic_projectile2");
             coinTexture = Content.Load<Texture2D>("Collectables/coin");
             manaCrystalTexture = Content.Load<Texture2D>("Collectables/mana_crystal_sheet");
             coinPickupSounds = new[]
@@ -277,13 +273,13 @@ namespace _1_2D_Top_Down
             inventoryButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/inventory-button");
             statsButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/stats-button");
             shopButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/shop-button");
-            mapButtonTexture =Content.Load<Texture2D>("UI/ingame buttons/map-button");
+            mapButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/map-button");
             skillTreeButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/skill-tree-button");
             settingsButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/settings-button");
             soundVolumeButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/sound-volume-button");
             startNextWaveButtonTexture = Content.Load<Texture2D>("UI/ingame buttons/start_next_wave");
-            wavePreviewPanelTexture =  Content.Load<Texture2D>("UI/wave_preview_panel");
-            int buttonWidth = (int)( startNextWaveButtonTexture.Width * StartNextWaveButtonScale);
+            wavePreviewPanelTexture = Content.Load<Texture2D>("UI/wave_preview_panel");
+            int buttonWidth = (int)(startNextWaveButtonTexture.Width * StartNextWaveButtonScale);
             int buttonHeight = (int)(startNextWaveButtonTexture.Height * StartNextWaveButtonScale);
             const int rightMargin = 20;
             const int bottomMargin = 20;
@@ -298,8 +294,6 @@ namespace _1_2D_Top_Down
             LoadMissionMap(DefaultMapFileName, loadPortals: true);
             playerProfile = new PlayerProfile();
             player = new Player(playerTexture, playerStartPosition, playerProfile);
-            waveManager = new WaveManager();
-
             LoadShopUpgradeIcons();
             InitializeShopItems();
             MediaPlayer.IsRepeating = true;
