@@ -50,7 +50,7 @@ namespace _1_2D_Top_Down
         private const int CoinDropChancePercent = 35;
         private Texture2D coinTexture;
         private List<Coin> coins = new List<Coin>();
-        private const int ManaCrystalDropChancePercent = 12;
+        private const int ManaCrystalDropChancePercent = 11;
         private const float ManaCrystalRestoreAmount = 25f;
         private Texture2D manaCrystalTexture;
         private List<ManaCrystal> manaCrystals = new List<ManaCrystal>();

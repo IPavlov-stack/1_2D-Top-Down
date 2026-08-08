@@ -35,7 +35,9 @@
             isCompleted = false;
         }
 
-        public bool TryCompleteWave( bool hasFinishedSpawningWave, int activeEnemyCount)
+        public bool TryCompleteWave(
+            bool hasFinishedSpawningWave,
+            int activeEnemyCount)
         {
             if (!hasFinishedSpawningWave || activeEnemyCount > 0)
             {
