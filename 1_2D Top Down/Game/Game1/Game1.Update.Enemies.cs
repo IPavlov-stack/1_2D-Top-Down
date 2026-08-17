@@ -13,11 +13,9 @@ namespace _1_2D_Top_Down
         }
         private void TryFinishCurrentWave()
         {
-            int activeEnemyCount = demons.Count + evilEyes.Count;
-
             if (missionRuntime.TryCompleteWave(
-                    hasFinishedSpawningWave,
-                    activeEnemyCount))
+                    enemyManager.HasFinishedSpawningWave,
+                    demons.Count + evilEyes.Count))
             {
                 gameFlowState = missionRuntime.IsCompleted
                     ? GameFlowState.MissionComplete

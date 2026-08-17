@@ -6,43 +6,21 @@ namespace _1_2D_Top_Down
 {
     public partial class Game1
     {
-        private float delayBetweenSpawnGroups;
         private void SpawnEnemy(EnemyType enemyType)
         {
             if (portalSpawnPoints.Count == 0)
+            {
                 return;
+            }
 
             Vector2 spawnPosition = portalSpawnPoints[random.Next(portalSpawnPoints.Count)];
 
-            switch (enemyType)
-            {
-                case EnemyType.Demon:
-                    demons.Add(new Demon(demonTexture, spawnPosition));
-                    break;
-
-                case EnemyType.EvilEye:
-                    evilEyes.Add(new Evil_Eye(
-                        evilEyeTexture,
-                        spawnPosition));
-                    break;
-            }
+            enemyManager.SpawnEnemy(enemyType,spawnPosition, demonTexture, evilEyeTexture);
         }
         private void SpawnEnemy(EnemyType enemyType, Vector2 spawnPosition)
         {
-            switch (enemyType)
-            {
-                case EnemyType.Demon:
-                    demons.Add(new Demon(demonTexture, spawnPosition));
-                    break;
-
-                case EnemyType.EvilEye:
-                    evilEyes.Add(new Evil_Eye(
-                        evilEyeTexture,
-                        spawnPosition));
-                    break;
-            }
+            enemyManager.SpawnEnemy(enemyType, spawnPosition, demonTexture, evilEyeTexture);
         }
-
         private void LoadPreplacedMissionEnemies(string mapFileName)
         {
             TiledMissionObjects missionObjects = TiledMissionObjects.FromFile(Content,mapFileName,EnvironmentScale);
@@ -76,74 +54,7 @@ namespace _1_2D_Top_Down
 
             enemyManager.StartSpawningWave(wave);
         }
-        private void SpawnDemon()
-        {
-            if (portalSpawnPoints.Count == 0)
-                return;
-
-            Vector2 spawnPosition = portalSpawnPoints[random.Next(portalSpawnPoints.Count)];
-
-            demons.Add(new Demon(demonTexture, spawnPosition));
-        }
-        private void UpdateWaveSpawnQueue(GameTime gameTime)
-        {
-            if (hasFinishedSpawningWave)
-                return;
-
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
 
-            if (delayBetweenSpawnGroups > 0f)
-            {
-                delayBetweenSpawnGroups -= deltaTime;
-
-                if (delayBetweenSpawnGroups > 0f)
-                    return;
-
-                delayBetweenSpawnGroups = 0f;
-            }
-
-            // no active group = we take the next one
-            if (activeSpawnGroup == null)
-            {
-                if (spawnGroupQueue.Count == 0)
-                {
-                    hasFinishedSpawningWave = true;
-                    return;
-                }
-
-                activeSpawnGroup = spawnGroupQueue.Dequeue();
-                remainingEnemiesInActiveGroup = activeSpawnGroup.Count;
-
-                // first enemy from 1st group shows up with no delay
-                spawnTimer = 0f;
-            }
-
-            spawnTimer -= deltaTime;
-
-            if (spawnTimer > 0f)
-                return;
-
-            SpawnEnemy(activeSpawnGroup.EnemyType);
-
-            remainingEnemiesInActiveGroup--;
-            spawnTimer = currentSpawnInterval;
-
-
-            if (remainingEnemiesInActiveGroup <= 0)
-            {
-                delayBetweenSpawnGroups =
-                    activeSpawnGroup.DelayAfterGroupSeconds;
-
-                activeSpawnGroup = null;
-
-
-                if (spawnGroupQueue.Count == 0)
-                {
-                    delayBetweenSpawnGroups = 0f;
-                    hasFinishedSpawningWave = true;
-                }
-            }
-        }
     }
 }

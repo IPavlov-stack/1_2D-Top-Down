@@ -92,7 +92,7 @@ namespace _1_2D_Top_Down
 
             _spriteBatch.End();
         }
-        private void StartMission(MissionDefinition mission)
+        private void StartMission(MissionDefinition mission, bool useSceneTransition = true)
         {
             missionRuntime.Start(mission);
             missionTriggers.Clear();
@@ -119,13 +119,13 @@ namespace _1_2D_Top_Down
                 playerStartPosition = DefaultPlayerStartPosition;
                 player.Position = playerStartPosition;
 
-                StartSceneTransition(GameFlowState.WaveIntermission);
+                EnterMissionScene(GameFlowState.WaveIntermission, useSceneTransition);
                 return;
             }
 
             LoadPreplacedMissionEnemies(mission.MapFileName);
             LoadMissionTriggers(mission.MapFileName);
-            StartSceneTransition(GameFlowState.Playing);
+            EnterMissionScene(GameFlowState.Playing, useSceneTransition);
         }
         private void HandleCampaignInput(KeyboardState keyboard, MouseState mouse)
         {
@@ -159,6 +159,19 @@ namespace _1_2D_Top_Down
             {
                 StartSceneTransition(GameFlowState.MainMenu);
             }
+        }
+
+        private void EnterMissionScene(GameFlowState scene,bool useSceneTransition)
+        {
+            if (useSceneTransition)
+            {
+                StartSceneTransition(scene);
+                return;
+            }
+
+            gameFlowState = scene;
+            CenterCameraOnPlayer();
+            UpdateMusicForgameFlowState();
         }
         private Rectangle GetCampaignBackButtonBounds()
         {

@@ -73,16 +73,7 @@ namespace _1_2D_Top_Down
         private List<EnemyProjectile> enemyProjectiles = new List<EnemyProjectile>();
         private Texture2D evilEyeShadowTexture;
 
-        //spawner info
-        private readonly Queue<EnemySpawnGroup> spawnGroupQueue = new();
 
-        private EnemySpawnGroup? activeSpawnGroup;
-        private int remainingEnemiesInActiveGroup;
-
-        private float spawnTimer;
-        private float currentSpawnInterval;
-
-        private bool hasFinishedSpawningWave;
         //camera info
         private Camera camera;
 
@@ -381,7 +372,7 @@ namespace _1_2D_Top_Down
                 UpdateDeathAnimations(gameTime);
                 UpdateCollectibles(gameTime);
 
-                RebuildEnemySpatialGrids();
+                enemyManager.RebuildSpatialGrids();
                 UpdatePlayerProjectiles(gameTime);
                 UpdateEnemyProjectiles(gameTime);
 

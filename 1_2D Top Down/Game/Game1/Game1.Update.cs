@@ -29,27 +29,15 @@ namespace _1_2D_Top_Down
             UpdateEnemyProjectiles(gameTime);
             UpdateDemons(gameTime);
             UpdatePlayerProjectiles(gameTime);
-            RebuildEnemySpatialGrids();
-            UpdateDemonDeathAnimations(gameTime);
+            enemyManager.RebuildSpatialGrids();
+            enemyManager.UpdateDemonDeathAnimations(gameTime);
             UpdateCoins(gameTime);
             UpdateManaCrystals(gameTime);
             UpdatePlayerResourceAnimations(gameTime);
         }
         private void RestartGame()
         {
-            gameFlowState = GameFlowState.WaveIntermission;
-            projectiles.Clear();
-            enemyManager.Clear();
-            enemyProjectiles.Clear();
-
-            coins.Clear();
-            manaCrystals.Clear();
-            inventoryResources.Clear();
-            player.Position = playerStartPosition;
-            player.Health.Reset();
-            player.ResetDamageEffects();
-            missionRuntime.Restart();
-
+            StartMission(missionRuntime.Definition, useSceneTransition: false);
         }
         private void UpdatePlayerMovement(GameTime gameTime)
         {
@@ -397,32 +385,6 @@ namespace _1_2D_Top_Down
                 0f,
                 0f);
         }
-        private void UpdateDemonDeathAnimations(GameTime gameTime)
-        {
-            enemyManager.UpdateDemonDeathAnimations(gameTime);
-        }
-        private void UpdateEvilEyeDeathAnimations(GameTime gameTime)
-        {
-            for (int i = evilEyes.Count - 1; i >= 0; i--)
-            {
-                Evil_Eye evilEye = evilEyes[i];
-
-                if (!evilEye.IsDead)
-                {
-                    continue;
-                }
-
-                evilEye.Update(
-                    gameTime,
-                    player,
-                    evilEyeProjectileTexture);
-
-                if (evilEye.IsDeathAnimationFinished)
-                {
-                    evilEyes.RemoveAt(i);
-                }
-            }
-        }
         private void HandlePlayerShooting(
             MouseState mouse,
             KeyboardState keyboard)
@@ -486,10 +448,7 @@ namespace _1_2D_Top_Down
                     player.Stats.ProjectileSpeed));
             }
         }
-        private void RebuildEnemySpatialGrids()
-        {
-            enemyManager.RebuildSpatialGrids();
-        }
+
         private void HandleDeveloperMode(KeyboardState keyboard)
         {
             if (keyboard.IsKeyDown(Keys.F3) &&
@@ -516,10 +475,10 @@ namespace _1_2D_Top_Down
         }
         private void UpdateDeathAnimations(GameTime gameTime)
         {
-            UpdateDemonDeathAnimations(gameTime);
-            UpdateEvilEyeDeathAnimations(gameTime);
-        }
+            enemyManager.UpdateDemonDeathAnimations(gameTime);
 
+            enemyManager.UpdateEvilEyeDeathAnimations( gameTime,player, evilEyeProjectileTexture);
+        }
         private void UpdateCollectibles(GameTime gameTime)
         {
             UpdateCoins(gameTime);

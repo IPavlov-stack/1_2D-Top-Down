@@ -170,6 +170,29 @@ namespace _1_2D_Top_Down
                 }
             }
         }
+
+        public void UpdateEvilEyeDeathAnimations(GameTime gameTime,Player player,Texture2D projectileTexture)
+        {
+            for (int i = EvilEyes.Count - 1; i >= 0; i--)
+            {
+                Evil_Eye evilEye = EvilEyes[i];
+
+                if (!evilEye.IsDead)
+                {
+                    continue;
+                }
+
+                evilEye.Update(
+                    gameTime,
+                    player,
+                    projectileTexture);
+
+                if (evilEye.IsDeathAnimationFinished)
+                {
+                    EvilEyes.RemoveAt(i);
+                }
+            }
+        }
         public void StartSpawningWave(WaveDefinition wave)
         {
             spawnGroupQueue.Clear();
@@ -256,6 +279,19 @@ namespace _1_2D_Top_Down
                 delayBetweenSpawnGroups = 0f;
 
                 HasFinishedSpawningWave = true;
+            }
+        }
+        public void SpawnEnemy( EnemyType enemyType, Vector2 spawnPosition, Texture2D demonTexture, Texture2D evilEyeTexture)
+        {
+            switch (enemyType)
+            {
+                case EnemyType.Demon:
+                    Demons.Add(new Demon(demonTexture,spawnPosition));
+                    break;
+
+                case EnemyType.EvilEye:
+                    EvilEyes.Add(new Evil_Eye( evilEyeTexture,spawnPosition));
+                    break;
             }
         }
     }
