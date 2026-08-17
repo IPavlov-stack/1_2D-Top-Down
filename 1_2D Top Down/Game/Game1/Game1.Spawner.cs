@@ -27,9 +27,7 @@ namespace _1_2D_Top_Down
                     break;
             }
         }
-        private void SpawnEnemy(
-    EnemyType enemyType,
-    Vector2 spawnPosition)
+        private void SpawnEnemy(EnemyType enemyType, Vector2 spawnPosition)
         {
             switch (enemyType)
             {
@@ -47,23 +45,16 @@ namespace _1_2D_Top_Down
 
         private void LoadPreplacedMissionEnemies(string mapFileName)
         {
-            TiledMissionObjects missionObjects = TiledMissionObjects.FromFile(
-                Content,
-                mapFileName,
-                EnvironmentScale);
+            TiledMissionObjects missionObjects = TiledMissionObjects.FromFile(Content,mapFileName,EnvironmentScale);
 
             playerStartPosition = missionObjects.PlayerSpawnPosition;
             player.Position = playerStartPosition;
 
             foreach (EnemySpawnPoint spawnPoint in missionObjects.EnemySpawnPoints)
             {
-                if (!Enum.TryParse(
-                        spawnPoint.EnemyType,
-                        ignoreCase: true,
-                        out EnemyType enemyType))
+                if (!Enum.TryParse(spawnPoint.EnemyType, ignoreCase: true,out EnemyType enemyType))
                 {
-                    throw new InvalidOperationException(
-                        $"Unknown EnemyType '{spawnPoint.EnemyType}' in {mapFileName}.");
+                    throw new InvalidOperationException($"Unknown EnemyType '{spawnPoint.EnemyType}' in {mapFileName}.");
                 }
 
                 SpawnEnemy(enemyType, spawnPoint.Position);
@@ -75,7 +66,7 @@ namespace _1_2D_Top_Down
 
             if (waveIndex >= missionRuntime.Definition.Waves.Count)
             {
-                // По-късно: Mission Complete
+
                 return;
             }
 
@@ -83,21 +74,7 @@ namespace _1_2D_Top_Down
 
             missionRuntime.Waves.StartNextWave(wave.TotalEnemyCount);
 
-            spawnGroupQueue.Clear();
-
-            foreach (EnemySpawnGroup group in wave.SpawnGroups)
-            {
-                spawnGroupQueue.Enqueue(group);
-            }
-
-            activeSpawnGroup = null;
-            remainingEnemiesInActiveGroup = 0;
-
-            currentSpawnInterval = wave.SpawnIntervalSeconds;
-            spawnTimer = 0f;
-            delayBetweenSpawnGroups = 0f;
-
-            hasFinishedSpawningWave = false;
+            enemyManager.StartSpawningWave(wave);
         }
         private void SpawnDemon()
         {
@@ -113,10 +90,9 @@ namespace _1_2D_Top_Down
             if (hasFinishedSpawningWave)
                 return;
 
-            float deltaTime =
-                (float)gameTime.ElapsedGameTime.TotalSeconds;
+            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            // Пауза след предишната група.
+
             if (delayBetweenSpawnGroups > 0f)
             {
                 delayBetweenSpawnGroups -= deltaTime;
@@ -127,7 +103,7 @@ namespace _1_2D_Top_Down
                 delayBetweenSpawnGroups = 0f;
             }
 
-            // Ако в момента няма активна група, взимаме следващата.
+            // no active group = we take the next one
             if (activeSpawnGroup == null)
             {
                 if (spawnGroupQueue.Count == 0)
@@ -139,7 +115,7 @@ namespace _1_2D_Top_Down
                 activeSpawnGroup = spawnGroupQueue.Dequeue();
                 remainingEnemiesInActiveGroup = activeSpawnGroup.Count;
 
-                // Първият враг от новата група излиза веднага.
+                // first enemy from 1st group shows up with no delay
                 spawnTimer = 0f;
             }
 
@@ -153,7 +129,7 @@ namespace _1_2D_Top_Down
             remainingEnemiesInActiveGroup--;
             spawnTimer = currentSpawnInterval;
 
-            // Последният враг от групата е spawn-нат.
+
             if (remainingEnemiesInActiveGroup <= 0)
             {
                 delayBetweenSpawnGroups =
@@ -161,8 +137,7 @@ namespace _1_2D_Top_Down
 
                 activeSpawnGroup = null;
 
-                // Ако това е последната група, няма причина да чакаме
-                // нейната пауза.
+
                 if (spawnGroupQueue.Count == 0)
                 {
                     delayBetweenSpawnGroups = 0f;

@@ -97,10 +97,9 @@ namespace _1_2D_Top_Down
             missionRuntime.Start(mission);
             missionTriggers.Clear();
             projectiles.Clear();
-            demons.Clear();
-            evilEyes.Clear();
+            enemyManager.Clear();
             enemyProjectiles.Clear();
-            demonDeathAnimations.Clear();
+
             coins.Clear();
             manaCrystals.Clear();
 

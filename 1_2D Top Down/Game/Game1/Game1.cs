@@ -57,23 +57,19 @@ namespace _1_2D_Top_Down
         private readonly List<InventoryResource> inventoryResources = new();
 
         //enemy info
-        private const int EnemySpatialCellSize = 128;
-        private readonly SpatialGrid<Demon> demonSpatialGrid = new SpatialGrid<Demon>(EnemySpatialCellSize);
-        private readonly SpatialGrid<Evil_Eye> evilEyeSpatialGrid = new SpatialGrid<Evil_Eye>(EnemySpatialCellSize);
-        private readonly List<Demon> nearbyDemons = new();
-        private readonly List<Evil_Eye> nearbyEvilEyes = new();
+        private readonly EnemyManager enemyManager = new();
 
         //demon info
         private Texture2D demonTexture;
-        private List<Demon> demons = new List<Demon>();
         private Texture2D demonDeathTexture;
-        private List<DeathAnimation> demonDeathAnimations = new List<DeathAnimation>();
         private Texture2D demonShadowTexture;
+        private List<Demon> demons => enemyManager.Demons;
+        private List<DeathAnimation> demonDeathAnimations => enemyManager.DemonDeathAnimations;
 
         //evil eye info
         private Texture2D evilEyeProjectileTexture;
         private Texture2D evilEyeTexture;
-        private List<Evil_Eye> evilEyes = new List<Evil_Eye>();
+        private List<Evil_Eye> evilEyes => enemyManager.EvilEyes;
         private List<EnemyProjectile> enemyProjectiles = new List<EnemyProjectile>();
         private Texture2D evilEyeShadowTexture;
 

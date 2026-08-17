@@ -19,6 +19,10 @@ namespace _1_2D_Top_Down
             PlayerProjectiles.Clear();
             EnemyProjectiles.Clear();
         }
+        public void AddEnemyProjectile( EnemyProjectile projectile)
+        {
+            EnemyProjectiles.Add(projectile);
+        }
 
         /// <summary>
         /// Updates enemy projectiles and returns true when the player dies
