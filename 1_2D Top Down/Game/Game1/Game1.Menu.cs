@@ -303,7 +303,7 @@ namespace _1_2D_Top_Down
         {
             if (transitionManager.Update(gameTime))
             {
-                gameFlowState = nextGameFlowState;
+                gameplaySession.ChangeFlowState(nextGameFlowState);
                 ActivateScreenForFlowState(gameFlowState);
                 UpdateMusicForgameFlowState();
 
@@ -333,11 +333,7 @@ namespace _1_2D_Top_Down
         }
         private void CenterCameraOnPlayer()
         {
-            cameraController.WorldBounds = new Rectangle(
-                0,
-                0,
-                (int)worldMap.WorldWidth,
-                (int)worldMap.WorldHeight);
+            cameraController.WorldBounds = gameMap.WorldBounds;
 
             cameraController.SnapToFollow(GraphicsDevice.Viewport.Bounds.Size);
         }

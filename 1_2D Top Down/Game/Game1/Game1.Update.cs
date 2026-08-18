@@ -15,12 +15,6 @@ namespace _1_2D_Top_Down
         }
         private void UpdateGameObjects(GameTime gameTime, bool allowPlayerInput = true)
         {
-            Rectangle worldBounds = new Rectangle(
-                0,
-                0,
-                (int)worldMap.WorldWidth,
-                (int)worldMap.WorldHeight);
-
             UpdatePlayerMovement(gameTime, allowPlayerInput);
             UpdateMissionTriggers();
             enemyManager.UpdateSpawnQueue(gameTime,SpawnEnemy);
@@ -39,17 +33,7 @@ namespace _1_2D_Top_Down
         }
         private void UpdatePlayerMovement(GameTime gameTime, bool allowPlayerInput = true)
         {
-            Rectangle worldBounds = new Rectangle(
-                0,
-                0,
-                (int)worldMap.WorldWidth,
-                (int)worldMap.WorldHeight);
-
-            player.Update(
-                gameTime,
-                worldBounds,
-                solidCollisionRectangles,
-                allowPlayerInput);
+            gameplaySession.UpdatePlayer(gameTime, allowPlayerInput);
         }
         private void UpdateEnemies(GameTime gameTime)
         {
@@ -58,7 +42,7 @@ namespace _1_2D_Top_Down
 
             if (player.Health.IsDead)
             {
-                gameFlowState = GameFlowState.GameOver;
+                gameplaySession.ChangeFlowState(GameFlowState.GameOver);
             }
         }
 
@@ -95,32 +79,20 @@ namespace _1_2D_Top_Down
         }
         private void UpdateEnemyProjectiles(GameTime gameTime)
         {
-            Rectangle worldBounds = new Rectangle(
-                0,
-                0,
-                (int)worldMap.WorldWidth,
-                (int)worldMap.WorldHeight);
-
             if (projectileManager.UpdateEnemyProjectiles(
                     gameTime,
-                    worldBounds,
+                    gameMap.WorldBounds,
                     IntersectsMapCollision,
                     player))
             {
-                gameFlowState = GameFlowState.GameOver;
+                gameplaySession.ChangeFlowState(GameFlowState.GameOver);
             }
         }
         private void UpdatePlayerProjectiles(GameTime gameTime)
         {
-            Rectangle worldBounds = new Rectangle(
-                0,
-                0,
-                (int)worldMap.WorldWidth,
-                (int)worldMap.WorldHeight);
-
             projectileManager.UpdatePlayerProjectiles(
                 gameTime,
-                worldBounds,
+                gameMap.WorldBounds,
                 IntersectsMapCollision,
                 TryHitNearbyEnemy);
         }
@@ -237,7 +209,7 @@ namespace _1_2D_Top_Down
 
         private bool IntersectsMapCollision(Rectangle bounds)
         {
-            return mapCollisionGrid.Intersects(bounds);
+            return gameMap.IntersectsCollision(bounds);
         }
 
         private void TryDropCoin(Vector2 enemyCenter)
@@ -391,21 +363,6 @@ namespace _1_2D_Top_Down
             }
         }
 
-        private void HandleDeveloperMode(KeyboardState keyboard)
-        {
-            if (keyboard.IsKeyDown(Keys.F3) &&
-                previousKeyboard.IsKeyUp(Keys.F3))
-            {
-                isDeveloperMode = !isDeveloperMode;
-            }
-
-            if (isDeveloperMode &&
-                keyboard.IsKeyDown(Keys.F6) &&
-                previousKeyboard.IsKeyUp(Keys.F6))
-            {
-                PlayCameraTestCutscene();
-            }
-        }
         private void UpdateWaveIntermissionInput(MouseState mouse)
         {
             if (gameFlowState != GameFlowState.WaveIntermission)
@@ -419,8 +376,7 @@ namespace _1_2D_Top_Down
             if (!clickedStartButton)
                 return;
 
-            StartNextWave();
-            gameFlowState = GameFlowState.Playing;
+            gameplaySession.TryStartNextWave();
         }
         private void UpdateDeathAnimations(GameTime gameTime)
         {
@@ -439,14 +395,14 @@ namespace _1_2D_Top_Down
                 {
                     AddInventoryResource("coin", uiCoinTexture, 1);
                     PlayNextCoinPickupSound();
-                    PublishMissionEvent(
+                    gameplaySession.PublishMissionEvent(
                         new CollectibleCollectedMissionEvent("coin", 1));
                 },
                 onManaCrystalCollected: _ =>
                 {
                     player.Mana.Restore(ManaCrystalRestoreAmount);
                     PlayManaCrystalCollectSound();
-                    PublishMissionEvent(
+                    gameplaySession.PublishMissionEvent(
                         new CollectibleCollectedMissionEvent(
                             "mana_crystal",
                             1));

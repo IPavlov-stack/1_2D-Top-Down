@@ -9,8 +9,6 @@ namespace _1_2D_Top_Down
 {
     public partial class Game1
     {
-        private readonly List<MissionTrigger> missionTriggers = new();
-
         private Rectangle GetCampaignMapBounds()
         {
             float scale = MathF.Min(
@@ -94,28 +92,29 @@ namespace _1_2D_Top_Down
         }
         private void StartMission(MissionDefinition mission, bool useSceneTransition = true)
         {
-            missionRuntime.Start(mission);
-            missionTriggers.Clear();
-            gameWorld.ClearMissionObjects();
+            gameplaySession.StartMission(mission);
 
-            player.Health.Reset();
-            player.ResetDamageEffects();
             string mapFileName = mission.MapFileName ?? DefaultMapFileName;
 
-            LoadMissionMap(mapFileName, loadPortals: mission.Type == MissionType.Survival);
+            LoadMissionMap(
+                mapFileName,
+                loadPortals: mission.Type == MissionType.Survival,
+                loadMissionData: mission.Type == MissionType.Adventure);
+
+            playerStartPosition = mission.Type == MissionType.Survival
+                ? DefaultPlayerStartPosition
+                : gameMap.PlayerSpawnPosition;
+            gameplaySession.PreparePlayerForMission(playerStartPosition);
+
             System.Diagnostics.Debug.WriteLine($"Mission: {mission.Name}, map: {mapFileName}, " + $"spawn: {playerStartPosition}");
 
             if (mission.Type == MissionType.Survival)
             {
-                playerStartPosition = DefaultPlayerStartPosition;
-                player.Position = playerStartPosition;
-
                 EnterMissionScene(GameFlowState.WaveIntermission, useSceneTransition);
                 return;
             }
 
-            LoadPreplacedMissionEnemies(mission.MapFileName);
-            LoadMissionTriggers(mission.MapFileName);
+            LoadPreplacedMissionEnemies();
             EnterMissionScene(GameFlowState.Playing, useSceneTransition);
         }
         private void HandleCampaignInput(KeyboardState keyboard, MouseState mouse)
@@ -160,7 +159,7 @@ namespace _1_2D_Top_Down
                 return;
             }
 
-            gameFlowState = scene;
+            gameplaySession.ChangeFlowState(scene);
             ActivateScreenForFlowState(scene);
             CenterCameraOnPlayer();
             UpdateMusicForgameFlowState();
@@ -239,17 +238,6 @@ namespace _1_2D_Top_Down
             return texture;
         }
 
-        private void LoadMissionTriggers(string mapFileName)
-        {
-            TiledMissionTriggers tiledTriggers =
-                TiledMissionTriggers.FromFile(
-                    Content,
-                    mapFileName,
-                    EnvironmentScale);
-
-            missionTriggers.AddRange(tiledTriggers.Triggers);
-        }
-
         private void UpdateMissionTriggers()
         {
             if (gameFlowState != GameFlowState.Playing)
@@ -257,7 +245,7 @@ namespace _1_2D_Top_Down
                 return;
             }
 
-            foreach (MissionTrigger trigger in missionTriggers)
+            foreach (MissionTrigger trigger in gameMap.MissionTriggers)
             {
                 if (trigger.IsActivated ||
                     !player.Bounds.Intersects(trigger.Bounds))
@@ -266,24 +254,11 @@ namespace _1_2D_Top_Down
                 }
 
                 trigger.Activate();
-                PublishMissionEvent(
-                    new TriggerActivatedMissionEvent(trigger.Name));
-
-                if (missionRuntime.IsCompleted)
+                if (gameplaySession.PublishMissionEvent(
+                        new TriggerActivatedMissionEvent(trigger.Name)))
                 {
-                    gameFlowState = GameFlowState.MissionComplete;
                     return;
                 }
-            }
-        }
-
-        private void PublishMissionEvent(MissionEvent missionEvent)
-        {
-            missionRuntime.Publish(missionEvent);
-
-            if (missionRuntime.IsCompleted)
-            {
-                gameFlowState = GameFlowState.MissionComplete;
             }
         }
     }

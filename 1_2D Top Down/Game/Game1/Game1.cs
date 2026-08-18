@@ -22,8 +22,9 @@ namespace _1_2D_Top_Down
         private bool IsGameplayActive => gameFlowState == GameFlowState.Playing;
         private const int WindowSizeX = 1920;
         private const int WindowSizeY = 1080;
-        private readonly StaticCollisionGrid mapCollisionGrid = new StaticCollisionGrid(128);
-        private GameFlowState gameFlowState = GameFlowState.MainMenu;
+        private readonly GameplaySession gameplaySession =
+            new GameplaySession(CampaignMissions.ForestOutskirts);
+        private GameFlowState gameFlowState => gameplaySession.FlowState;
         private GameFlowState nextGameFlowState;
         private readonly ScreenManager screenManager = new();
         private readonly OverlayManager overlayManager = new();
@@ -31,8 +32,7 @@ namespace _1_2D_Top_Down
         private PauseOverlay pauseOverlay;
 
         //campaign info
-        private readonly MissionRuntime missionRuntime =
-            new MissionRuntime(CampaignMissions.ForestOutskirts);
+        private MissionRuntime missionRuntime => gameplaySession.Mission;
         private Texture2D campaignMapTexture;
         private Texture2D missionNodeTexture;
 
@@ -42,15 +42,14 @@ namespace _1_2D_Top_Down
         private KeyboardState previousKeyboard;
 
         //player info
-        private Player player;
+        private Player player => gameplaySession.Player;
         private Vector2 playerStartPosition = new Vector2(2150, 1850);
         private static readonly Vector2 DefaultPlayerStartPosition = new Vector2(2150, 1850);
         private Texture2D playerProjectileTexture;
-        private readonly GameWorld gameWorld = new();
+        private GameWorld gameWorld => gameplaySession.World;
         private ProjectileManager projectileManager => gameWorld.Projectiles;
         private IReadOnlyList<PlayerProjectile> projectiles => projectileManager.PlayerProjectiles;
         private Texture2D playerShadowTexture;
-        private PlayerProfile playerProfile;
 
         //collectables info
         private const int CoinDropChancePercent = 35;
@@ -86,11 +85,7 @@ namespace _1_2D_Top_Down
         private Texture2D forestTileset;
         private TextureAtlas environmentGroundAtlas;
         private TextureAtlas environmentPropsAtlas;
-        private TiledTileLayer waterMap;
-        private TiledTileLayer worldMap;
-        private TiledPropsLayer propsLayer;
-        private TiledCollisionLayer collisionLayer;
-        private List<Rectangle> solidCollisionRectangles;
+        private GameMap gameMap => gameplaySession.Map;
 
         //ui info
         private Texture2D inventoryPanelTexture;
@@ -169,7 +164,9 @@ namespace _1_2D_Top_Down
 
         //others
         private Random random = new Random();
-        private bool isDeveloperMode;
+        private readonly DeveloperModeController developerMode = new();
+        private WorldDebugRenderer worldDebugRenderer;
+        private DeveloperHudOverlay developerHudOverlay;
 
         public Game1()
         {
@@ -275,8 +272,11 @@ namespace _1_2D_Top_Down
             environmentPropsAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentPropsAtlas.xml");
 
             LoadMissionMap(DefaultMapFileName, loadPortals: true);
-            playerProfile = new PlayerProfile();
-            player = new Player(playerTexture, playerStartPosition, playerProfile);
+            gameplaySession.SetPlayer(
+                new Player(
+                    playerTexture,
+                    playerStartPosition,
+                    new PlayerProfile()));
             LoadShopUpgradeIcons();
             InitializeShopItems();
             MediaPlayer.IsRepeating = true;
@@ -298,6 +298,14 @@ namespace _1_2D_Top_Down
             dialogueOverlay = new DialogueOverlay(this);
             cutsceneDirector = new CutsceneDirector(
                 new CutsceneContext(cameraController, overlayManager, dialogueOverlay));
+            worldDebugRenderer = new WorldDebugRenderer(pixelTexture);
+            developerHudOverlay = new DeveloperHudOverlay(
+                developerMode,
+                gameplaySession,
+                camera,
+                cameraController,
+                pixelTexture,
+                boldpixels);
         }
 
         private void PlayMusic(Song music)
@@ -332,8 +340,7 @@ namespace _1_2D_Top_Down
         }
         protected override void Update(GameTime gameTime)
         {
-            if (arePortalsActive)
-                portalLayer.Update(gameTime);
+            gameMap.Update(gameTime);
 
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();

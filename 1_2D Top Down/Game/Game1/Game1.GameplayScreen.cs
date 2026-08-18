@@ -10,6 +10,7 @@ namespace _1_2D_Top_Down
         {
             PlayMusic(backgroundMusic);
             CenterCameraOnPlayer();
+            overlayManager.Push(developerHudOverlay);
         }
 
         internal void OnGameplayScreenExited()
@@ -23,6 +24,8 @@ namespace _1_2D_Top_Down
         {
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
+
+            developerMode.UpdateToggle(keyboard, previousKeyboard);
 
             if (overlayManager.HasOverlays)
                 overlayManager.Update(gameTime);
@@ -66,6 +69,14 @@ namespace _1_2D_Top_Down
                 return;
             }
 
+            if (allowInput)
+            {
+                developerMode.UpdateCommands(
+                    keyboard,
+                    previousKeyboard,
+                    PlayCameraTestCutscene);
+            }
+
             if (gameFlowState == GameFlowState.WaveIntermission)
             {
                 if (allowInput)
@@ -81,7 +92,6 @@ namespace _1_2D_Top_Down
                 UpdatePlayerResourceAnimations(gameTime);
                 if (allowInput)
                 {
-                    HandleDeveloperMode(keyboard);
                     UpdateWaveIntermissionInput(mouse);
                 }
                 return;
@@ -89,7 +99,6 @@ namespace _1_2D_Top_Down
 
             if (allowInput)
             {
-                HandleDeveloperMode(keyboard);
                 bool gameplayUiClickHandled = HandleGameplayUIInput(keyboard, mouse);
                 if (!gameplayUiClickHandled)
                     HandlePlayerShooting(mouse, keyboard);
@@ -107,18 +116,23 @@ namespace _1_2D_Top_Down
         internal void DrawGameplayScreen()
         {
             GraphicsDevice.Clear(
-                isDeveloperMode
-                    ? Color.DimGray
-                    : gameFlowState == GameFlowState.GameOver ? Color.Black : BackgroundColor);
+                gameFlowState == GameFlowState.GameOver
+                    ? Color.Black
+                    : BackgroundColor);
 
             _spriteBatch.Begin(
                 transformMatrix: camera.Transform,
                 samplerState: SamplerState.PointClamp);
 
-            if (isDeveloperMode)
-                DrawDeveloperMode();
-            else
-                DrawNormalWorld();
+            DrawNormalWorld();
+
+            if (developerMode.IsEnabled)
+            {
+                worldDebugRenderer.Draw(
+                    _spriteBatch,
+                    gameplaySession,
+                    developerMode.View);
+            }
 
             _spriteBatch.End();
             DrawUi();

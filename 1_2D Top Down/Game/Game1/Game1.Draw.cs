@@ -23,7 +23,9 @@ namespace _1_2D_Top_Down
                 manaCrystal.Draw(_spriteBatch);
 
             player.Draw(_spriteBatch);
-            propsLayer.DrawInFrontOfPlayer(_spriteBatch, player.Bounds.Bottom);
+            gameMap.PropsLayer.DrawInFrontOfPlayer(
+                _spriteBatch,
+                player.Bounds.Bottom);
 
             foreach (Projectile projectile in projectiles)
                 projectile.Draw(_spriteBatch);
@@ -192,13 +194,15 @@ namespace _1_2D_Top_Down
 
         private void DrawMap()
         {
-            waterMap.Draw(_spriteBatch);
-            worldMap.Draw(_spriteBatch);
-            if (arePortalsActive)
+            gameMap.WaterLayer.Draw(_spriteBatch);
+            gameMap.GroundLayer.Draw(_spriteBatch);
+            if (gameMap.ArePortalsActive)
             {
-                portalLayer.Draw(_spriteBatch);
+                gameMap.PortalLayer.Draw(_spriteBatch);
             }
-            propsLayer.DrawBehindPlayer(_spriteBatch, player.Bounds.Bottom);
+            gameMap.PropsLayer.DrawBehindPlayer(
+                _spriteBatch,
+                player.Bounds.Bottom);
         }
 
         private void DrawPlayerResourceUi()
@@ -302,63 +306,6 @@ namespace _1_2D_Top_Down
                     flashBounds,
                     Color.White);
             }
-        }
-        private void DrawDeveloperMode()
-        {
-            foreach (Rectangle collisionRectangle in solidCollisionRectangles)
-                DrawDebugRectangle(collisionRectangle, Color.White);
-
-            DrawDebugRectangle(player.Bounds, Color.DodgerBlue);
-
-            foreach (Coin coin in coins)
-                DrawDebugRectangle(coin.Bounds, Color.Gold);
-
-            foreach (ManaCrystal manaCrystal in manaCrystals)
-            {
-                DrawDebugRectangle(manaCrystal.Bounds, Color.DarkSlateBlue);
-            }
-
-            foreach (PlayerProjectile projectile in projectiles)
-                DrawDebugRectangle(projectile.Bounds, Color.LimeGreen);
-
-            foreach (Enemy enemy in enemies)
-            {
-                DrawDebugRectangle(enemy.Bounds, Color.Red);
-            }
-
-            foreach (EnemyProjectile projectile in enemyProjectiles)
-                DrawDebugRectangle(projectile.Bounds, Color.MediumPurple);
-        }
-
-        private void DrawDebugRectangle(Rectangle rectangle, Color color)
-        {
-            const int outlineThickness = 2;
-
-            _spriteBatch.Draw(pixelTexture, rectangle, color * 0.25f);
-
-            _spriteBatch.Draw(
-                pixelTexture,
-                new Rectangle(rectangle.X, rectangle.Y,
-                    rectangle.Width, outlineThickness),
-                color);
-
-            _spriteBatch.Draw(
-                pixelTexture,
-                new Rectangle(rectangle.X, rectangle.Bottom - outlineThickness,
-                    rectangle.Width, outlineThickness),
-                color);
-
-            _spriteBatch.Draw(
-                pixelTexture,
-                new Rectangle(rectangle.X, rectangle.Y,
-                    outlineThickness, rectangle.Height),
-                color);
-
-            _spriteBatch.Draw(
-                pixelTexture,
-                new Rectangle(rectangle.Right - outlineThickness, rectangle.Y,
-                    outlineThickness, rectangle.Height),
-                color);
         }
         private void DrawWaveIntermissionUi()
         {

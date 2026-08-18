@@ -7,7 +7,7 @@ namespace _1_2D_Top_Down
         private void HandleEnemyDeath(Enemy enemy)
         {
             player.GainExperience(enemy.ExperienceReward);
-            PublishMissionEvent(
+            gameplaySession.PublishMissionEvent(
                 new EnemyDefeatedMissionEvent(enemy.Definition.Id));
 
             Vector2 deathPosition = enemy.Bounds.Center.ToVector2();
@@ -15,14 +15,9 @@ namespace _1_2D_Top_Down
         }
         private void TryFinishCurrentWave()
         {
-            if (missionRuntime.TryCompleteWave(
-                    enemyManager.HasFinishedSpawningWave,
-                    enemies.Count))
-            {
-                gameFlowState = missionRuntime.IsCompleted
-                    ? GameFlowState.MissionComplete
-                    : GameFlowState.WaveIntermission;
-            }
+            gameplaySession.TryFinishCurrentWave(
+                enemyManager.HasFinishedSpawningWave,
+                enemies.Count);
         }
         private void SpawnEnemyDrops(Vector2 enemyCenter)
         {

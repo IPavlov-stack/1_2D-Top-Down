@@ -8,12 +8,13 @@ namespace _1_2D_Top_Down
     {
         private void SpawnEnemy(EnemyType enemyType)
         {
-            if (portalSpawnPoints.Count == 0)
+            if (gameMap.PortalSpawnPoints.Count == 0)
             {
                 return;
             }
 
-            Vector2 spawnPosition = portalSpawnPoints[random.Next(portalSpawnPoints.Count)];
+            Vector2 spawnPosition = gameMap.PortalSpawnPoints[
+                random.Next(gameMap.PortalSpawnPoints.Count)];
 
             enemyManager.Add(enemyFactory.Create(enemyType, spawnPosition));
         }
@@ -25,43 +26,21 @@ namespace _1_2D_Top_Down
         {
             enemyManager.Add(enemyFactory.Create(enemyId, spawnPosition));
         }
-        private void LoadPreplacedMissionEnemies(string mapFileName)
+        private void LoadPreplacedMissionEnemies()
         {
-            TiledMissionObjects missionObjects = TiledMissionObjects.FromFile(Content,mapFileName,EnvironmentScale);
-
-            playerStartPosition = missionObjects.PlayerSpawnPosition;
-            player.Position = playerStartPosition;
-
-            foreach (EnemySpawnPoint spawnPoint in missionObjects.EnemySpawnPoints)
+            foreach (EnemySpawnPoint spawnPoint in gameMap.EnemySpawnPoints)
             {
                 if (!EnemyDefinitions.TryGet(
                         spawnPoint.EnemyType,
                         out EnemyDefinition? definition))
                 {
                     throw new InvalidOperationException(
-                        $"Unknown enemy definition '{spawnPoint.EnemyType}' in {mapFileName}.");
+                        $"Unknown enemy definition '{spawnPoint.EnemyType}' in " +
+                        $"{missionRuntime.Definition.MapFileName}.");
                 }
 
                 SpawnEnemy(definition.Id, spawnPoint.Position);
             }
         }
-        private void StartNextWave()
-        {
-            int waveIndex = missionRuntime.Waves.CurrentWave;
-
-            if (waveIndex >= missionRuntime.Definition.Waves.Count)
-            {
-
-                return;
-            }
-
-            WaveDefinition wave = missionRuntime.Definition.Waves[waveIndex];
-
-            missionRuntime.Waves.StartNextWave(wave.TotalEnemyCount);
-
-            enemyManager.StartSpawningWave(wave);
-        }
-
-
     }
 }
