@@ -28,14 +28,11 @@ namespace _1_2D_Top_Down
             foreach (Projectile projectile in projectiles)
                 projectile.Draw(_spriteBatch);
 
-            foreach (Demon demon in demons)
-                demon.Draw(_spriteBatch);
+            foreach (Enemy enemy in enemies)
+                enemy.Draw(_spriteBatch);
 
-            foreach (DeathAnimation deathAnimation in demonDeathAnimations)
+            foreach (DeathAnimation deathAnimation in deathAnimations)
                 deathAnimation.Draw(_spriteBatch);
-
-            foreach (Evil_Eye evilEye in evilEyes)
-                evilEye.Draw(_spriteBatch);
 
             foreach (EnemyProjectile enemyProjectile in enemyProjectiles)
                 enemyProjectile.Draw(_spriteBatch);
@@ -44,27 +41,16 @@ namespace _1_2D_Top_Down
         }
         private void DrawEnemyShadows()
         {
-            foreach (Demon demon in demons)
+            foreach (Enemy enemy in enemies)
             {
-                DrawEnemyShadow(
-                    demonShadowTexture,
-                    demon.Bounds,
-                    0.40f,
-                    0.75f,
-                    4f);
-            }
+                EnemyDefinition definition = enemy.Definition;
 
-            foreach (Evil_Eye evilEye in evilEyes)
-            {
-                if (!evilEye.IsDead)
-                {
-                    DrawEnemyShadow(
-                        evilEyeShadowTexture,
-                        evilEye.Bounds,
-                        0.35f,
-                        0.65f,
-                        2f);
-                }
+                DrawEnemyShadow(
+                    enemyFactory.GetTexture(definition.ShadowTextureAsset),
+                    enemy.Bounds,
+                    definition.ShadowScale,
+                    definition.ShadowOpacity,
+                    definition.ShadowBottomOffset);
             }
         }
 
@@ -115,17 +101,9 @@ namespace _1_2D_Top_Down
         }
         private void DrawEnemyHealthBars()
         {
-            foreach (Demon demon in demons)
+            foreach (Enemy enemy in enemies)
             {
-                DrawEnemyHealthBar(demon.Health, demon.Bounds);
-            }
-
-            foreach (Evil_Eye evilEye in evilEyes)
-            {
-                if (!evilEye.IsDead)
-                {
-                    DrawEnemyHealthBar(evilEye.Health, evilEye.Bounds);
-                }
+                DrawEnemyHealthBar(enemy.Health, enemy.Bounds);
             }
         }
 
@@ -344,13 +322,9 @@ namespace _1_2D_Top_Down
             foreach (PlayerProjectile projectile in projectiles)
                 DrawDebugRectangle(projectile.Bounds, Color.LimeGreen);
 
-            foreach (Demon demon in demons)
-                DrawDebugRectangle(demon.Bounds, Color.Red);
-
-            foreach (Evil_Eye evilEye in evilEyes)
+            foreach (Enemy enemy in enemies)
             {
-                if (!evilEye.IsDead)
-                    DrawDebugRectangle(evilEye.Bounds, Color.OrangeRed);
+                DrawDebugRectangle(enemy.Bounds, Color.Red);
             }
 
             foreach (EnemyProjectile projectile in enemyProjectiles)
@@ -571,27 +545,29 @@ namespace _1_2D_Top_Down
             switch (enemyType)
             {
                 case EnemyType.Demon:
-                    texture = demonTexture;
+                    texture = enemyFactory.GetTexture(
+                        EnemyDefinitions.Demon.TextureAsset);
 
                     // Demon FLYING sheet: 1 row, 4 frames
                     sourceRectangle = new Rectangle(
                         0,
                         0,
-                        demonTexture.Width / 4,
-                        demonTexture.Height);
+                        texture.Width / 4,
+                        texture.Height);
 
                     return true;
 
                 case EnemyType.EvilEye:
-                    texture = evilEyeTexture;
+                    texture = enemyFactory.GetTexture(
+                        EnemyDefinitions.EvilEye.TextureAsset);
 
                     // Evil Eye: 6 колони и 3 реда
                     // flying row, frame 1
                     sourceRectangle = new Rectangle(
                         0,
                         0,
-                        evilEyeTexture.Width / 6,
-                        evilEyeTexture.Height / 3);
+                        texture.Width / 6,
+                        texture.Height / 3);
 
                     return true;
 

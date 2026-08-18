@@ -96,23 +96,14 @@ namespace _1_2D_Top_Down
         {
             missionRuntime.Start(mission);
             missionTriggers.Clear();
-            projectiles.Clear();
-            enemyManager.Clear();
-            enemyProjectiles.Clear();
-
-            coins.Clear();
-            manaCrystals.Clear();
+            gameWorld.ClearMissionObjects();
 
             player.Health.Reset();
             player.ResetDamageEffects();
             string mapFileName = mission.MapFileName ?? DefaultMapFileName;
 
             LoadMissionMap(mapFileName, loadPortals: mission.Type == MissionType.Survival);
-            System.Diagnostics.Debug.WriteLine($"Mission: {mission.Name}, map: {mapFileName}, " + 
-                                               $"spawn: {playerStartPosition}");
-            LoadMissionMap(
-                mapFileName,
-                loadPortals: mission.Type == MissionType.Survival);
+            System.Diagnostics.Debug.WriteLine($"Mission: {mission.Name}, map: {mapFileName}, " + $"spawn: {playerStartPosition}");
 
             if (mission.Type == MissionType.Survival)
             {

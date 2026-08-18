@@ -25,14 +25,12 @@ namespace _1_2D_Top_Down
             UpdateMissionTriggers();
             enemyManager.UpdateSpawnQueue(gameTime,SpawnEnemy);
             TryFinishCurrentWave();
-            UpdateEvilEyes(gameTime);
+            UpdateEnemies(gameTime);
             UpdateEnemyProjectiles(gameTime);
-            UpdateDemons(gameTime);
+            enemyManager.RebuildSpatialGrid();
             UpdatePlayerProjectiles(gameTime);
-            enemyManager.RebuildSpatialGrids();
-            enemyManager.UpdateDemonDeathAnimations(gameTime);
-            UpdateCoins(gameTime);
-            UpdateManaCrystals(gameTime);
+            enemyManager.UpdateDeathAnimations(gameTime);
+            UpdateCollectibles(gameTime);
             UpdatePlayerResourceAnimations(gameTime);
         }
         private void RestartGame()
@@ -53,24 +51,47 @@ namespace _1_2D_Top_Down
                 solidCollisionRectangles,
                 true);
         }
-        private void UpdateDemons(GameTime gameTime)
+        private void UpdateEnemies(GameTime gameTime)
         {
-            bool playerDied = enemyManager.UpdateDemons(
-                gameTime,
-                player);
+            enemyManager.UpdateEnemies(gameTime, player);
+            ProcessEnemyActionRequests();
 
-            if (playerDied)
+            if (player.Health.IsDead)
             {
                 gameFlowState = GameFlowState.GameOver;
             }
         }
-        private void UpdateEvilEyes(GameTime gameTime)
+
+        private void ProcessEnemyActionRequests()
         {
-            enemyManager.UpdateEvilEyes(
-                gameTime,
-                player,
-                evilEyeProjectileTexture,
-                enemyProjectiles.Add);
+            foreach (EnemyActionRequest request in enemyManager.PendingActions)
+            {
+                switch (request)
+                {
+                    case DamagePlayerRequest damageRequest:
+                        if (!player.Health.IsDead)
+                        {
+                            player.TakeDamage(damageRequest.Damage);
+                        }
+                        break;
+
+                    case ProjectileSpawnRequest projectileRequest:
+                        projectileManager.AddEnemyProjectile(
+                            new EnemyProjectile(
+                                enemyFactory.GetTexture(
+                                    projectileRequest.ProjectileAsset),
+                                projectileRequest.Position,
+                                projectileRequest.Direction));
+                        break;
+
+                    case EnemySpawnRequest spawnRequest:
+                        enemyManager.Add(
+                            enemyFactory.Create(
+                                spawnRequest.EnemyId,
+                                spawnRequest.Position));
+                        break;
+                }
+            }
         }
         private void UpdateEnemyProjectiles(GameTime gameTime)
         {
@@ -80,41 +101,13 @@ namespace _1_2D_Top_Down
                 (int)worldMap.WorldWidth,
                 (int)worldMap.WorldHeight);
 
-            for (int i = enemyProjectiles.Count - 1; i >= 0; i--)
+            if (projectileManager.UpdateEnemyProjectiles(
+                    gameTime,
+                    worldBounds,
+                    IntersectsMapCollision,
+                    player))
             {
-                EnemyProjectile enemyProjectile = enemyProjectiles[i];
-
-                enemyProjectile.Update(gameTime);
-                if (enemyProjectile.HasReachedMaxTravelDistance)
-                {
-                    enemyProjectiles.RemoveAt(i);
-                    continue;
-                }
-
-                if (IntersectsMapCollision(enemyProjectile.Bounds))
-                {
-                    enemyProjectiles.RemoveAt(i);
-                    continue;
-                }
-
-                if (enemyProjectile.Bounds.Intersects(player.Bounds))
-                {
-                    player.TakeDamage(15);
-
-                    enemyProjectiles.RemoveAt(i);
-
-                    if (player.Health.IsDead)
-                    {
-                        gameFlowState = GameFlowState.GameOver;
-                    }
-
-                    continue;
-                }
-
-                if (!worldBounds.Intersects(enemyProjectile.Bounds))
-                {
-                    enemyProjectiles.RemoveAt(i);
-                }
+                gameFlowState = GameFlowState.GameOver;
             }
         }
         private void UpdatePlayerProjectiles(GameTime gameTime)
@@ -125,25 +118,11 @@ namespace _1_2D_Top_Down
                 (int)worldMap.WorldWidth,
                 (int)worldMap.WorldHeight);
 
-            for (int i = projectiles.Count - 1; i >= 0; i--)
-            {
-                PlayerProjectile projectile = projectiles[i];
-
-                projectile.Update(gameTime);
-
-                if (!worldBounds.Intersects(projectile.Bounds) ||
-                    IntersectsMapCollision(projectile.Bounds))
-                {
-                    projectiles.RemoveAt(i);
-                    continue;
-                }
-
-                bool hitEnemy = TryHitNearbyEnemy(projectile);
-                if (hitEnemy)
-                {
-                    projectiles.RemoveAt(i);
-                }
-            }
+            projectileManager.UpdatePlayerProjectiles(
+                gameTime,
+                worldBounds,
+                IntersectsMapCollision,
+                TryHitNearbyEnemy);
         }
 
         private bool TryHitNearbyEnemy(PlayerProjectile projectile)
@@ -168,24 +147,34 @@ namespace _1_2D_Top_Down
 
             HandleEnemyDeath(defeatedEnemy);
 
-            if (hit.DefeatedEnemyType == EnemyType.Demon)
+            CreateEnemyDeathAnimation(defeatedEnemy);
+
+            if (defeatedEnemy.Definition.Type == EnemyType.Demon)
             {
-                Vector2 deathPosition =
-                    defeatedEnemy.Bounds.Center.ToVector2();
-
-                demonDeathAnimations.Add(
-                    new DeathAnimation(
-                        demonDeathTexture,
-                        deathPosition));
-
                 PlayRandomDemonDeathSound();
             }
-            else if (hit.DefeatedEnemyType == EnemyType.EvilEye)
+            else if (defeatedEnemy.Definition.Type == EnemyType.EvilEye)
             {
                 PlayRandomEvilEyeDeathSound();
             }
 
             return true;
+        }
+
+        private void CreateEnemyDeathAnimation(Enemy enemy)
+        {
+            EnemyDefinition definition = enemy.Definition;
+
+            deathAnimations.Add(
+                new DeathAnimation(
+                    enemyFactory.GetTexture(definition.DeathTextureAsset),
+                    enemy.Bounds.Center.ToVector2(),
+                    definition.DeathFrameCount,
+                    definition.DeathSheetColumnCount,
+                    definition.DeathSheetRowCount,
+                    definition.DeathAnimationRow,
+                    definition.DeathFrameDuration,
+                    definition.DeathScale));
         }
 
         private void UpdatePlayerResourceAnimations(GameTime gameTime)
@@ -255,62 +244,15 @@ namespace _1_2D_Top_Down
         {
             if (random.Next(100) < CoinDropChancePercent)
             {
-                coins.Add(new Coin(coinTexture, enemyCenter));
+                collectibleManager.Add(new Coin(coinTexture, enemyCenter));
             }
         }
         private void TryDropManaCrystal(Vector2 enemyCenter)
         {
             if (random.Next(100) < ManaCrystalDropChancePercent)
             {
-                manaCrystals.Add(
+                collectibleManager.Add(
                     new ManaCrystal(manaCrystalTexture, enemyCenter));
-            }
-        }
-
-        private void UpdateCoins(GameTime gameTime)
-        {
-            for (int i = coins.Count - 1; i >= 0; i--)
-            {
-                Coin coin = coins[i];
-                coin.Update(gameTime);
-                if (coin.IsExpired)
-                {
-                    coins.RemoveAt(i);
-                    continue;
-                }
-
-                if (player.Bounds.Intersects(coin.Bounds))
-                {
-                    coins.RemoveAt(i);
-                    AddInventoryResource("coin", uiCoinTexture, 1);
-                    PlayNextCoinPickupSound();
-                }
-            }
-        }
-        private void UpdateManaCrystals(GameTime gameTime)
-        {
-            for (int i = manaCrystals.Count - 1; i >= 0; i--)
-            {
-                ManaCrystal manaCrystal = manaCrystals[i];
-
-                manaCrystal.Update(gameTime);
-                if (manaCrystal.IsExpired)
-                {
-                    manaCrystals.RemoveAt(i);
-                    continue;
-                }
-
-                bool playerCanReceiveMana =
-                    player.Mana.CurrentMana < player.Mana.MaxMana;
-
-                if (playerCanReceiveMana &&
-                    player.Bounds.Intersects(manaCrystal.Bounds))
-                {
-                    player.Mana.Restore(ManaCrystalRestoreAmount);
-                    manaCrystals.RemoveAt(i);
-
-                    PlayManaCrystalCollectSound();
-                }
             }
         }
         private void PlayNextCoinPickupSound()
@@ -441,7 +383,7 @@ namespace _1_2D_Top_Down
                     baseDirection,
                     Matrix.CreateRotationZ(angle));
 
-                projectiles.Add(new PlayerProjectile(
+                projectileManager.AddPlayerProjectile(new PlayerProjectile(
                     playerProjectileTexture,
                     startPosition,
                     projectileDirection,
@@ -475,14 +417,27 @@ namespace _1_2D_Top_Down
         }
         private void UpdateDeathAnimations(GameTime gameTime)
         {
-            enemyManager.UpdateDemonDeathAnimations(gameTime);
-
-            enemyManager.UpdateEvilEyeDeathAnimations( gameTime,player, evilEyeProjectileTexture);
+            enemyManager.UpdateDeathAnimations(gameTime);
         }
         private void UpdateCollectibles(GameTime gameTime)
         {
-            UpdateCoins(gameTime);
-            UpdateManaCrystals(gameTime);
+            bool playerCanReceiveMana =
+                player.Mana.CurrentMana < player.Mana.MaxMana;
+
+            collectibleManager.Update(
+                gameTime,
+                player.Bounds,
+                playerCanReceiveMana,
+                onCoinCollected: _ =>
+                {
+                    AddInventoryResource("coin", uiCoinTexture, 1);
+                    PlayNextCoinPickupSound();
+                },
+                onManaCrystalCollected: _ =>
+                {
+                    player.Mana.Restore(ManaCrystalRestoreAmount);
+                    PlayManaCrystalCollectSound();
+                });
         }
     }
 }

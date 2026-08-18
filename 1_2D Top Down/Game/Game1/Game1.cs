@@ -42,36 +42,30 @@ namespace _1_2D_Top_Down
         private Vector2 playerStartPosition = new Vector2(2150, 1850);
         private static readonly Vector2 DefaultPlayerStartPosition = new Vector2(2150, 1850);
         private Texture2D playerProjectileTexture;
-        private List<PlayerProjectile> projectiles = new List<PlayerProjectile>();
+        private readonly GameWorld gameWorld = new();
+        private ProjectileManager projectileManager => gameWorld.Projectiles;
+        private IReadOnlyList<PlayerProjectile> projectiles => projectileManager.PlayerProjectiles;
         private Texture2D playerShadowTexture;
         private PlayerProfile playerProfile;
 
         //collectables info
         private const int CoinDropChancePercent = 35;
         private Texture2D coinTexture;
-        private List<Coin> coins = new List<Coin>();
+        private CollectibleManager collectibleManager => gameWorld.Collectibles;
+        private IReadOnlyList<Coin> coins => collectibleManager.Coins;
         private const int ManaCrystalDropChancePercent = 11;
         private const float ManaCrystalRestoreAmount = 25f;
         private Texture2D manaCrystalTexture;
-        private List<ManaCrystal> manaCrystals = new List<ManaCrystal>();
+        private IReadOnlyList<ManaCrystal> manaCrystals => collectibleManager.ManaCrystals;
         private readonly List<InventoryResource> inventoryResources = new();
 
         //enemy info
-        private readonly EnemyManager enemyManager = new();
+        private EnemyManager enemyManager => gameWorld.Enemies;
+        private EnemyFactory enemyFactory;
+        private IReadOnlyList<Enemy> enemies => enemyManager.Enemies;
+        private List<DeathAnimation> deathAnimations => enemyManager.DeathAnimations;
 
-        //demon info
-        private Texture2D demonTexture;
-        private Texture2D demonDeathTexture;
-        private Texture2D demonShadowTexture;
-        private List<Demon> demons => enemyManager.Demons;
-        private List<DeathAnimation> demonDeathAnimations => enemyManager.DemonDeathAnimations;
-
-        //evil eye info
-        private Texture2D evilEyeProjectileTexture;
-        private Texture2D evilEyeTexture;
-        private List<Evil_Eye> evilEyes => enemyManager.EvilEyes;
-        private List<EnemyProjectile> enemyProjectiles = new List<EnemyProjectile>();
-        private Texture2D evilEyeShadowTexture;
+        private IReadOnlyList<EnemyProjectile> enemyProjectiles => projectileManager.EnemyProjectiles;
 
 
         //camera info
@@ -205,10 +199,8 @@ namespace _1_2D_Top_Down
             pixelTexture.SetData(new[] { Color.White });
             Texture2D playerTexture = Content.Load<Texture2D>("player/Character");
             playerShadowTexture = Content.Load<Texture2D>("player/shadow_player");
-            demonTexture = Content.Load<Texture2D>("enemies/Demon/FLYING");
-            demonDeathTexture = Content.Load<Texture2D>("enemies/Demon/DEATH");
-            demonShadowTexture = Content.Load<Texture2D>("enemies/Demon/shadow_demon");
-            evilEyeShadowTexture = Content.Load<Texture2D>("enemies/Evil Eye/shadow_eye");
+            enemyFactory = new EnemyFactory(
+                assetName => Content.Load<Texture2D>(assetName));
             playerProjectileTexture = Content.Load<Texture2D>("projectiles/magic_projectile2");
             coinTexture = Content.Load<Texture2D>("Collectables/coin");
             manaCrystalTexture = Content.Load<Texture2D>("Collectables/mana_crystal_sheet");
@@ -239,8 +231,6 @@ namespace _1_2D_Top_Down
                 Content.Load<SoundEffect>("Sounds/Enemies/Evil_Eye/evil_eye_death4")
             };
             manaCrystalCollectSound = Content.Load<SoundEffect>("Sounds/Mana/mana_collect");
-            evilEyeProjectileTexture = Content.Load<Texture2D>("projectiles/evilEye/evilEye_projectile_sphere");
-            evilEyeTexture = Content.Load<Texture2D>("enemies/Evil Eye/Evil Eye Sprite sheet");
             backgroundMusic = Content.Load<Song>("Music/ambient_forest");
             mainMenuMusic = Content.Load<Song>("Music/Main Menu/main_menu");
             campaignMapTexture = Content.Load<Texture2D>("Campaign/campaign_map1");
@@ -372,7 +362,7 @@ namespace _1_2D_Top_Down
                 UpdateDeathAnimations(gameTime);
                 UpdateCollectibles(gameTime);
 
-                enemyManager.RebuildSpatialGrids();
+                enemyManager.RebuildSpatialGrid();
                 UpdatePlayerProjectiles(gameTime);
                 UpdateEnemyProjectiles(gameTime);
 

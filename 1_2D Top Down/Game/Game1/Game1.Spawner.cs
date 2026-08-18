@@ -15,11 +15,15 @@ namespace _1_2D_Top_Down
 
             Vector2 spawnPosition = portalSpawnPoints[random.Next(portalSpawnPoints.Count)];
 
-            enemyManager.SpawnEnemy(enemyType,spawnPosition, demonTexture, evilEyeTexture);
+            enemyManager.Add(enemyFactory.Create(enemyType, spawnPosition));
         }
         private void SpawnEnemy(EnemyType enemyType, Vector2 spawnPosition)
         {
-            enemyManager.SpawnEnemy(enemyType, spawnPosition, demonTexture, evilEyeTexture);
+            enemyManager.Add(enemyFactory.Create(enemyType, spawnPosition));
+        }
+        private void SpawnEnemy(string enemyId, Vector2 spawnPosition)
+        {
+            enemyManager.Add(enemyFactory.Create(enemyId, spawnPosition));
         }
         private void LoadPreplacedMissionEnemies(string mapFileName)
         {
@@ -30,12 +34,15 @@ namespace _1_2D_Top_Down
 
             foreach (EnemySpawnPoint spawnPoint in missionObjects.EnemySpawnPoints)
             {
-                if (!Enum.TryParse(spawnPoint.EnemyType, ignoreCase: true,out EnemyType enemyType))
+                if (!EnemyDefinitions.TryGet(
+                        spawnPoint.EnemyType,
+                        out EnemyDefinition? definition))
                 {
-                    throw new InvalidOperationException($"Unknown EnemyType '{spawnPoint.EnemyType}' in {mapFileName}.");
+                    throw new InvalidOperationException(
+                        $"Unknown enemy definition '{spawnPoint.EnemyType}' in {mapFileName}.");
                 }
 
-                SpawnEnemy(enemyType, spawnPoint.Position);
+                SpawnEnemy(definition.Id, spawnPoint.Position);
             }
         }
         private void StartNextWave()

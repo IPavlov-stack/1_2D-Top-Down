@@ -11,17 +11,46 @@ namespace _1_2D_Top_Down
     /// </summary>
     public sealed class ProjectileManager
     {
-        public List<PlayerProjectile> PlayerProjectiles { get; } = new();
-        public List<EnemyProjectile> EnemyProjectiles { get; } = new();
+        private readonly List<PlayerProjectile> playerProjectiles = new();
+        private readonly List<EnemyProjectile> enemyProjectiles = new();
+
+        public IReadOnlyList<PlayerProjectile> PlayerProjectiles => playerProjectiles;
+        public IReadOnlyList<EnemyProjectile> EnemyProjectiles => enemyProjectiles;
 
         public void Clear()
         {
-            PlayerProjectiles.Clear();
-            EnemyProjectiles.Clear();
+            playerProjectiles.Clear();
+            enemyProjectiles.Clear();
         }
-        public void AddEnemyProjectile( EnemyProjectile projectile)
+
+        public void AddPlayerProjectile(PlayerProjectile projectile)
         {
-            EnemyProjectiles.Add(projectile);
+            playerProjectiles.Add(projectile);
+        }
+
+        public void AddEnemyProjectile(EnemyProjectile projectile)
+        {
+            enemyProjectiles.Add(projectile);
+        }
+
+        public void UpdatePlayerProjectiles(
+            GameTime gameTime,
+            Rectangle worldBounds,
+            Func<Rectangle, bool> intersectsMapCollision,
+            Func<PlayerProjectile, bool> tryHitEnemy)
+        {
+            for (int i = playerProjectiles.Count - 1; i >= 0; i--)
+            {
+                PlayerProjectile projectile = playerProjectiles[i];
+                projectile.Update(gameTime);
+
+                if (!worldBounds.Intersects(projectile.Bounds) ||
+                    intersectsMapCollision(projectile.Bounds) ||
+                    tryHitEnemy(projectile))
+                {
+                    playerProjectiles.RemoveAt(i);
+                }
+            }
         }
 
         /// <summary>
@@ -36,16 +65,16 @@ namespace _1_2D_Top_Down
         {
             bool playerDied = false;
 
-            for (int i = EnemyProjectiles.Count - 1; i >= 0; i--)
+            for (int i = enemyProjectiles.Count - 1; i >= 0; i--)
             {
-                EnemyProjectile projectile = EnemyProjectiles[i];
+                EnemyProjectile projectile = enemyProjectiles[i];
                 projectile.Update(gameTime);
 
                 if (projectile.HasReachedMaxTravelDistance ||
                     intersectsMapCollision(projectile.Bounds) ||
                     !worldBounds.Intersects(projectile.Bounds))
                 {
-                    EnemyProjectiles.RemoveAt(i);
+                    enemyProjectiles.RemoveAt(i);
                     continue;
                 }
 
@@ -55,7 +84,7 @@ namespace _1_2D_Top_Down
                 }
 
                 player.TakeDamage(15);
-                EnemyProjectiles.RemoveAt(i);
+                enemyProjectiles.RemoveAt(i);
                 playerDied |= player.Health.IsDead;
             }
 

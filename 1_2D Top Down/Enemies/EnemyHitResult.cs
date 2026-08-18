@@ -3,35 +3,31 @@
     public sealed class EnemyHitResult
     {
         public Enemy? Enemy { get; }
-        public EnemyType? DefeatedEnemyType { get; }
-
         public bool HasHit => Enemy != null;
 
-        public bool HasDefeatedEnemy =>  DefeatedEnemyType.HasValue;
+        public bool HasDefeatedEnemy { get; }
 
         private EnemyHitResult(
             Enemy? enemy,
-            EnemyType? defeatedEnemyType)
+            bool hasDefeatedEnemy)
         {
             Enemy = enemy;
-            DefeatedEnemyType = defeatedEnemyType;
+            HasDefeatedEnemy = hasDefeatedEnemy;
         }
 
         public static EnemyHitResult Miss()
         {
-            return new EnemyHitResult(null, null);
+            return new EnemyHitResult(null, false);
         }
 
         public static EnemyHitResult Hit(Enemy enemy)
         {
-            return new EnemyHitResult(enemy, null);
+            return new EnemyHitResult(enemy, false);
         }
 
-        public static EnemyHitResult Defeat(
-            Enemy enemy,
-            EnemyType enemyType)
+        public static EnemyHitResult Defeat(Enemy enemy)
         {
-            return new EnemyHitResult(enemy, enemyType);
+            return new EnemyHitResult(enemy, true);
         }
     }
 }

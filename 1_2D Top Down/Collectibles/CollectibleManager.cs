@@ -10,13 +10,26 @@ namespace _1_2D_Top_Down
     /// </summary>
     public sealed class CollectibleManager
     {
-        public List<Coin> Coins { get; } = new();
-        public List<ManaCrystal> ManaCrystals { get; } = new();
+        private readonly List<Coin> coins = new();
+        private readonly List<ManaCrystal> manaCrystals = new();
+
+        public IReadOnlyList<Coin> Coins => coins;
+        public IReadOnlyList<ManaCrystal> ManaCrystals => manaCrystals;
 
         public void Clear()
         {
-            Coins.Clear();
-            ManaCrystals.Clear();
+            coins.Clear();
+            manaCrystals.Clear();
+        }
+
+        public void Add(Coin coin)
+        {
+            coins.Add(coin);
+        }
+
+        public void Add(ManaCrystal manaCrystal)
+        {
+            manaCrystals.Add(manaCrystal);
         }
 
         public void Update(
@@ -32,20 +45,20 @@ namespace _1_2D_Top_Down
 
         private void UpdateCoins(GameTime gameTime, Rectangle playerBounds, Action<Coin> onCoinCollected)
         {
-            for (int i = Coins.Count - 1; i >= 0; i--)
+            for (int i = coins.Count - 1; i >= 0; i--)
             {
-                Coin coin = Coins[i];
+                Coin coin = coins[i];
                 coin.Update(gameTime);
 
                 if (coin.IsExpired)
                 {
-                    Coins.RemoveAt(i);
+                    coins.RemoveAt(i);
                     continue;
                 }
 
                 if (playerBounds.Intersects(coin.Bounds))
                 {
-                    Coins.RemoveAt(i);
+                    coins.RemoveAt(i);
                     onCoinCollected(coin);
                 }
             }
@@ -57,21 +70,21 @@ namespace _1_2D_Top_Down
             bool playerCanReceiveMana,
             Action<ManaCrystal> onManaCrystalCollected)
         {
-            for (int i = ManaCrystals.Count - 1; i >= 0; i--)
+            for (int i = manaCrystals.Count - 1; i >= 0; i--)
             {
-                ManaCrystal manaCrystal = ManaCrystals[i];
+                ManaCrystal manaCrystal = manaCrystals[i];
                 manaCrystal.Update(gameTime);
 
                 if (manaCrystal.IsExpired)
                 {
-                    ManaCrystals.RemoveAt(i);
+                    manaCrystals.RemoveAt(i);
                     continue;
                 }
 
                 if (playerCanReceiveMana &&
                     playerBounds.Intersects(manaCrystal.Bounds))
                 {
-                    ManaCrystals.RemoveAt(i);
+                    manaCrystals.RemoveAt(i);
                     onManaCrystalCollected(manaCrystal);
                 }
             }

@@ -7,6 +7,7 @@ namespace _1_2D_Top_Down
     public class Enemy
     {
         protected Texture2D texture;
+        private readonly IEnemyBehavior behavior;
 
         // Размерът на цялата мрежа в sprite sheet
         protected int frameCount;
@@ -23,14 +24,15 @@ namespace _1_2D_Top_Down
         protected int FrameWidth => texture.Width / frameCount;
         protected int FrameHeight => texture.Height / frameRows;
 
-        protected Vector2 SpriteCenter =>
+        internal Vector2 SpriteCenter =>
             Position + new Vector2(
                 FrameWidth * scale / 2f,
                 FrameHeight * scale / 2f);
 
         public Vector2 Position;
+        public EnemyDefinition Definition { get; }
         public Health Health { get; }
-        public int ExperienceReward { get; }
+        public int ExperienceReward => Definition.ExperienceReward;
 
         public EnemyState CurrentState { get; private set; } = EnemyState.Idle;
 
@@ -65,11 +67,13 @@ namespace _1_2D_Top_Down
             int frameRows,
             float frameDuration,
             float scale,
-            int maxHealth,
-            int experienceReward)
+            EnemyDefinition definition,
+            IEnemyBehavior behavior)
         {
             this.texture = texture;
             Position = startPosition;
+            Definition = definition;
+            this.behavior = behavior;
 
             this.frameCount = frameCount;
             this.frameRows = frameRows;
@@ -77,10 +81,15 @@ namespace _1_2D_Top_Down
             this.scale = scale;
 
             framesInCurrentAnimation = frameCount;
-            Health = new Health(maxHealth);
-            ExperienceReward = Math.Max(0, experienceReward);
+            Health = new Health(definition.MaxHealth);
         }
-        protected void ChangeState(EnemyState newState)
+        public void Update(GameTime gameTime, EnemyUpdateContext context)
+        {
+            UpdateKnockback(gameTime);
+            behavior.Update(this, gameTime, context);
+        }
+
+        internal void ChangeState(EnemyState newState)
         {
             if (CurrentState == newState)
                 return;
@@ -93,7 +102,7 @@ namespace _1_2D_Top_Down
             return CurrentState == state;
         }
 
-        protected void SetAnimation(int row, int animationFrameCount)
+        internal void SetAnimation(int row, int animationFrameCount)
         {
             bool animationChanged =
                 animationRow != row ||
@@ -109,7 +118,7 @@ namespace _1_2D_Top_Down
         }
 
         // Връща true само ако non-looping анимацията е приключила.
-        protected bool UpdateAnimation(GameTime gameTime, bool loop = true)
+        internal bool UpdateAnimation(GameTime gameTime, bool loop = true)
         {
             animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
@@ -165,7 +174,12 @@ namespace _1_2D_Top_Down
             knockback.Apply(direction, force);
         }
 
-        protected void UpdateKnockback(GameTime gameTime)
+        internal void SetRotation(float value)
+        {
+            rotation = value;
+        }
+
+        private void UpdateKnockback(GameTime gameTime)
         {
             Position += knockback.Update(gameTime);
         }

@@ -1,19 +1,16 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 
 namespace _1_2D_Top_Down
 {
     /// <summary>
-    /// Owns enemy runtime collections for the active mission.
-    /// Enemy behaviour remains in Game1 during this transitional step.
+    /// Owns the active enemy lifecycle, spatial lookup and queued AI actions.
     /// </summary>
     public sealed class EnemyManager
     {
         private const int SpatialCellSize = 128;
-        private readonly SpatialGrid<Demon> demonSpatialGrid = new(SpatialCellSize);
-        private readonly SpatialGrid<Evil_Eye> evilEyeSpatialGrid = new(SpatialCellSize);
+        private readonly SpatialGrid<Enemy> enemySpatialGrid = new(SpatialCellSize);
         private readonly Queue<EnemySpawnGroup> spawnGroupQueue = new();
 
         private EnemySpawnGroup? activeSpawnGroup;
@@ -22,17 +19,18 @@ namespace _1_2D_Top_Down
         private float spawnIntervalSeconds;
         private float delayBetweenSpawnGroups;
         public bool HasFinishedSpawningWave { get; private set; }
-        private readonly List<Demon> nearbyDemons = new();
-        private readonly List<Evil_Eye> nearbyEvilEyes = new();
-        public List<Demon> Demons { get; } = new();
-        public List<Evil_Eye> EvilEyes { get; } = new();
-        public List<DeathAnimation> DemonDeathAnimations { get; } = new();
+        private readonly List<Enemy> nearbyEnemies = new();
+        private readonly List<Enemy> enemies = new();
+        private readonly List<EnemyActionRequest> pendingActions = new();
+        public IReadOnlyList<Enemy> Enemies => enemies;
+        public IReadOnlyList<EnemyActionRequest> PendingActions => pendingActions;
+        public List<DeathAnimation> DeathAnimations { get; } = new();
 
         public void Clear()
         {
-            Demons.Clear();
-            EvilEyes.Clear();
-            DemonDeathAnimations.Clear();
+            enemies.Clear();
+            pendingActions.Clear();
+            DeathAnimations.Clear();
 
             spawnGroupQueue.Clear();
             activeSpawnGroup = null;
@@ -42,38 +40,26 @@ namespace _1_2D_Top_Down
             delayBetweenSpawnGroups = 0f;
             HasFinishedSpawningWave = false;
         }
-        public void RebuildSpatialGrids()
+        public void Add(Enemy enemy)
         {
-            demonSpatialGrid.Rebuild(Demons);
-            evilEyeSpatialGrid.Rebuild(EvilEyes);
+            enemies.Add(enemy);
         }
 
-        public Demon? FindIntersectingDemon(Rectangle bounds)
+        public void RebuildSpatialGrid()
         {
-            demonSpatialGrid.QueryNearby(bounds, nearbyDemons);
-
-            foreach (Demon demon in nearbyDemons)
-            {
-                if (!demon.Health.IsDead &&
-                    bounds.Intersects(demon.Bounds))
-                {
-                    return demon;
-                }
-            }
-
-            return null;
+            enemySpatialGrid.Rebuild(enemies);
         }
 
-        public Evil_Eye? FindIntersectingEvilEye(Rectangle bounds)
+        public Enemy? FindIntersectingEnemy(Rectangle bounds)
         {
-            evilEyeSpatialGrid.QueryNearby(bounds, nearbyEvilEyes);
+            enemySpatialGrid.QueryNearby(bounds, nearbyEnemies);
 
-            foreach (Evil_Eye evilEye in nearbyEvilEyes)
+            foreach (Enemy enemy in nearbyEnemies)
             {
-                if (!evilEye.IsDead &&
-                    bounds.Intersects(evilEye.Bounds))
+                if (!enemy.Health.IsDead &&
+                    bounds.Intersects(enemy.Bounds))
                 {
-                    return evilEye;
+                    return enemy;
                 }
             }
 
@@ -81,115 +67,48 @@ namespace _1_2D_Top_Down
         }
         public EnemyHitResult TryHitEnemy(Rectangle projectileBounds,int damage,Vector2 attackPosition,float knockbackForce)
         {
-            Demon? demon = FindIntersectingDemon(projectileBounds);
+            Enemy? enemy = FindIntersectingEnemy(projectileBounds);
 
-            if (demon != null)
-            {
-                demon.Health.TakeDamage(damage);
-
-                demon.ApplyKnockback(attackPosition,knockbackForce);
-
-                if (!demon.Health.IsDead)
-                {
-                    return EnemyHitResult.Hit(demon);
-                }
-
-                Demons.Remove(demon);
-
-                return EnemyHitResult.Defeat( demon, EnemyType.Demon);
-            }
-
-            Evil_Eye? evilEye = FindIntersectingEvilEye(projectileBounds);
-
-            if (evilEye == null)
+            if (enemy == null)
             {
                 return EnemyHitResult.Miss();
             }
 
-            evilEye.Health.TakeDamage(damage);
+            enemy.Health.TakeDamage(damage);
+            enemy.ApplyKnockback(attackPosition, knockbackForce);
 
-            evilEye.ApplyKnockback(attackPosition, knockbackForce);
-
-            if (!evilEye.Health.IsDead)
+            if (!enemy.Health.IsDead)
             {
-                return EnemyHitResult.Hit(evilEye);
+                return EnemyHitResult.Hit(enemy);
             }
 
-            evilEye.Die();
+            enemies.Remove(enemy);
 
-            return EnemyHitResult.Defeat(evilEye,EnemyType.EvilEye);
+            return EnemyHitResult.Defeat(enemy);
         }
-        public bool UpdateDemons( GameTime gameTime, Player player)
+        public void UpdateEnemies(GameTime gameTime, Player player)
         {
-            for (int i = Demons.Count - 1; i >= 0; i--)
+            pendingActions.Clear();
+            EnemyUpdateContext context =
+                new EnemyUpdateContext(player, pendingActions);
+
+            for (int i = enemies.Count - 1; i >= 0; i--)
             {
-                Demon demon = Demons[i];
-
-                demon.Update(gameTime, player);
-
-                if (player.Bounds.Intersects(demon.Bounds) &&
-                    demon.TryDamagePlayer(player, 20) &&
-                    player.Health.IsDead)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        public void UpdateEvilEyes(GameTime gameTime, Player player, Texture2D projectileTexture, Action<EnemyProjectile> spawnProjectile)
-        {
-            for (int i = EvilEyes.Count - 1; i >= 0; i--)
-            {
-                Evil_Eye evilEye = EvilEyes[i];
-
-                EnemyProjectile? projectile = evilEye.Update(gameTime, player,projectileTexture);
-
-                if (projectile != null)
-                {
-                    spawnProjectile(projectile);
-                }
-
-                if (evilEye.IsDeathAnimationFinished)
-                {
-                    EvilEyes.RemoveAt(i);
-                }
+                Enemy enemy = enemies[i];
+                enemy.Update(gameTime, context);
             }
         }
-        public void UpdateDemonDeathAnimations( GameTime gameTime)
+        public void UpdateDeathAnimations(GameTime gameTime)
         {
-            for (int i = DemonDeathAnimations.Count - 1; i >= 0; i--)
+            for (int i = DeathAnimations.Count - 1; i >= 0; i--)
             {
-                DeathAnimation animation =DemonDeathAnimations[i];
+                DeathAnimation animation = DeathAnimations[i];
 
                 animation.Update(gameTime);
 
                 if (animation.IsFinished)
                 {
-                    DemonDeathAnimations.RemoveAt(i);
-                }
-            }
-        }
-
-        public void UpdateEvilEyeDeathAnimations(GameTime gameTime,Player player,Texture2D projectileTexture)
-        {
-            for (int i = EvilEyes.Count - 1; i >= 0; i--)
-            {
-                Evil_Eye evilEye = EvilEyes[i];
-
-                if (!evilEye.IsDead)
-                {
-                    continue;
-                }
-
-                evilEye.Update(
-                    gameTime,
-                    player,
-                    projectileTexture);
-
-                if (evilEye.IsDeathAnimationFinished)
-                {
-                    EvilEyes.RemoveAt(i);
+                    DeathAnimations.RemoveAt(i);
                 }
             }
         }
@@ -279,19 +198,6 @@ namespace _1_2D_Top_Down
                 delayBetweenSpawnGroups = 0f;
 
                 HasFinishedSpawningWave = true;
-            }
-        }
-        public void SpawnEnemy( EnemyType enemyType, Vector2 spawnPosition, Texture2D demonTexture, Texture2D evilEyeTexture)
-        {
-            switch (enemyType)
-            {
-                case EnemyType.Demon:
-                    Demons.Add(new Demon(demonTexture,spawnPosition));
-                    break;
-
-                case EnemyType.EvilEye:
-                    EvilEyes.Add(new Evil_Eye( evilEyeTexture,spawnPosition));
-                    break;
             }
         }
     }

@@ -15,7 +15,7 @@ namespace _1_2D_Top_Down
         {
             if (missionRuntime.TryCompleteWave(
                     enemyManager.HasFinishedSpawningWave,
-                    demons.Count + evilEyes.Count))
+                    enemies.Count))
             {
                 gameFlowState = missionRuntime.IsCompleted
                     ? GameFlowState.MissionComplete
