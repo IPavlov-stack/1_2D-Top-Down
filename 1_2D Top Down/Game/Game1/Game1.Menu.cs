@@ -19,8 +19,6 @@ namespace _1_2D_Top_Down
         private bool isMusicSliderDragging; 
         private const int SoundEffectsSliderThumbSize = 32;
         private bool isSoundEffectsSliderDragging;
-        private GameFlowState optionsReturnScene = GameFlowState.MainMenu;
-        private bool reopenPauseAfterOptions;
 
         private Rectangle GetMenuButtonBounds(int index)
         {
@@ -54,13 +52,11 @@ namespace _1_2D_Top_Down
 
             if (GetMenuButtonBounds(0).Contains(mousePosition))
             {
-                StartSceneTransition(GameFlowState.Campaign);
+                StartScreenTransition(GameFlowState.Campaign);
             }
             else if (GetMenuButtonBounds(1).Contains(mousePosition))
             {
-                optionsReturnScene = GameFlowState.MainMenu;
-                reopenPauseAfterOptions = false;
-                StartSceneTransition(GameFlowState.Options);
+                StartScreenTransition(GameFlowState.Options);
             }
             else if (GetMenuButtonBounds(2).Contains(mousePosition))
             {
@@ -115,13 +111,7 @@ namespace _1_2D_Top_Down
         }
         private void ReturnFromOptions()
         {
-            StartSceneTransition(optionsReturnScene);
-
-            if (reopenPauseAfterOptions)
-            {
-                isExitConfirmationOpen = true;
-                reopenPauseAfterOptions = false;
-            }
+            StartScreenBackTransition();
         }
         private Rectangle GetSoundEffectsSliderBounds()
         {
@@ -299,34 +289,22 @@ namespace _1_2D_Top_Down
         }
         private void StartSceneTransition(GameFlowState scene)
         {
-            if (isSceneTransitioning)
+            if (transitionManager.IsActive)
             {
                 return;
             }
 
             nextGameFlowState = scene;
-            sceneTransitionTimer = 0f;
-            sceneChangedDuringTransition = false;
-            isSceneTransitioning = true;
+            pendingScreenNavigation = ScreenNavigation.Direct;
+            transitionManager.Start();
         }
 
         private void UpdateSceneTransition(GameTime gameTime)
         {
-            if (!isSceneTransitioning)
-            {
-                return;
-            }
-
-            sceneTransitionTimer +=
-                (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            float halfDuration = SceneTransitionDuration / 2f;
-
-            // В момента, в който екранът е изцяло черен.
-            if (!sceneChangedDuringTransition &&
-                sceneTransitionTimer >= halfDuration)
+            if (transitionManager.Update(gameTime))
             {
                 gameFlowState = nextGameFlowState;
+                ActivateScreenForFlowState(gameFlowState);
                 UpdateMusicForgameFlowState();
 
                 if (gameFlowState == GameFlowState.Playing ||
@@ -334,35 +312,14 @@ namespace _1_2D_Top_Down
                 {
                     CenterCameraOnPlayer();
                 }
-                sceneChangedDuringTransition = true;
-            }
-
-            if (sceneTransitionTimer >= SceneTransitionDuration)
-            {
-                isSceneTransitioning = false;
             }
         }
 
         private void DrawSceneTransition()
         {
-            if (!isSceneTransitioning)
+            if (!transitionManager.IsActive)
             {
                 return;
-            }
-
-            float halfDuration = SceneTransitionDuration / 2f;
-            float opacity;
-
-            if (sceneTransitionTimer <= halfDuration)
-            {
-                // Потъмняване.
-                opacity = sceneTransitionTimer / halfDuration;
-            }
-            else
-            {
-                // Появяване на новата сцена.
-                opacity = 1f -
-                    (sceneTransitionTimer - halfDuration) / halfDuration;
             }
 
             _spriteBatch.Begin();
@@ -370,22 +327,19 @@ namespace _1_2D_Top_Down
             _spriteBatch.Draw(
                 pixelTexture,
                 GraphicsDevice.Viewport.Bounds,
-                Color.Black * MathHelper.Clamp(opacity, 0f, 1f));
+                Color.Black * transitionManager.Opacity);
 
             _spriteBatch.End();
         }
         private void CenterCameraOnPlayer()
         {
-            Vector2 playerCenter = player.Position +
-                new Vector2(
-                    player.texture.Width / 2f,
-                    player.texture.Height / 2f);
+            cameraController.WorldBounds = new Rectangle(
+                0,
+                0,
+                (int)worldMap.WorldWidth,
+                (int)worldMap.WorldHeight);
 
-            Vector2 visibleScreenCenter = new Vector2(
-                GraphicsDevice.Viewport.Width / (2f * camera.Zoom),
-                GraphicsDevice.Viewport.Height / (2f * camera.Zoom));
-
-            camera.Follow(playerCenter - visibleScreenCenter);
+            cameraController.SnapToFollow(GraphicsDevice.Viewport.Bounds.Size);
         }
         private void UpdateVolumeSliders( MouseState mouse,Rectangle musicSliderBounds, Rectangle soundEffectsSliderBounds)
         {

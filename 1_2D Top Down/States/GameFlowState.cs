@@ -6,9 +6,7 @@
         Campaign,
         Options,
         Playing,
-        Paused,
         GameOver,
-        Victory,
         WaveIntermission,
         MissionComplete
     }

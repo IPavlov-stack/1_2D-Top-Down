@@ -1,11 +1,34 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace _1_2D_Top_Down
 {
     public partial class Game1
     {
-        private bool isExitConfirmationOpen;
+        private bool isExitConfirmationOpen
+        {
+            get => overlayManager.Contains("pause");
+            set
+            {
+                if (value)
+                    overlayManager.Push(pauseOverlay);
+                else
+                    overlayManager.Remove("pause");
+            }
+        }
+
+        internal void UpdatePauseOverlay()
+        {
+            HandleExitConfirmationInput(Keyboard.GetState(), Mouse.GetState());
+        }
+
+        internal void DrawPauseOverlay()
+        {
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+            DrawExitConfirmation();
+            _spriteBatch.End();
+        }
         private Rectangle GetPauseButtonBounds(int index)
         {
             const int buttonWidth = 280;

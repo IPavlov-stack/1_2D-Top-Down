@@ -65,6 +65,8 @@ namespace _1_2D_Top_Down
             }
         }
 
+        public Vector2 Center => new Vector2(Bounds.Center.X, Bounds.Center.Y);
+
         public Player(Texture2D texture, Vector2 startPosition, PlayerProfile profile)
         {
             this.texture = texture;
@@ -131,8 +133,8 @@ namespace _1_2D_Top_Down
                     if (currentFrame >= FrameCount)
                         currentFrame = 0;
                 }
-                Mana.Update(gameTime);
             }
+            Mana.Update(gameTime);
             UpdateState(deltaTime, isMoving);
         }
         public void Draw(SpriteBatch spriteBatch)

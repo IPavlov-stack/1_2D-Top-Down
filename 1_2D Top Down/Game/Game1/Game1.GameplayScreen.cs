@@ -1,0 +1,127 @@
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+
+namespace _1_2D_Top_Down
+{
+    public partial class Game1
+    {
+        internal void OnGameplayScreenEntered()
+        {
+            PlayMusic(backgroundMusic);
+            CenterCameraOnPlayer();
+        }
+
+        internal void OnGameplayScreenExited()
+        {
+            cutsceneDirector.Stop();
+            overlayManager.Clear();
+            CloseOpenGameplayPanels();
+        }
+
+        internal void UpdateGameplayScreen(GameTime gameTime)
+        {
+            KeyboardState keyboard = Keyboard.GetState();
+            MouseState mouse = Mouse.GetState();
+
+            if (overlayManager.HasOverlays)
+                overlayManager.Update(gameTime);
+
+            cutsceneDirector.Update(gameTime);
+
+            if (cutsceneDirector.IsActive)
+            {
+                UpdateCamera(gameTime);
+                return;
+            }
+
+            if (overlayManager.BlocksUpdateBelow)
+            {
+                return;
+            }
+
+            bool allowInput = !overlayManager.BlocksInputBelow;
+
+            if (gameFlowState == GameFlowState.MissionComplete)
+            {
+                HandleVictoryInput(mouse);
+                return;
+            }
+
+            if (gameFlowState == GameFlowState.GameOver)
+            {
+                bool pressedRestart = keyboard.IsKeyDown(Keys.R) && previousKeyboard.IsKeyUp(Keys.R);
+                if (allowInput && pressedRestart)
+                    RestartGame();
+
+                return;
+            }
+
+            bool pressedEscape = keyboard.IsKeyDown(Keys.Escape) && previousKeyboard.IsKeyUp(Keys.Escape);
+            if (allowInput && pressedEscape)
+            {
+                if (!CloseOpenGameplayPanels())
+                    isExitConfirmationOpen = true;
+
+                return;
+            }
+
+            if (gameFlowState == GameFlowState.WaveIntermission)
+            {
+                if (allowInput)
+                    HandleGameplayUIInput(keyboard, mouse);
+
+                UpdatePlayerMovement(gameTime, allowInput);
+                UpdateCamera(gameTime);
+                UpdateDeathAnimations(gameTime);
+                UpdateCollectibles(gameTime);
+                enemyManager.RebuildSpatialGrid();
+                UpdatePlayerProjectiles(gameTime);
+                UpdateEnemyProjectiles(gameTime);
+                UpdatePlayerResourceAnimations(gameTime);
+                if (allowInput)
+                {
+                    HandleDeveloperMode(keyboard);
+                    UpdateWaveIntermissionInput(mouse);
+                }
+                return;
+            }
+
+            if (allowInput)
+            {
+                HandleDeveloperMode(keyboard);
+                bool gameplayUiClickHandled = HandleGameplayUIInput(keyboard, mouse);
+                if (!gameplayUiClickHandled)
+                    HandlePlayerShooting(mouse, keyboard);
+            }
+
+            UpdateGameObjects(gameTime, allowInput);
+            UpdateCamera(gameTime);
+        }
+
+        private void UpdateCamera(GameTime gameTime)
+        {
+            cameraController.Update(gameTime, GraphicsDevice.Viewport.Bounds.Size);
+        }
+
+        internal void DrawGameplayScreen()
+        {
+            GraphicsDevice.Clear(
+                isDeveloperMode
+                    ? Color.DimGray
+                    : gameFlowState == GameFlowState.GameOver ? Color.Black : BackgroundColor);
+
+            _spriteBatch.Begin(
+                transformMatrix: camera.Transform,
+                samplerState: SamplerState.PointClamp);
+
+            if (isDeveloperMode)
+                DrawDeveloperMode();
+            else
+                DrawNormalWorld();
+
+            _spriteBatch.End();
+            DrawUi();
+        }
+    }
+}

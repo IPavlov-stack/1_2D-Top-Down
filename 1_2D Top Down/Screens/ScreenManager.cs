@@ -9,8 +9,11 @@ namespace _1_2D_Top_Down
     {
         private readonly Dictionary<string, IGameScreen> screens =
             new(StringComparer.OrdinalIgnoreCase);
+        private readonly Stack<string> navigationHistory = new();
 
         public IGameScreen CurrentScreen { get; private set; }
+
+        public bool CanGoBack => navigationHistory.Count > 0;
 
         public void Register(IGameScreen screen)
         {
@@ -29,6 +32,51 @@ namespace _1_2D_Top_Down
         }
 
         public void ChangeScreen(string screenId)
+        {
+            Activate(screenId);
+        }
+
+        public void SetRoot(string screenId)
+        {
+            navigationHistory.Clear();
+            Activate(screenId);
+        }
+
+        public void NavigateTo(string screenId)
+        {
+            if (CurrentScreen != null &&
+                !string.Equals(CurrentScreen.Id, screenId, StringComparison.OrdinalIgnoreCase))
+            {
+                navigationHistory.Push(CurrentScreen.Id);
+            }
+
+            Activate(screenId);
+        }
+
+        public bool TryGetPreviousScreenId(out string screenId)
+        {
+            return navigationHistory.TryPeek(out screenId);
+        }
+
+        public bool GoBack()
+        {
+            if (!navigationHistory.TryPop(out string previousScreenId))
+                return false;
+
+            Activate(previousScreenId);
+            return true;
+        }
+
+        public void Deactivate(bool clearHistory = false)
+        {
+            CurrentScreen?.Exit();
+            CurrentScreen = null;
+
+            if (clearHistory)
+                navigationHistory.Clear();
+        }
+
+        private void Activate(string screenId)
         {
             if (!screens.TryGetValue(screenId, out IGameScreen nextScreen))
                 throw new KeyNotFoundException($"No screen with ID '{screenId}' is registered.");

@@ -124,7 +124,7 @@ namespace _1_2D_Top_Down
 
             if (pressedEscape)
             {
-                StartSceneTransition(GameFlowState.MainMenu);
+                StartScreenBackTransition();
             }
             bool clickedBackButton = mouse.LeftButton == ButtonState.Pressed &&
                                     previousMouseState.LeftButton == ButtonState.Released &&
@@ -148,7 +148,7 @@ namespace _1_2D_Top_Down
             }
             if (clickedBackButton)
             {
-                StartSceneTransition(GameFlowState.MainMenu);
+                StartScreenBackTransition();
             }
         }
 
@@ -161,6 +161,7 @@ namespace _1_2D_Top_Down
             }
 
             gameFlowState = scene;
+            ActivateScreenForFlowState(scene);
             CenterCameraOnPlayer();
             UpdateMusicForgameFlowState();
         }

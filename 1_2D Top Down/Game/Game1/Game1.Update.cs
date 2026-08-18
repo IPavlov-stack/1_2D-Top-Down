@@ -13,7 +13,7 @@ namespace _1_2D_Top_Down
                 Exit();
             }
         }
-        private void UpdateGameObjects(GameTime gameTime)
+        private void UpdateGameObjects(GameTime gameTime, bool allowPlayerInput = true)
         {
             Rectangle worldBounds = new Rectangle(
                 0,
@@ -21,7 +21,7 @@ namespace _1_2D_Top_Down
                 (int)worldMap.WorldWidth,
                 (int)worldMap.WorldHeight);
 
-            UpdatePlayerMovement(gameTime);
+            UpdatePlayerMovement(gameTime, allowPlayerInput);
             UpdateMissionTriggers();
             enemyManager.UpdateSpawnQueue(gameTime,SpawnEnemy);
             TryFinishCurrentWave();
@@ -37,7 +37,7 @@ namespace _1_2D_Top_Down
         {
             StartMission(missionRuntime.Definition, useSceneTransition: false);
         }
-        private void UpdatePlayerMovement(GameTime gameTime)
+        private void UpdatePlayerMovement(GameTime gameTime, bool allowPlayerInput = true)
         {
             Rectangle worldBounds = new Rectangle(
                 0,
@@ -49,7 +49,7 @@ namespace _1_2D_Top_Down
                 gameTime,
                 worldBounds,
                 solidCollisionRectangles,
-                true);
+                allowPlayerInput);
         }
         private void UpdateEnemies(GameTime gameTime)
         {
@@ -343,7 +343,7 @@ namespace _1_2D_Top_Down
 
             Vector2 startPosition = player.Bounds.Center.ToVector2();
 
-            Vector2 mouseWorldPosition = mouse.Position.ToVector2() / camera.Zoom + camera.Position;
+            Vector2 mouseWorldPosition = camera.ScreenToWorld(mouse.Position.ToVector2());
             Vector2 direction = mouseWorldPosition - startPosition;
 
             if (direction != Vector2.Zero)
@@ -397,6 +397,13 @@ namespace _1_2D_Top_Down
                 previousKeyboard.IsKeyUp(Keys.F3))
             {
                 isDeveloperMode = !isDeveloperMode;
+            }
+
+            if (isDeveloperMode &&
+                keyboard.IsKeyDown(Keys.F6) &&
+                previousKeyboard.IsKeyUp(Keys.F6))
+            {
+                PlayCameraTestCutscene();
             }
         }
         private void UpdateWaveIntermissionInput(MouseState mouse)

@@ -25,6 +25,10 @@ namespace _1_2D_Top_Down
         private readonly StaticCollisionGrid mapCollisionGrid = new StaticCollisionGrid(128);
         private GameFlowState gameFlowState = GameFlowState.MainMenu;
         private GameFlowState nextGameFlowState;
+        private readonly ScreenManager screenManager = new();
+        private readonly OverlayManager overlayManager = new();
+        private readonly ScreenTransitionManager transitionManager = new(0.8f);
+        private PauseOverlay pauseOverlay;
 
         //campaign info
         private readonly MissionRuntime missionRuntime =
@@ -69,7 +73,10 @@ namespace _1_2D_Top_Down
 
 
         //camera info
-        private Camera camera;
+        private Camera2D camera;
+        private CameraController cameraController;
+        private DialogueOverlay dialogueOverlay;
+        private CutsceneDirector cutsceneDirector;
 
         //world map info
         private const int WorldWidth = 3000;
@@ -157,10 +164,6 @@ namespace _1_2D_Top_Down
             }
         }
         //scene info
-        private const float SceneTransitionDuration = 0.8f;
-        private bool isSceneTransitioning;
-        private bool sceneChangedDuringTransition;
-        private float sceneTransitionTimer;
         //fonts info
         private SpriteFont boldpixels;
 
@@ -187,8 +190,11 @@ namespace _1_2D_Top_Down
 
         protected override void Initialize()
         {
-            camera = new Camera();
-            camera.Zoom = 1.2f;
+            camera = new Camera2D();
+            camera.SetZoom(1.2f);
+            cameraController = new CameraController(
+                camera,
+                () => player == null ? playerStartPosition : player.Center);
             base.Initialize();
         }
 
@@ -282,6 +288,16 @@ namespace _1_2D_Top_Down
             }
 
             PlayMusic(mainMenuMusic);
+
+            screenManager.Register(new MainMenuScreen(this));
+            screenManager.Register(new OptionsScreen(this));
+            screenManager.Register(new CampaignMapScreen(this));
+            screenManager.Register(new GameplayScreen(this));
+            screenManager.ChangeScreen(ScreenIds.MainMenu);
+            pauseOverlay = new PauseOverlay(this);
+            dialogueOverlay = new DialogueOverlay(this);
+            cutsceneDirector = new CutsceneDirector(
+                new CutsceneContext(cameraController, overlayManager, dialogueOverlay));
         }
 
         private void PlayMusic(Song music)
@@ -317,239 +333,27 @@ namespace _1_2D_Top_Down
         protected override void Update(GameTime gameTime)
         {
             if (arePortalsActive)
-            {
                 portalLayer.Update(gameTime);
-            }
+
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
             UpdateSceneTransition(gameTime);
-
-            if (gameFlowState == GameFlowState.WaveIntermission)
-            {
-                if (isExitConfirmationOpen)
-                {
-                    HandleExitConfirmationInput(keyboard, mouse);
-
-                    previousKeyboard = keyboard;
-                    previousMouseState = mouse;
-
-                    base.Update(gameTime);
-                    return;
-                }
-
-                bool intermissionEscapePressed = keyboard.IsKeyDown(Keys.Escape) && previousKeyboard.IsKeyUp(Keys.Escape);
-                if (intermissionEscapePressed)
-                {
-                    bool closedPanel = CloseOpenGameplayPanels();
-
-                    if (!closedPanel)
-                    {
-                        isExitConfirmationOpen = true;
-                    }
-
-                    previousKeyboard = keyboard;
-                    previousMouseState = mouse;
-
-                    base.Update(gameTime);
-                    return;
-                }
-
-                HandleGameplayUIInput(keyboard, mouse);
-                UpdatePlayerMovement(gameTime);
-                CenterCameraOnPlayer();
-
-                UpdateDeathAnimations(gameTime);
-                UpdateCollectibles(gameTime);
-
-                enemyManager.RebuildSpatialGrid();
-                UpdatePlayerProjectiles(gameTime);
-                UpdateEnemyProjectiles(gameTime);
-
-                UpdatePlayerResourceAnimations(gameTime);
-                HandleDeveloperMode(keyboard);
-
-                UpdateWaveIntermissionInput(mouse);
-                UpdateMusicForgameFlowState();
-
-                previousKeyboard = keyboard;
-                previousMouseState = mouse;
-
-                base.Update(gameTime);
-                return;
-            }
             UpdateMusicForgameFlowState();
 
-            if (isSceneTransitioning)
-            {
-                previousKeyboard = keyboard;
-                previousMouseState = mouse;
-
-                base.Update(gameTime);
-                return;
-            }
-
-            if (gameFlowState == GameFlowState.MainMenu)
-            {
-                HandleMainMenuInput(mouse);
-
-                previousKeyboard = keyboard;
-                previousMouseState = mouse;
-
-                base.Update(gameTime);
-                return;
-            }
-
-            if (gameFlowState == GameFlowState.Options)
-            {
-                HandleOptionsInput(mouse);
-
-                previousKeyboard = keyboard;
-                previousMouseState = mouse;
-
-                base.Update(gameTime);
-                return;
-            }
-            if (gameFlowState == GameFlowState.Campaign)
-            {
-                HandleCampaignInput(keyboard, mouse);
-
-                previousKeyboard = keyboard;
-                previousMouseState = mouse;
-
-                base.Update(gameTime);
-                return;
-            }
-            if (gameFlowState == GameFlowState.MissionComplete)
-            {
-                isExitConfirmationOpen = false;
-                HandleVictoryInput(mouse);
-                previousKeyboard = keyboard;
-                previousMouseState = mouse;
-
-                base.Update(gameTime);
-                return;
-            }
-            if (gameFlowState == GameFlowState.GameOver)
-            {
-                //puase менюто не може да отвори при game over screen или да остане
-                isExitConfirmationOpen = false;
-
-                bool pressedRestart =
-                    keyboard.IsKeyDown(Keys.R) &&
-                    previousKeyboard.IsKeyUp(Keys.R);
-
-                if (pressedRestart)
-                {
-                    RestartGame();
-                }
-
-                previousKeyboard = keyboard;
-                previousMouseState = mouse;
-
-                base.Update(gameTime);
-                return;
-            }
-            if (isExitConfirmationOpen)
-            {
-                HandleExitConfirmationInput(keyboard, mouse);
-
-                previousKeyboard = keyboard;
-                previousMouseState = mouse;
-
-                base.Update(gameTime);
-                return;
-            }
-
-            bool pressedEscape =
-                keyboard.IsKeyDown(Keys.Escape) &&
-                previousKeyboard.IsKeyUp(Keys.Escape);
-
-            if (pressedEscape)
-            {
-                bool closedPanel = CloseOpenGameplayPanels();
-
-                if (!closedPanel)
-                {
-                    isExitConfirmationOpen = true;
-                }
-
-                previousKeyboard = keyboard;
-                previousMouseState = mouse;
-
-                base.Update(gameTime);
-                return;
-            }
-            HandleDeveloperMode(keyboard);
-
-            if (gameFlowState != GameFlowState.GameOver)
-            {
-                bool gameplayUiClickHandled =
-                    HandleGameplayUIInput(keyboard, mouse);
-
-                if (!gameplayUiClickHandled)
-                {
-                    HandlePlayerShooting(mouse, keyboard);
-                }
-                UpdateGameObjects(gameTime);
-                CenterCameraOnPlayer();
-            }
-
+            if (!transitionManager.IsActive)
+                screenManager.Update(gameTime);
 
             previousKeyboard = keyboard;
             previousMouseState = mouse;
-
             base.Update(gameTime);
         }
+
         protected override void Draw(GameTime gameTime)
         {
-            if (gameFlowState == GameFlowState.MainMenu)
-            {
-                DrawMainMenu();
-                DrawSceneTransition();
-                base.Draw(gameTime);
-                return;
-            }
-
-            if (gameFlowState == GameFlowState.Options)
-            {
-                DrawOptions();
-                DrawSceneTransition();
-
-                base.Draw(gameTime);
-                return;
-            }
-            if (gameFlowState == GameFlowState.Campaign)
-            {
-                DrawCampaign();
-                DrawSceneTransition();
-
-                base.Draw(gameTime);
-                return;
-            }
-            GraphicsDevice.Clear(
-                isDeveloperMode
-                    ? Color.DimGray
-                    : gameFlowState == GameFlowState.GameOver ? Color.Black : BackgroundColor);
-
-            _spriteBatch.Begin(
-                transformMatrix: camera.Transform,
-                samplerState: SamplerState.PointClamp);
-
-            if (isDeveloperMode)
-            {
-                DrawDeveloperMode();
-            }
-            else
-            {
-                DrawNormalWorld();
-            }
-
-            _spriteBatch.End();
-
+            screenManager.Draw(gameTime, _spriteBatch);
+            overlayManager.Draw(gameTime, _spriteBatch);
             DrawSceneTransition();
-            DrawUi();
-
             base.Draw(gameTime);
         }
         private static int ScaleUi(int value, float scale)
