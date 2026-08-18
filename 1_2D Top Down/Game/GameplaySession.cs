@@ -78,22 +78,18 @@ namespace _1_2D_Top_Down
                 return false;
 
             ChangeFlowState(GameFlowState.MissionComplete);
+            
             return true;
         }
 
-        public bool TryFinishCurrentWave(
-            bool hasFinishedSpawningWave,
-            int activeEnemyCount)
+        public bool TryFinishCurrentWave(bool hasFinishedSpawningWave, int activeEnemyCount)
         {
-            if (!Mission.TryCompleteWave(
-                    hasFinishedSpawningWave,
-                    activeEnemyCount))
+            if (!Mission.TryCompleteWave( hasFinishedSpawningWave, activeEnemyCount))
             {
                 return false;
             }
 
-            ChangeFlowState(
-                Mission.IsCompleted
+            ChangeFlowState( Mission.IsCompleted
                     ? GameFlowState.MissionComplete
                     : GameFlowState.WaveIntermission);
             return true;

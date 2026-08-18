@@ -279,6 +279,7 @@ namespace _1_2D_Top_Down
                     new PlayerProfile()));
             LoadShopUpgradeIcons();
             InitializeShopItems();
+            InitializeGameplayPanels();
             MediaPlayer.IsRepeating = true;
             MediaPlayer.Volume = MusicVolume;
 
@@ -334,7 +335,7 @@ namespace _1_2D_Top_Down
             }
             else
             {
-                // Main Menu и Options.
+                // Main Menu & Options
                 PlayMusic(mainMenuMusic);
             }
         }
