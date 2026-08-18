@@ -10,17 +10,15 @@ namespace _1_2D_Top_Down
             NotEnoughCoins,
             SoldOut
         }
+        public ShopItemDefinition Definition { get; }
         public Texture2D Icon { get; }
-        public string Id { get; }
-        public string Name { get; }
-        public string Description { get; }
-        public int Price { get; }
-
-        public PlayerStatType Stat { get; }
-        public float StatAmount { get; }
+        public string Id => Definition.Id;
+        public string Name => Definition.Name;
+        public string Description => Definition.Description;
+        public int Price => Definition.Price;
 
         // -1 означава неограничен брой покупки.
-        public int MaxPurchases { get; }
+        public int MaxPurchases => Definition.MaxPurchases;
         public int PurchasedCount { get; private set; }
 
         public bool IsSoldOut =>
@@ -28,23 +26,11 @@ namespace _1_2D_Top_Down
             PurchasedCount >= MaxPurchases;
 
         public ShopItem(
-            string id,
-            string name,
-            string description,
-            Texture2D icon,
-            int price,
-            PlayerStatType stat,
-            float statAmount,
-            int maxPurchases = -1)
+            ShopItemDefinition definition,
+            Texture2D icon)
         {
-            Id = id;
-            Name = name;
-            Description = description;
+            Definition = definition;
             Icon = icon;
-            Price = price;
-            Stat = stat;
-            StatAmount = statAmount;
-            MaxPurchases = maxPurchases;
         }
 
         public void RegisterPurchase()

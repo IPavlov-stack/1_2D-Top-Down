@@ -66,6 +66,24 @@ namespace _1_2D_Top_Down
                             definition.ProjectileReleaseTimeSeconds,
                         attackDuration:
                             definition.AttackDurationSeconds)),
+                EnemyType.Necromancer => new Necromancer(
+                    texture,
+                    position,
+                    definition,
+                    new NecromancerBehavior(
+                        new KeepDistanceRangedBehavior(
+                            movementAnimationRow: 0,
+                            movementFrameCount: 4,
+                            attackAnimationRow: 1,
+                            attackFrameCount: 4,
+                            projectileReleaseTime:
+                                definition.ProjectileReleaseTimeSeconds,
+                            attackDuration:
+                                definition.AttackDurationSeconds,
+                            rotateDuringAttack: false),
+                        definition.SummonEnemyId!,
+                        definition.SummonCooldownSeconds,
+                        definition.SummonRadius)),
                 _ => throw new InvalidOperationException(
                     $"No runtime enemy is registered for '{definition.Id}'.")
             };

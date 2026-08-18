@@ -571,6 +571,18 @@ namespace _1_2D_Top_Down
 
                     return true;
 
+                case EnemyType.Necromancer:
+                    texture = enemyFactory.GetTexture(
+                        EnemyDefinitions.Necromancer.TextureAsset);
+
+                    sourceRectangle = new Rectangle(
+                        0,
+                        0,
+                        texture.Width / 4,
+                        texture.Height / 3);
+
+                    return true;
+
                 default:
                     texture = null;
                     sourceRectangle = Rectangle.Empty;

@@ -3,6 +3,7 @@
     public enum EnemyType
     {
         Demon,
-        EvilEye
+        EvilEye,
+        Necromancer
     }
 }

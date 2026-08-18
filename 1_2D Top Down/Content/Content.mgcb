@@ -109,6 +109,18 @@
 /processorParam:TextureFormat=Color
 /build:enemies/Evil Eye/Evil Eye Sprite sheet.png;enemies/Evil Eye/Evil Eye Sprite sheet
 
+#begin enemies/Skeleton Mage/skeleton_mage.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Skeleton Mage/skeleton_mage.png
+
 #begin enemies/Evil Eye/shadow_eye.png
 /importer:TextureImporter
 /processor:TextureProcessor

@@ -11,6 +11,7 @@ namespace _1_2D_Top_Down
         private readonly int attackFrameCount;
         private readonly float projectileReleaseTime;
         private readonly float attackDuration;
+        private readonly bool rotateDuringAttack;
 
         private float shootTimer;
         private float attackTimer;
@@ -22,7 +23,8 @@ namespace _1_2D_Top_Down
             int attackAnimationRow,
             int attackFrameCount,
             float projectileReleaseTime,
-            float attackDuration)
+            float attackDuration,
+            bool rotateDuringAttack = true)
         {
             this.movementAnimationRow = movementAnimationRow;
             this.movementFrameCount = movementFrameCount;
@@ -30,6 +32,7 @@ namespace _1_2D_Top_Down
             this.attackFrameCount = attackFrameCount;
             this.projectileReleaseTime = projectileReleaseTime;
             this.attackDuration = attackDuration;
+            this.rotateDuringAttack = rotateDuringAttack;
         }
 
         public void Update(
@@ -78,7 +81,7 @@ namespace _1_2D_Top_Down
                     projectileRequested = false;
                     enemy.ChangeState(EnemyState.Attacking);
 
-                    if (direction != Vector2.Zero)
+                    if (rotateDuringAttack && direction != Vector2.Zero)
                     {
                         direction.Normalize();
                         enemy.SetRotation(GetAttackRotation(direction));
@@ -111,7 +114,10 @@ namespace _1_2D_Top_Down
                 return;
 
             attackTimer = 0f;
-            enemy.SetRotation(0f);
+            if (rotateDuringAttack)
+            {
+                enemy.SetRotation(0f);
+            }
             enemy.ChangeState(EnemyState.Idle);
             enemy.SetAnimation(movementAnimationRow, movementFrameCount);
         }

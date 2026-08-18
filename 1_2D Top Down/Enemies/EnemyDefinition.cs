@@ -19,6 +19,9 @@ namespace _1_2D_Top_Down
         public float AttackStateDurationSeconds { get; }
         public float ProjectileReleaseTimeSeconds { get; }
         public float AttackDurationSeconds { get; }
+        public string? SummonEnemyId { get; }
+        public float SummonCooldownSeconds { get; }
+        public float SummonRadius { get; }
 
         public int DeathFrameCount { get; }
         public int DeathSheetColumnCount { get; }
@@ -56,7 +59,10 @@ namespace _1_2D_Top_Down
             float contactDamageCooldownSeconds = 0f,
             float attackStateDurationSeconds = 0f,
             float projectileReleaseTimeSeconds = 0f,
-            float attackDurationSeconds = 0f)
+            float attackDurationSeconds = 0f,
+            string? summonEnemyId = null,
+            float summonCooldownSeconds = 0f,
+            float summonRadius = 0f)
         {
             Id = id;
             Type = type;
@@ -74,6 +80,9 @@ namespace _1_2D_Top_Down
             AttackStateDurationSeconds = attackStateDurationSeconds;
             ProjectileReleaseTimeSeconds = projectileReleaseTimeSeconds;
             AttackDurationSeconds = attackDurationSeconds;
+            SummonEnemyId = summonEnemyId;
+            SummonCooldownSeconds = summonCooldownSeconds;
+            SummonRadius = summonRadius;
             DeathFrameCount = deathFrameCount;
             DeathSheetColumnCount = deathSheetColumnCount;
             DeathSheetRowCount = deathSheetRowCount;

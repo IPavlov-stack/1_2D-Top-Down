@@ -12,6 +12,9 @@ namespace _1_2D_Top_Down
                 MissionType.Survival =>
                     new SurvivalObjective(mission.Waves.Count),
 
+                MissionType.Adventure =>
+                    new ReachTriggerObjective("Exit"),
+
                 _ => throw new NotSupportedException(
                     $"Mission type {mission.Type} is not implemented yet.")
             };

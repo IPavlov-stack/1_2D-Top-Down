@@ -25,9 +25,12 @@
                 IsCompleted = true;
             }
         }
-        public override void OnWaveCompleted()
+        public override void HandleEvent(MissionEvent missionEvent)
         {
-            CompleteWave();
+            if (missionEvent is WaveCompletedMissionEvent)
+            {
+                CompleteWave();
+            }
         }
         public override void Reset()
         {

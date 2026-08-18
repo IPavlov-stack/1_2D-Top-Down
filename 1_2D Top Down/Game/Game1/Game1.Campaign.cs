@@ -251,8 +251,7 @@ namespace _1_2D_Top_Down
 
         private void UpdateMissionTriggers()
         {
-            if (gameFlowState != GameFlowState.Playing ||
-                missionRuntime.Definition.Type != MissionType.Adventure)
+            if (gameFlowState != GameFlowState.Playing)
             {
                 return;
             }
@@ -265,16 +264,25 @@ namespace _1_2D_Top_Down
                     continue;
                 }
 
-                if (trigger.Name.Equals(
-                        "Exit",
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    trigger.Activate();
-                    missionRuntime.Complete();
-                    gameFlowState = GameFlowState.MissionComplete;
+                trigger.Activate();
+                PublishMissionEvent(
+                    new TriggerActivatedMissionEvent(trigger.Name));
 
+                if (missionRuntime.IsCompleted)
+                {
+                    gameFlowState = GameFlowState.MissionComplete;
                     return;
                 }
+            }
+        }
+
+        private void PublishMissionEvent(MissionEvent missionEvent)
+        {
+            missionRuntime.Publish(missionEvent);
+
+            if (missionRuntime.IsCompleted)
+            {
+                gameFlowState = GameFlowState.MissionComplete;
             }
         }
     }

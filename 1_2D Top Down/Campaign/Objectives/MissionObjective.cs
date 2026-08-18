@@ -7,7 +7,7 @@
         public bool IsCompleted { get; protected set; }
         public bool IsFailed { get; protected set; }
 
-        public virtual void OnWaveCompleted()
+        public virtual void HandleEvent(MissionEvent missionEvent)
         {
         }
 

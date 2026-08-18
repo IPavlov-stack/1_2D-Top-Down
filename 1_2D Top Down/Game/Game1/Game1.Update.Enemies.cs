@@ -7,6 +7,8 @@ namespace _1_2D_Top_Down
         private void HandleEnemyDeath(Enemy enemy)
         {
             player.GainExperience(enemy.ExperienceReward);
+            PublishMissionEvent(
+                new EnemyDefeatedMissionEvent(enemy.Definition.Id));
 
             Vector2 deathPosition = enemy.Bounds.Center.ToVector2();
             SpawnEnemyDrops(deathPosition);

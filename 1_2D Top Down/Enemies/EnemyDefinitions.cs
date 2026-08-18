@@ -52,10 +52,39 @@ namespace _1_2D_Top_Down
             shadowOpacity: 0.65f,
             shadowBottomOffset: 2f);
 
+        public static EnemyDefinition Necromancer { get; } = new EnemyDefinition(
+            id: "necromancer",
+            type: EnemyType.Necromancer,
+            textureAsset: "enemies/Skeleton Mage/skeleton_mage",
+            shadowTextureAsset: "enemies/Demon/shadow_demon",
+            deathTextureAsset: "enemies/Skeleton Mage/skeleton_mage",
+            projectileTextureAsset: "projectiles/mage_arcane_projectile",
+            maxHealth: 8,
+            moveSpeed: 75f,
+            contactDamage: 0,
+            experienceReward: 35,
+            attackRange: 500f,
+            attackCooldownSeconds: 1.8f,
+            projectileReleaseTimeSeconds: 0.45f,
+            attackDurationSeconds: 0.90f,
+            summonEnemyId: "demon",
+            summonCooldownSeconds: 8f,
+            summonRadius: 110f,
+            deathFrameCount: 4,
+            deathSheetColumnCount: 4,
+            deathSheetRowCount: 3,
+            deathAnimationRow: 2,
+            deathFrameDuration: 0.15f,
+            deathScale: 0.55f,
+            shadowScale: 0.45f,
+            shadowOpacity: 0.70f,
+            shadowBottomOffset: 4f);
+
         private static readonly Dictionary<EnemyType, EnemyDefinition> ByType = new()
         {
             [EnemyType.Demon] = Demon,
-            [EnemyType.EvilEye] = EvilEye
+            [EnemyType.EvilEye] = EvilEye,
+            [EnemyType.Necromancer] = Necromancer
         };
 
         private static readonly Dictionary<string, EnemyDefinition> ById = new(
@@ -63,7 +92,8 @@ namespace _1_2D_Top_Down
         {
             [Demon.Id] = Demon,
             [EvilEye.Id] = EvilEye,
-            [nameof(EnemyType.EvilEye)] = EvilEye
+            [nameof(EnemyType.EvilEye)] = EvilEye,
+            [Necromancer.Id] = Necromancer
         };
 
         public static EnemyDefinition Get(EnemyType type)

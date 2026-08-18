@@ -49,9 +49,19 @@
                 return false;
             }
 
-            Objective?.OnWaveCompleted();
-            isCompleted = Objective?.IsCompleted ?? false;
+            Publish(
+                new WaveCompletedMissionEvent(
+                    Waves.CurrentWave));
             return true;
+        }
+
+        public void Publish(MissionEvent missionEvent)
+        {
+            if (isCompleted)
+                return;
+
+            Objective?.HandleEvent(missionEvent);
+            isCompleted = Objective?.IsCompleted ?? false;
         }
         public void Complete()
         {
@@ -62,9 +72,7 @@
         private static MissionObjective? CreateObjective(
             MissionDefinition definition)
         {
-            return definition.Type == MissionType.Survival
-                ? MissionObjectiveFactory.Create(definition)
-                : null;
+            return MissionObjectiveFactory.Create(definition);
         }
     }
 }

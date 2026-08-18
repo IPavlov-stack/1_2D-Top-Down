@@ -29,7 +29,8 @@
                         7,
                         delayAfterGroupSeconds: 1.5f),
 
-                    new EnemySpawnGroup(EnemyType.EvilEye, 3)),
+                    new EnemySpawnGroup(EnemyType.EvilEye, 3),
+                    new EnemySpawnGroup(EnemyType.Necromancer, 1)),
 
                 new WaveDefinition(
                     0.18f,

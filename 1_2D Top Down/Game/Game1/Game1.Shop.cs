@@ -12,75 +12,13 @@ namespace _1_2D_Top_Down
         {
             shopItems.Clear();
 
-            shopItems.Add(new ShopItem(
-                id: "vitality_training",
-                name: "Vitality Training",
-                description: "+20 Max Health",
-                icon: shopUpgradeIcons["health"],
-                price: 5,
-                stat: PlayerStatType.MaxHealth,
-                statAmount: 20,
-                maxPurchases: 10));
-
-            shopItems.Add(new ShopItem(
-                id: "mana_training",
-                name: "Mana Training",
-                description: "+20 Max Mana",
-                icon: shopUpgradeIcons["mana"],
-                price: 5,
-                stat: PlayerStatType.MaxMana,
-                statAmount: 20,
-                maxPurchases: 10));
-
-            shopItems.Add(new ShopItem(
-                id: "strength_training",
-                name: "Strength Training",
-                description: "+1 Damage",
-                icon: shopUpgradeIcons["damage"],
-                price: 10,
-                stat: PlayerStatType.Damage,
-                statAmount: 1,
-                maxPurchases: 10));
-
-            shopItems.Add(new ShopItem(
-                id: "forceful_magic",
-                name: "Forceful Magic",
-                description: "+50 Knockback",
-                icon: shopUpgradeIcons["knockback"],
-                price: 8,
-                stat: PlayerStatType.Knockback,
-                statAmount: 50,
-                maxPurchases: 10));
-
-            shopItems.Add(new ShopItem(
-                id: "swift_boots",
-                name: "Swift Boots",
-                description: "+25 Move Speed",
-                icon: shopUpgradeIcons["movement-speed"],
-                price: 12,
-                stat: PlayerStatType.MoveSpeed,
-                statAmount: 25,
-                maxPurchases: 5));
-
-            shopItems.Add(new ShopItem(
-                id: "arcane_acceleration",
-                name: "Arcane Acceleration",
-                description: "+75 Projectile Speed",
-                icon: shopUpgradeIcons["projectile-speed"],
-                price: 10,
-                stat: PlayerStatType.ProjectileSpeed,
-                statAmount: 75,
-                maxPurchases: 5));
-
-            shopItems.Add(new ShopItem(
-                id: "multishot",
-                name: "Multishot",
-                description: "Fire 3 projectiles in a spread.",
-                icon: shopUpgradeIcons["multishot"],
-                price: 30,
-                stat: PlayerStatType.ProjectileCount,
-                statAmount: 2,
-                maxPurchases: 1));
+            foreach (ShopItemDefinition definition in ShopDefinitions.All)
+            {
+                shopItems.Add(
+                    new ShopItem(
+                        definition,
+                        shopUpgradeIcons[definition.IconId]));
+            }
 
         }
         private ShopPurchaseResult TryPurchaseShopItem(ShopItem item)
@@ -95,9 +33,7 @@ namespace _1_2D_Top_Down
             if (!coinsSpent)
                 return ShopPurchaseResult.NotEnoughCoins;
 
-            player.AddStatBonus(
-                item.Stat,
-                item.StatAmount);
+            item.Definition.Effect.Apply(player);
 
             item.RegisterPurchase();
 

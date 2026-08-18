@@ -432,11 +432,17 @@ namespace _1_2D_Top_Down
                 {
                     AddInventoryResource("coin", uiCoinTexture, 1);
                     PlayNextCoinPickupSound();
+                    PublishMissionEvent(
+                        new CollectibleCollectedMissionEvent("coin", 1));
                 },
                 onManaCrystalCollected: _ =>
                 {
                     player.Mana.Restore(ManaCrystalRestoreAmount);
                     PlayManaCrystalCollectSound();
+                    PublishMissionEvent(
+                        new CollectibleCollectedMissionEvent(
+                            "mana_crystal",
+                            1));
                 });
         }
     }
