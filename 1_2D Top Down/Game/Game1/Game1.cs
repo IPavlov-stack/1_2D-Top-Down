@@ -42,8 +42,7 @@ namespace _1_2D_Top_Down
 
         //player info
         private Player player => gameplaySession.Player;
-        private Vector2 playerStartPosition = new Vector2(2150, 1850);
-        private static readonly Vector2 DefaultPlayerStartPosition = new Vector2(2150, 1850);
+        private Vector2 playerStartPosition;
         private Texture2D playerProjectileTexture;
         private GameWorld gameWorld => gameplaySession.World;
         private ProjectileManager projectileManager => gameWorld.Projectiles;
@@ -182,7 +181,6 @@ namespace _1_2D_Top_Down
         protected override void Initialize()
         {
             camera = new Camera2D();
-            camera.SetZoom(1.5f);
             cameraController = new CameraController(
                 camera,
                 () => player == null ? playerStartPosition : player.Center);
@@ -268,6 +266,7 @@ namespace _1_2D_Top_Down
                 MapThemes.Get(initialMission.MapThemeId),
                 loadEnemySpawners: initialMission.Type == MissionType.Survival,
                 loadMissionData: initialMission.Type == MissionType.Adventure);
+            playerStartPosition = gameMap.PlayerSpawnPosition;
             gameplaySession.SetPlayer(
                 new Player(
                     playerTexture,

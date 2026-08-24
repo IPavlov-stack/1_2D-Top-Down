@@ -5,6 +5,8 @@ namespace _1_2D_Top_Down
 {
     public sealed class CameraController
     {
+        public const float DefaultGameplayZoom = 1.2f;
+
         private readonly Camera2D camera;
         private readonly Func<Vector2> followTargetProvider;
         private Vector2 previousFollowTarget;
@@ -14,7 +16,7 @@ namespace _1_2D_Top_Down
         private CameraShot activeShot;
         private CameraMode followMode = CameraMode.FollowPlayer;
         private Vector2 staticFocus;
-        private float staticZoom = 1.5f;
+        private float staticZoom = DefaultGameplayZoom;
 
         public CameraController(Camera2D camera, Func<Vector2> followTargetProvider)
         {
@@ -22,7 +24,7 @@ namespace _1_2D_Top_Down
             this.followTargetProvider = followTargetProvider;
         }
 
-        public float FollowZoom { get; set; } = 1.5f;
+        public float FollowZoom { get; set; } = DefaultGameplayZoom;
         public float LookAheadDistance { get; set; } = 70f;
         public float FollowSharpness { get; set; } = 8f;
         public bool IsShotActive => activeShot != null;

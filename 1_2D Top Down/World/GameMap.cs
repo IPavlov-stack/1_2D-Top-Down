@@ -125,27 +125,27 @@ namespace _1_2D_Top_Down
                 enemySpawnerPoints = new List<Vector2>();
             }
 
+            TiledMissionObjects missionObjects =
+                TiledMissionObjects.FromFile(
+                    content,
+                    mapFileName,
+                    theme.Scale);
+
+            PlayerSpawnPosition = missionObjects.PlayerSpawnPosition;
+
             if (loadMissionData)
             {
-                TiledMissionObjects missionObjects =
-                    TiledMissionObjects.FromFile(
-                        content,
-                        mapFileName,
-                        theme.Scale);
-
                 TiledMissionTriggers tiledTriggers =
                     TiledMissionTriggers.FromFile(
                         content,
                         mapFileName,
                         theme.Scale);
 
-                PlayerSpawnPosition = missionObjects.PlayerSpawnPosition;
                 enemySpawnPoints = missionObjects.EnemySpawnPoints;
                 missionTriggers = tiledTriggers.Triggers;
             }
             else
             {
-                PlayerSpawnPosition = Vector2.Zero;
                 enemySpawnPoints = new List<EnemySpawnPoint>();
                 missionTriggers = new List<MissionTrigger>();
             }

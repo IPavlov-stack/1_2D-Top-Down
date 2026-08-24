@@ -2,7 +2,8 @@
 
 Open `Mission01.tmx` and `Mission02.tmx` directly in Tiled. Both maps are
 finite orthogonal maps, use CSV layer data, and use 16x16 source tiles. The
-game renders them at scale 4, so one tile occupies 64x64 world pixels.
+game renders them at scale 2.5, so one tile occupies 40x40 world pixels. The
+default gameplay camera zoom is 1.6, making a tile exactly 64x64 screen pixels.
 
 ## Required layer contract
 
@@ -29,7 +30,8 @@ game renders them at scale 4, so one tile occupies 64x64 world pixels.
 - `Props`: object layer. Place tiles from `Chapter1Objects.tsx` here.
 - `Collisions`: rectangle object layer for solid obstacles.
 - `EnemySpawners`: required by survival missions.
-- `MissionObjects`: required by adventure missions.
+- `MissionObjects`: required by every mission and must contain one
+  `PlayerSpawn` point.
 - `MissionTriggers`: required by adventure missions.
 
 Do not rename these layers. Keep the maps finite and the tile layers encoded
@@ -74,7 +76,8 @@ definitions supplied with `Chapter1WaterDetails2` are supported at runtime.
 
 ## Mission 1 (survival)
 
-`Mission01.tmx` contains four placeholder point objects named `EnemySpawner`
+`Mission01.tmx` contains a placeholder `PlayerSpawn` point in
+`MissionObjects` and four placeholder point objects named `EnemySpawner`
 in the `EnemySpawners` object layer. Move, add, or remove these points as the
 map layout requires, but keep at least one. Wave definitions determine enemy
 types and counts; the runtime distributes spawned enemies across these points.
@@ -83,7 +86,8 @@ Enemy spawners have no required visual tile and do not belong in `Props`.
 ## Mission 2 (adventure)
 
 `Mission02.tmx` contains a placeholder point named `PlayerSpawn` in
-`MissionObjects`. Move it to the desired start location, but do not remove it.
+`MissionObjects`. Every mission uses this point as its player start position.
+Move it to the desired start location, but do not remove it.
 
 Additional preplaced enemies are points named `EnemySpawn` with a string
 property named `EnemyType`. Mission trigger rectangles go in

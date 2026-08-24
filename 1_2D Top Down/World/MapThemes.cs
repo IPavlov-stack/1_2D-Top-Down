@@ -56,7 +56,7 @@ namespace _1_2D_Top_Down
 
         public static MapThemeDefinition Chapter1 { get; } = new(
             Chapter1Id,
-            4f,
+            2.5f,
             "Environment/Chapter1/Ground",
             "Chapter1Ground.tsx",
             "Environment/Chapter1/Water",

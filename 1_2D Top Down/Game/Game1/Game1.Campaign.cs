@@ -103,9 +103,7 @@ namespace _1_2D_Top_Down
                 loadEnemySpawners: mission.Type == MissionType.Survival,
                 loadMissionData: mission.Type == MissionType.Adventure);
 
-            playerStartPosition = mission.Type == MissionType.Survival
-                ? DefaultPlayerStartPosition
-                : gameMap.PlayerSpawnPosition;
+            playerStartPosition = gameMap.PlayerSpawnPosition;
             gameplaySession.PreparePlayerForMission(playerStartPosition);
 
             System.Diagnostics.Debug.WriteLine(
