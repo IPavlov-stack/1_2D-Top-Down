@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Tiled;
 
 namespace _1_2D_Top_Down
 {
@@ -38,6 +39,9 @@ namespace _1_2D_Top_Down
 
             foreach (EnemyProjectile enemyProjectile in enemyProjectiles)
                 enemyProjectile.Draw(_spriteBatch);
+
+            foreach (TiledTileLayer layer in gameMap.ForegroundLayers)
+                layer.Draw(_spriteBatch);
 
             DrawEnemyHealthBars();
         }
@@ -195,11 +199,15 @@ namespace _1_2D_Top_Down
         private void DrawMap()
         {
             gameMap.WaterLayer.Draw(_spriteBatch);
+
+            foreach (TiledTileLayer layer in gameMap.UnderGroundLayers)
+                layer.Draw(_spriteBatch);
+
             gameMap.GroundLayer.Draw(_spriteBatch);
-            if (gameMap.ArePortalsActive)
-            {
-                gameMap.PortalLayer.Draw(_spriteBatch);
-            }
+
+            foreach (TiledTileLayer layer in gameMap.OverGroundLayers)
+                layer.Draw(_spriteBatch);
+
             gameMap.PropsLayer.DrawBehindPlayer(
                 _spriteBatch,
                 player.Bounds.Bottom);

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="64" height="48" tilewidth="256" tileheight="256" infinite="0" nextlayerid="5" nextobjectid="223">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="64" height="48" tilewidth="256" tileheight="256" infinite="0" nextlayerid="6" nextobjectid="230">
  <tileset firstgid="1" source="EnvironmentGround.tsx"/>
  <tileset firstgid="57" source="EnvironmentProps.tsx"/>
- <tileset firstgid="117" source="../Objects/portal_orange-1.tsx"/>
  <tileset firstgid="132" source="tileset_water256x256.tsx"/>
  <layer id="4" name="Water" width="64" height="48">
   <data encoding="csv">
@@ -248,13 +247,15 @@
    </properties>
   </object>
   <object id="162" gid="108" x="8448" y="4864" width="342.588" height="448"/>
-  <object id="213" gid="2147483772" x="13715.5" y="8088.88" width="576.091" height="576.091"/>
-  <object id="214" gid="124" x="8523.95" y="2651.95" width="576.091" height="576.091"/>
-  <object id="215" gid="2147483772" x="6279.95" y="10228" width="576.091" height="576.091"/>
-  <object id="216" gid="124" x="2048" y="8704" width="576.091" height="576.091"/>
-  <object id="218" gid="124" x="13752" y="3783.95" width="576.091" height="576.091"/>
-  <object id="219" gid="124" x="11248" y="10240" width="576.091" height="576.091"/>
-  <object id="220" gid="124" x="2048" y="3840" width="576.091" height="576.091"/>
+ </objectgroup>
+ <objectgroup id="5" name="EnemySpawners">
+  <object id="223" name="EnemySpawner" x="14003.55" y="7800.83"><point/></object>
+  <object id="224" name="EnemySpawner" x="8812" y="2363.9"><point/></object>
+  <object id="225" name="EnemySpawner" x="6568" y="9939.95"><point/></object>
+  <object id="226" name="EnemySpawner" x="2336.0455" y="8415.9545"><point/></object>
+  <object id="227" name="EnemySpawner" x="14040.0455" y="3495.9045"><point/></object>
+  <object id="228" name="EnemySpawner" x="11536.0455" y="9951.9545"><point/></object>
+  <object id="229" name="EnemySpawner" x="2336.0455" y="3551.9545"><point/></object>
  </objectgroup>
  <objectgroup id="3" name="Collisions">
   <object id="167" x="4936" y="3263.88" width="424" height="498.121"/>

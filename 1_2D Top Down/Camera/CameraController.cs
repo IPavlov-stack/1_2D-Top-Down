@@ -14,7 +14,7 @@ namespace _1_2D_Top_Down
         private CameraShot activeShot;
         private CameraMode followMode = CameraMode.FollowPlayer;
         private Vector2 staticFocus;
-        private float staticZoom = 1.2f;
+        private float staticZoom = 1.5f;
 
         public CameraController(Camera2D camera, Func<Vector2> followTargetProvider)
         {
@@ -22,7 +22,7 @@ namespace _1_2D_Top_Down
             this.followTargetProvider = followTargetProvider;
         }
 
-        public float FollowZoom { get; set; } = 1.2f;
+        public float FollowZoom { get; set; } = 1.5f;
         public float LookAheadDistance { get; set; } = 70f;
         public float FollowSharpness { get; set; } = 8f;
         public bool IsShotActive => activeShot != null;

@@ -3,7 +3,11 @@
     public static class CampaignMissions
     {
         public static MissionDefinition ForestOutskirts { get; } =
-           new MissionDefinition( "Forest Outskirts", MissionType.Survival,
+           new MissionDefinition(
+                "Forest Outskirts",
+                MissionType.Survival,
+                "Maps/Chapter1/Mission01.tmx",
+                MapThemes.Chapter1Id,
 
                 new WaveDefinition(
                     0.25f,
@@ -55,6 +59,10 @@
                     new EnemySpawnGroup(EnemyType.EvilEye, 5)));
 
         public static MissionDefinition ForestPath { get; } =
-            new MissionDefinition("Forest Path", MissionType.Adventure, "Maps/Mission_2.tmx");
+            new MissionDefinition(
+                "Forest Path",
+                MissionType.Adventure,
+                "Maps/Chapter1/Mission02.tmx",
+                MapThemes.Chapter1Id);
     }
 }

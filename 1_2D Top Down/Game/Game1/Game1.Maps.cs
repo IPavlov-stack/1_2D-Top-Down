@@ -10,17 +10,15 @@ namespace _1_2D_Top_Down
 
         private void LoadMissionMap(
             string mapFileName,
-            bool loadPortals,
+            MapThemeDefinition mapTheme,
+            bool loadEnemySpawners,
             bool loadMissionData = false)
         {
             gameMap.Load(
                 Content,
                 mapFileName,
-                environmentPropsAtlas,
-                Content.Load<Microsoft.Xna.Framework.Graphics.Texture2D>(
-                    "Objects/Portal_orange-sheet"),
-                EnvironmentScale,
-                loadPortals,
+                mapTheme,
+                loadEnemySpawners,
                 loadMissionData);
         }
     }

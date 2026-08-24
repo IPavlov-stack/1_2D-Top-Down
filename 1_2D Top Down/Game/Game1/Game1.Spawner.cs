@@ -8,13 +8,13 @@ namespace _1_2D_Top_Down
     {
         private void SpawnEnemy(EnemyType enemyType)
         {
-            if (gameMap.PortalSpawnPoints.Count == 0)
+            if (gameMap.EnemySpawnerPoints.Count == 0)
             {
                 return;
             }
 
-            Vector2 spawnPosition = gameMap.PortalSpawnPoints[
-                random.Next(gameMap.PortalSpawnPoints.Count)];
+            Vector2 spawnPosition = gameMap.EnemySpawnerPoints[
+                random.Next(gameMap.EnemySpawnerPoints.Count)];
 
             enemyManager.Add(enemyFactory.Create(enemyType, spawnPosition));
         }

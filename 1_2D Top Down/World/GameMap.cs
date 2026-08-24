@@ -1,6 +1,5 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
 using MonoGameLibrary.Graphics;
 using System.Collections.Generic;
 using Tiled;
@@ -8,13 +7,13 @@ using Tiled;
 namespace _1_2D_Top_Down
 {
     /// <summary>
-    /// Owns the loaded Tiled layers and their runtime collision and portal data.
+    /// Owns the loaded Tiled layers and their runtime collision and spawn data.
     /// </summary>
     public sealed class GameMap
     {
         private readonly StaticCollisionGrid collisionGrid = new(128);
         private readonly List<Rectangle> solidCollisionRectangles = new();
-        private IReadOnlyList<Vector2> portalSpawnPoints = new List<Vector2>();
+        private IReadOnlyList<Vector2> enemySpawnerPoints = new List<Vector2>();
         private IReadOnlyList<EnemySpawnPoint> enemySpawnPoints =
             new List<EnemySpawnPoint>();
         private IReadOnlyList<MissionTrigger> missionTriggers =
@@ -22,14 +21,18 @@ namespace _1_2D_Top_Down
 
         public TiledTileLayer WaterLayer { get; private set; }
         public TiledTileLayer GroundLayer { get; private set; }
+        public IReadOnlyList<TiledTileLayer> UnderGroundLayers { get; private set; } =
+            new List<TiledTileLayer>();
+        public IReadOnlyList<TiledTileLayer> OverGroundLayers { get; private set; } =
+            new List<TiledTileLayer>();
+        public IReadOnlyList<TiledTileLayer> ForegroundLayers { get; private set; } =
+            new List<TiledTileLayer>();
         public TiledPropsLayer PropsLayer { get; private set; }
-        public TiledPortalLayer PortalLayer { get; private set; }
         public IReadOnlyList<Rectangle> SolidCollisionRectangles => solidCollisionRectangles;
-        public IReadOnlyList<Vector2> PortalSpawnPoints => portalSpawnPoints;
+        public IReadOnlyList<Vector2> EnemySpawnerPoints => enemySpawnerPoints;
         public IReadOnlyList<EnemySpawnPoint> EnemySpawnPoints => enemySpawnPoints;
         public IReadOnlyList<MissionTrigger> MissionTriggers => missionTriggers;
         public Vector2 PlayerSpawnPosition { get; private set; }
-        public bool ArePortalsActive { get; private set; }
 
         public Rectangle WorldBounds => new(
             0,
@@ -40,68 +43,86 @@ namespace _1_2D_Top_Down
         public void Load(
             ContentManager content,
             string mapFileName,
-            TextureAtlas propsAtlas,
-            Texture2D portalTexture,
-            float mapScale,
-            bool loadPortals,
+            MapThemeDefinition theme,
+            bool loadEnemySpawners,
             bool loadMissionData)
         {
             WaterLayer = TiledTileLayer.FromFile(
                 content,
                 mapFileName,
-                "Environment/Water/tileset_water256x256",
-                "tileset_water256x256.tsx",
-                mapScale,
-                "Water");
+                theme.Scale,
+                theme.WaterLayerName);
 
             GroundLayer = TiledTileLayer.FromFile(
                 content,
                 mapFileName,
-                "Environment/EnvironmentGroundAtlas",
-                "EnvironmentGround.tsx",
-                mapScale,
-                "Ground");
+                theme.Scale,
+                theme.GroundLayerName);
 
-            PropsLayer = TiledPropsLayer.FromFile(
+            UnderGroundLayers = LoadTileLayers(
                 content,
                 mapFileName,
-                propsAtlas,
-                mapScale);
+                theme,
+                theme.UnderGroundLayers);
+
+            OverGroundLayers = LoadTileLayers(
+                content,
+                mapFileName,
+                theme,
+                theme.OverGroundLayers);
+
+            ForegroundLayers = LoadTileLayers(
+                content,
+                mapFileName,
+                theme,
+                theme.ForegroundLayers);
+
+            PropsLayer = theme.UsesGridProps
+                ? TiledPropsLayer.FromGridFile(
+                    content,
+                    mapFileName,
+                    theme.PropsTextureAsset,
+                    theme.PropsTileWidth,
+                    theme.PropsTileHeight,
+                    theme.Scale,
+                    theme.PropsTilesetFile,
+                    theme.PropsLayerName)
+                : TiledPropsLayer.FromFile(
+                    content,
+                    mapFileName,
+                    TextureAtlas.FromFile(content, theme.PropsAtlasAsset),
+                    theme.Scale,
+                    theme.PropsTilesetFile,
+                    theme.PropsRegionNames,
+                    theme.PropsLayerName);
 
             TiledCollisionLayer collisionLayer =
-                TiledCollisionLayer.FromFile(content, mapFileName, mapScale);
+                TiledCollisionLayer.FromFile(content, mapFileName, theme.Scale);
 
             TiledWaterCollisionLayer waterCollisionLayer =
                 TiledWaterCollisionLayer.FromFile(
                     content,
                     mapFileName,
-                    "tileset_water256x256.tsx",
-                    mapScale);
+                    theme.WaterTilesetFile,
+                    theme.Scale,
+                    theme.WaterLayerName,
+                    theme.GroundLayerName);
 
             solidCollisionRectangles.Clear();
             solidCollisionRectangles.AddRange(collisionLayer.Rectangles);
             solidCollisionRectangles.AddRange(waterCollisionLayer.Rectangles);
             collisionGrid.Build(solidCollisionRectangles);
 
-            ArePortalsActive = loadPortals;
-
-            if (loadPortals)
+            if (loadEnemySpawners)
             {
-                portalSpawnPoints = TiledPortalSpawns.FromFile(
+                enemySpawnerPoints = TiledEnemySpawners.FromFile(
                     content,
                     mapFileName,
-                    mapScale);
-
-                PortalLayer = TiledPortalLayer.FromFile(
-                    content,
-                    mapFileName,
-                    portalTexture,
-                    mapScale);
+                    theme.Scale);
             }
             else
             {
-                portalSpawnPoints = new List<Vector2>();
-                PortalLayer = null;
+                enemySpawnerPoints = new List<Vector2>();
             }
 
             if (loadMissionData)
@@ -110,13 +131,13 @@ namespace _1_2D_Top_Down
                     TiledMissionObjects.FromFile(
                         content,
                         mapFileName,
-                        mapScale);
+                        theme.Scale);
 
                 TiledMissionTriggers tiledTriggers =
                     TiledMissionTriggers.FromFile(
                         content,
                         mapFileName,
-                        mapScale);
+                        theme.Scale);
 
                 PlayerSpawnPosition = missionObjects.PlayerSpawnPosition;
                 enemySpawnPoints = missionObjects.EnemySpawnPoints;
@@ -135,8 +156,38 @@ namespace _1_2D_Top_Down
 
         public void Update(GameTime gameTime)
         {
-            if (ArePortalsActive)
-                PortalLayer.Update(gameTime);
+            WaterLayer.Update(gameTime);
+            GroundLayer.Update(gameTime);
+
+            foreach (TiledTileLayer layer in UnderGroundLayers)
+                layer.Update(gameTime);
+
+            foreach (TiledTileLayer layer in OverGroundLayers)
+                layer.Update(gameTime);
+
+            foreach (TiledTileLayer layer in ForegroundLayers)
+                layer.Update(gameTime);
+
+        }
+
+        private static IReadOnlyList<TiledTileLayer> LoadTileLayers(
+            ContentManager content,
+            string mapFileName,
+            MapThemeDefinition theme,
+            IReadOnlyList<MapTileLayerDefinition> definitions)
+        {
+            List<TiledTileLayer> layers = new(definitions.Count);
+
+            foreach (MapTileLayerDefinition definition in definitions)
+            {
+                layers.Add(TiledTileLayer.FromFile(
+                    content,
+                    mapFileName,
+                    theme.Scale,
+                    definition.LayerName));
+            }
+
+            return layers;
         }
     }
 }

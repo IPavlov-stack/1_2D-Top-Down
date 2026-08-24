@@ -95,10 +95,12 @@ namespace _1_2D_Top_Down
             gameplaySession.StartMission(mission);
 
             string mapFileName = mission.MapFileName ?? DefaultMapFileName;
+            MapThemeDefinition mapTheme = MapThemes.Get(mission.MapThemeId);
 
             LoadMissionMap(
                 mapFileName,
-                loadPortals: mission.Type == MissionType.Survival,
+                mapTheme,
+                loadEnemySpawners: mission.Type == MissionType.Survival,
                 loadMissionData: mission.Type == MissionType.Adventure);
 
             playerStartPosition = mission.Type == MissionType.Survival
@@ -106,7 +108,9 @@ namespace _1_2D_Top_Down
                 : gameMap.PlayerSpawnPosition;
             gameplaySession.PreparePlayerForMission(playerStartPosition);
 
-            System.Diagnostics.Debug.WriteLine($"Mission: {mission.Name}, map: {mapFileName}, " + $"spawn: {playerStartPosition}");
+            System.Diagnostics.Debug.WriteLine(
+                $"Mission: {mission.Name}, map: {mapFileName}, " +
+                $"theme: {mapTheme.Id}, spawn: {playerStartPosition}");
 
             if (mission.Type == MissionType.Survival)
             {

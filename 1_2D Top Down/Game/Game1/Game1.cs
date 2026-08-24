@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-using MonoGameLibrary.Graphics;
 using System;
 using System.Collections.Generic;
 using Tiled;
@@ -81,10 +80,6 @@ namespace _1_2D_Top_Down
         private const int WorldWidth = 3000;
         private const int WorldHeight = 2000;
         private const int TileSize = 64;
-        private const float EnvironmentScale = 0.25f;
-        private Texture2D forestTileset;
-        private TextureAtlas environmentGroundAtlas;
-        private TextureAtlas environmentPropsAtlas;
         private GameMap gameMap => gameplaySession.Map;
 
         //ui info
@@ -158,7 +153,6 @@ namespace _1_2D_Top_Down
                 MediaPlayer.Volume = musicVolume;
             }
         }
-        //scene info
         //fonts info
         private SpriteFont boldpixels;
 
@@ -188,7 +182,7 @@ namespace _1_2D_Top_Down
         protected override void Initialize()
         {
             camera = new Camera2D();
-            camera.SetZoom(1.2f);
+            camera.SetZoom(1.5f);
             cameraController = new CameraController(
                 camera,
                 () => player == null ? playerStartPosition : player.Center);
@@ -268,10 +262,12 @@ namespace _1_2D_Top_Down
                 GraphicsDevice.Viewport.Height - buttonHeight - bottomMargin,
                 buttonWidth,
                 buttonHeight);
-            environmentGroundAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentGroundAtlas.xml");
-            environmentPropsAtlas = TextureAtlas.FromFile(Content, "Environment/EnvironmentPropsAtlas.xml");
-
-            LoadMissionMap(DefaultMapFileName, loadPortals: true);
+            MissionDefinition initialMission = missionRuntime.Definition;
+            LoadMissionMap(
+                initialMission.MapFileName ?? DefaultMapFileName,
+                MapThemes.Get(initialMission.MapThemeId),
+                loadEnemySpawners: initialMission.Type == MissionType.Survival,
+                loadMissionData: initialMission.Type == MissionType.Adventure);
             gameplaySession.SetPlayer(
                 new Player(
                     playerTexture,

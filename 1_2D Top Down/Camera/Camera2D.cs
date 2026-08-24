@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using System;
 
 namespace _1_2D_Top_Down
 {
@@ -11,7 +12,14 @@ namespace _1_2D_Top_Down
             Matrix.CreateTranslation(-Position.X, -Position.Y, 0f) *
             Matrix.CreateScale(Zoom);
 
-        public void SetPosition(Vector2 position) => Position = position;
+        public void SetPosition(Vector2 position)
+        {
+            // Keep the world-to-screen translation on whole pixels. This
+            // prevents seams between adjacent pixel-art tiles while moving.
+            Position = new Vector2(
+                MathF.Round(position.X * Zoom) / Zoom,
+                MathF.Round(position.Y * Zoom) / Zoom);
+        }
 
         public void SetZoom(float zoom)
         {

@@ -145,6 +145,114 @@
 /processorParam:TextureFormat=Color
 /build:Environment/EnvironmentGroundAtlas.png
 
+#begin Environment/Chapter1/Ground.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Environment/Chapter1/Ground.png
+
+#begin Environment/Chapter1/GrassStairs.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Environment/Chapter1/GrassStairs.png
+
+#begin Environment/Chapter1/Lianas.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Environment/Chapter1/Lianas.png
+
+#begin Environment/Chapter1/Objects.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Environment/Chapter1/Objects.png
+
+#begin Environment/Chapter1/RockSpots.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Environment/Chapter1/RockSpots.png
+
+#begin Environment/Chapter1/Spots.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Environment/Chapter1/Spots.png
+
+#begin Environment/Chapter1/Water.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Environment/Chapter1/Water.png
+
+#begin Environment/Chapter1/WaterDetails.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Environment/Chapter1/WaterDetails.png
+
+#begin Environment/Chapter1/WaterDetails2.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Environment/Chapter1/WaterDetails2.png
+
 #begin Environment/EnvironmentGroundAtlas.xml
 /copy:Environment/EnvironmentGroundAtlas.xml
 
@@ -177,6 +285,42 @@
 
 #begin Maps/ForestMap.tmx
 /copy:Maps/ForestMap.tmx
+
+#begin Maps/EnvironmentGround.tsx
+/copy:Maps/EnvironmentGround.tsx
+
+#begin Maps/Chapter1/Chapter1Ground.tsx
+/copy:Maps/Chapter1/Chapter1Ground.tsx
+
+#begin Maps/Chapter1/Chapter1GrassStairs.tsx
+/copy:Maps/Chapter1/Chapter1GrassStairs.tsx
+
+#begin Maps/Chapter1/Chapter1Lianas.tsx
+/copy:Maps/Chapter1/Chapter1Lianas.tsx
+
+#begin Maps/Chapter1/Chapter1Objects.tsx
+/copy:Maps/Chapter1/Chapter1Objects.tsx
+
+#begin Maps/Chapter1/Chapter1RockSpots.tsx
+/copy:Maps/Chapter1/Chapter1RockSpots.tsx
+
+#begin Maps/Chapter1/Chapter1Spots.tsx
+/copy:Maps/Chapter1/Chapter1Spots.tsx
+
+#begin Maps/Chapter1/Chapter1Water.tsx
+/copy:Maps/Chapter1/Chapter1Water.tsx
+
+#begin Maps/Chapter1/Chapter1WaterDetails.tsx
+/copy:Maps/Chapter1/Chapter1WaterDetails.tsx
+
+#begin Maps/Chapter1/Chapter1WaterDetails2.tsx
+/copy:Maps/Chapter1/Chapter1WaterDetails2.tsx
+
+#begin Maps/Chapter1/Mission01.tmx
+/copy:Maps/Chapter1/Mission01.tmx
+
+#begin Maps/Chapter1/Mission02.tmx
+/copy:Maps/Chapter1/Mission02.tmx
 
 #begin Maps/Mission_2.tmx
 /copy:Maps/Mission_2.tmx

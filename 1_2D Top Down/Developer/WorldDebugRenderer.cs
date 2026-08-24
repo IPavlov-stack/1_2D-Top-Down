@@ -65,7 +65,7 @@ namespace _1_2D_Top_Down
 
         private void DrawSpawnData(SpriteBatch spriteBatch, GameMap map)
         {
-            foreach (Vector2 position in map.PortalSpawnPoints)
+            foreach (Vector2 position in map.EnemySpawnerPoints)
                 DrawPoint(spriteBatch, position, Color.Orange);
 
             foreach (EnemySpawnPoint spawnPoint in map.EnemySpawnPoints)
