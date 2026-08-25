@@ -97,17 +97,173 @@
 /processorParam:TextureFormat=Color
 /build:enemies/Demon/shadow_demon.png
 
-#begin enemies/Evil Eye/Evil Eye Sprite sheet.png
+#begin enemies/Demon/Tier1/Idle.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
+/processorParam:ColorKeyEnabled=False
 /processorParam:GenerateMipmaps=False
 /processorParam:PremultiplyAlpha=True
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:enemies/Evil Eye/Evil Eye Sprite sheet.png;enemies/Evil Eye/Evil Eye Sprite sheet
+/build:enemies/Demon/Tier1/Idle.png
+
+#begin enemies/Demon/Tier1/Walk.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Demon/Tier1/Walk.png
+
+#begin enemies/Demon/Tier1/Run.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Demon/Tier1/Run.png
+
+#begin enemies/Demon/Tier1/Attack.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Demon/Tier1/Attack.png
+
+#begin enemies/Demon/Tier1/Hurt.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Demon/Tier1/Hurt.png
+
+#begin enemies/Demon/Tier1/Death.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Demon/Tier1/Death.png
+
+#begin enemies/Demon/Tier1/Shadow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Demon/Tier1/Shadow.png
+
+#begin enemies/Lich/Tier1/Idle.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Lich/Tier1/Idle.png
+
+#begin enemies/Lich/Tier1/Walk.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Lich/Tier1/Walk.png
+
+#begin enemies/Lich/Tier1/Run.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Lich/Tier1/Run.png
+
+#begin enemies/Lich/Tier1/Attack.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Lich/Tier1/Attack.png
+
+#begin enemies/Lich/Tier1/Hurt.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Lich/Tier1/Hurt.png
+
+#begin enemies/Lich/Tier1/Death.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Lich/Tier1/Death.png
+
+#begin enemies/Lich/Tier1/Shadow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=False
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:enemies/Lich/Tier1/Shadow.png
 
 #begin enemies/Skeleton Mage/skeleton_mage.png
 /importer:TextureImporter
@@ -120,18 +276,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:enemies/Skeleton Mage/skeleton_mage.png
-
-#begin enemies/Evil Eye/shadow_eye.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:enemies/Evil Eye/shadow_eye.png
 
 #begin Environment/EnvironmentGroundAtlas.png
 /importer:TextureImporter
@@ -379,7 +523,7 @@
 /processorParam:TextureFormat=Color
 /build:player/shadow_player.png
 
-#begin projectiles/evilEye/sprite_sheet.png
+#begin projectiles/Lich/Projectile.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -389,7 +533,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:projectiles/evilEye/sprite_sheet.png;projectiles/evilEye/evilEye_projectile_sphere.png
+/build:projectiles/Lich/Projectile.png
 
 #begin projectiles/mage_arcane_projectile.png
 /importer:TextureImporter
@@ -469,29 +613,29 @@
 /processorParam:Quality=Best
 /build:Sounds/Enemies/Demon/demon_death4.wav
 
-#begin Sounds/Enemies/Evil_Eye/evil_eye_death1.wav
+#begin Sounds/Enemies/Lich/lich_death1.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:Sounds/Enemies/Evil_Eye/evil_eye_death1.wav
+/build:Sounds/Enemies/Lich/lich_death1.wav
 
-#begin Sounds/Enemies/Evil_Eye/evil_eye_death2.wav
+#begin Sounds/Enemies/Lich/lich_death2.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:Sounds/Enemies/Evil_Eye/evil_eye_death2.wav
+/build:Sounds/Enemies/Lich/lich_death2.wav
 
-#begin Sounds/Enemies/Evil_Eye/evil_eye_death3.wav
+#begin Sounds/Enemies/Lich/lich_death3.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:Sounds/Enemies/Evil_Eye/evil_eye_death3.wav
+/build:Sounds/Enemies/Lich/lich_death3.wav
 
-#begin Sounds/Enemies/Evil_Eye/evil_eye_death4.wav
+#begin Sounds/Enemies/Lich/lich_death4.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:Sounds/Enemies/Evil_Eye/evil_eye_death4.wav
+/build:Sounds/Enemies/Lich/lich_death4.wav
 
 #begin Sounds/Mana/mana_collect.wav
 /importer:WavImporter

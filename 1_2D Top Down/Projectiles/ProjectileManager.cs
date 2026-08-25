@@ -83,7 +83,7 @@ namespace _1_2D_Top_Down
                     continue;
                 }
 
-                player.TakeDamage(15);
+                player.TakeHit(projectile.CreateHit());
                 enemyProjectiles.RemoveAt(i);
                 playerDied |= player.Health.IsDead;
             }

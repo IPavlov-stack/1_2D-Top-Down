@@ -41,6 +41,9 @@ namespace _1_2D_Top_Down
             0,
             (int)GroundLayer.WorldWidth,
             (int)GroundLayer.WorldHeight);
+        public Vector2 WorldTileSize => new(
+            GroundLayer.TileWidth,
+            GroundLayer.TileHeight);
 
         public void Load(
             ContentManager content,

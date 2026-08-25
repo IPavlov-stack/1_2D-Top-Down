@@ -30,7 +30,9 @@ namespace _1_2D_Top_Down
             Texture2D texture,
             Vector2 startPosition,
             Vector2 direction,
-            float speed)
+            float speed,
+            int damage,
+            float knockback)
             : base(
                 texture,
                 startPosition,
@@ -39,7 +41,13 @@ namespace _1_2D_Top_Down
                 scale: 1.0f,
                 frameCount: 3,
                 frameRows: 1,
-                frameDuration: 0.08f)
+                frameDuration: 0.08f,
+                faction: CombatFaction.Player,
+                damage: damage,
+                damageType: DamageType.Arcane,
+                knockback: knockback,
+                isReflectable: false,
+                sourceId: "player")
         {
         }
     }

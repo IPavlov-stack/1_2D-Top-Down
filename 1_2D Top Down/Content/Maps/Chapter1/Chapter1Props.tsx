@@ -307,7 +307,7 @@
  <tile id="86">
   <image source="../../Environment/Chapter1/Props/Tree12.png" width="64" height="64"/>
   <objectgroup draworder="index" id="2">
-   <object id="1" x="16.9886" y="37.4545" width="29.4318" height="17.4545"/>
+   <object id="1" x="16.9886" y="37.4545" width="29.4318" height="19.7045"/>
   </objectgroup>
  </tile>
  <tile id="87">

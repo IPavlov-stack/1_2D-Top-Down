@@ -5,19 +5,27 @@ namespace _1_2D_Top_Down
 {
     public sealed class ChaseContactBehavior : IEnemyBehavior
     {
+        private readonly int contactDamage;
         private readonly float contactDamageCooldown;
         private readonly float attackStateDuration;
+        private readonly float damageReleaseTime;
+        private readonly EnemyAnimationDefinition movementAnimation;
+        private readonly EnemyAnimationDefinition attackAnimation;
 
         private float contactDamageTimer;
-        private float attackStateTimer;
+        private float attackTimer;
+        private bool isAttacking;
+        private bool attackDamageRequested;
 
-        public ChaseContactBehavior(
-            float contactDamageCooldown,
-            float attackStateDuration)
+        public ChaseContactBehavior(ChaseContactBehaviorDefinition definition)
         {
-            this.contactDamageCooldown = contactDamageCooldown;
-            this.attackStateDuration = attackStateDuration;
-            contactDamageTimer = contactDamageCooldown;
+            contactDamage = definition.ContactDamage;
+            contactDamageCooldown = definition.DamageCooldown;
+            attackStateDuration = definition.AttackStateDuration;
+            damageReleaseTime = definition.DamageReleaseTime;
+            movementAnimation = definition.MovementAnimation;
+            attackAnimation = definition.AttackAnimation;
+            contactDamageTimer = definition.DamageCooldown;
         }
 
         public void Update(
@@ -29,24 +37,63 @@ namespace _1_2D_Top_Down
                 (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             contactDamageTimer += deltaTime;
-            attackStateTimer = MathF.Max(0f, attackStateTimer - deltaTime);
-
-            enemy.ChangeState(
-                attackStateTimer > 0f
-                    ? EnemyState.Attacking
-                    : EnemyState.Chasing);
 
             Vector2 direction =
                 context.Target.Hurtbox.Center.ToVector2() -
                 enemy.Bounds.Center.ToVector2();
 
-            if (direction != Vector2.Zero)
+            enemy.SetFacingDirection(direction);
+
+            if (isAttacking)
             {
-                direction.Normalize();
-                enemy.Position +=
-                    direction * enemy.Definition.MoveSpeed * deltaTime;
+                attackTimer += deltaTime;
+                enemy.Motor.Stop();
+                enemy.ChangeState(EnemyState.Attacking);
+                enemy.SetAnimation(attackAnimation);
+                enemy.UpdateAnimation(gameTime, loop: false);
+
+                if (!attackDamageRequested &&
+                    attackTimer >= damageReleaseTime)
+                {
+                    attackDamageRequested = true;
+
+                    if (context.Target.Hurtbox.Intersects(enemy.Hurtbox))
+                    {
+                        context.RequestPlayerDamage(new CombatHit(
+                            contactDamage,
+                            DamageType.Physical,
+                            CombatFaction.Enemy,
+                            enemy.Definition.Id,
+                            enemy.Hurtbox.Center.ToVector2()));
+                        contactDamageTimer = 0f;
+                    }
+                }
+
+                if (attackTimer >= attackStateDuration)
+                {
+                    isAttacking = false;
+                    enemy.ChangeState(EnemyState.Chasing);
+                }
+
+                return;
             }
 
+            enemy.ChangeState(EnemyState.Chasing);
+
+            if (direction != Vector2.Zero)
+            {
+                enemy.Motor.Move(
+                    enemy,
+                    direction,
+                    enemy.Definition.MoveSpeed,
+                    EnemyMovementMode.Walk,
+                    deltaTime,
+                    context);
+            }
+            else
+                enemy.Motor.Stop();
+
+            enemy.SetAnimation(movementAnimation);
             enemy.UpdateAnimation(gameTime);
 
             if (contactDamageTimer < contactDamageCooldown ||
@@ -55,10 +102,11 @@ namespace _1_2D_Top_Down
                 return;
             }
 
-            context.RequestPlayerDamage(enemy.Definition.ContactDamage);
-            contactDamageTimer = 0f;
-            attackStateTimer = attackStateDuration;
+            isAttacking = true;
+            attackTimer = 0f;
+            attackDamageRequested = false;
             enemy.ChangeState(EnemyState.Attacking);
+            enemy.SetAnimation(attackAnimation);
         }
     }
 }

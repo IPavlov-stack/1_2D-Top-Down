@@ -5,6 +5,7 @@
         Idle,
         Chasing,
         Attacking,
+        Hurt,
         Knockback,
         Dead
     }

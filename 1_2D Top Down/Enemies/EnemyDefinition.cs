@@ -4,94 +4,43 @@ namespace _1_2D_Top_Down
     {
         public string Id { get; }
         public EnemyType Type { get; }
-        public string TextureAsset { get; }
-        public string ShadowTextureAsset { get; }
-        public string DeathTextureAsset { get; }
-        public string? ProjectileTextureAsset { get; }
+        public EnemyVisualDefinition Visuals { get; }
+        public EnemyStatsDefinition Stats { get; }
+        public EnemyLocomotionDefinition Locomotion { get; }
+        public EnemyBehaviorDefinition Behavior { get; }
 
-        public int MaxHealth { get; }
-        public float MoveSpeed { get; }
-        public int ContactDamage { get; }
-        public int ExperienceReward { get; }
-        public float AttackRange { get; }
-        public float AttackCooldownSeconds { get; }
-        public float ContactDamageCooldownSeconds { get; }
-        public float AttackStateDurationSeconds { get; }
-        public float ProjectileReleaseTimeSeconds { get; }
-        public float AttackDurationSeconds { get; }
-        public string? SummonEnemyId { get; }
-        public float SummonCooldownSeconds { get; }
-        public float SummonRadius { get; }
-
-        public int DeathFrameCount { get; }
-        public int DeathSheetColumnCount { get; }
-        public int DeathSheetRowCount { get; }
-        public int DeathAnimationRow { get; }
-        public float DeathFrameDuration { get; }
-        public float DeathScale { get; }
-
-        public float ShadowScale { get; }
-        public float ShadowOpacity { get; }
-        public float ShadowBottomOffset { get; }
+        // Compatibility aliases keep mission and rendering code stable while
+        // new enemy features consume the component definitions directly.
+        public string TextureAsset => Visuals.TextureAsset;
+        public string ShadowTextureAsset => Visuals.ShadowTextureAsset;
+        public string DeathTextureAsset => Visuals.DeathTextureAsset;
+        public int MaxHealth => Stats.MaxHealth;
+        public int ExperienceReward => Stats.ExperienceReward;
+        public float MoveSpeed => Locomotion.WalkSpeed;
+        public int DeathFrameCount => Visuals.DeathFrameCount;
+        public int DeathSheetColumnCount => Visuals.DeathSheetColumns;
+        public int DeathSheetRowCount => Visuals.DeathSheetRows;
+        public int DeathAnimationRow => Visuals.DeathAnimationRow;
+        public float DeathFrameDuration => Visuals.DeathFrameDuration;
+        public float DeathScale => Visuals.DeathScale;
+        public float ShadowScale => Visuals.ShadowScale;
+        public float ShadowOpacity => Visuals.ShadowOpacity;
+        public float ShadowBottomOffset => Visuals.ShadowBottomOffset;
 
         public EnemyDefinition(
             string id,
             EnemyType type,
-            string textureAsset,
-            string shadowTextureAsset,
-            string deathTextureAsset,
-            int maxHealth,
-            float moveSpeed,
-            int contactDamage,
-            int experienceReward,
-            int deathFrameCount,
-            int deathSheetColumnCount,
-            int deathSheetRowCount,
-            int deathAnimationRow,
-            float deathFrameDuration,
-            float deathScale,
-            float shadowScale,
-            float shadowOpacity,
-            float shadowBottomOffset,
-            string? projectileTextureAsset = null,
-            float attackRange = 0f,
-            float attackCooldownSeconds = 0f,
-            float contactDamageCooldownSeconds = 0f,
-            float attackStateDurationSeconds = 0f,
-            float projectileReleaseTimeSeconds = 0f,
-            float attackDurationSeconds = 0f,
-            string? summonEnemyId = null,
-            float summonCooldownSeconds = 0f,
-            float summonRadius = 0f)
+            EnemyVisualDefinition visuals,
+            EnemyStatsDefinition stats,
+            EnemyLocomotionDefinition locomotion,
+            EnemyBehaviorDefinition behavior)
         {
             Id = id;
             Type = type;
-            TextureAsset = textureAsset;
-            ShadowTextureAsset = shadowTextureAsset;
-            DeathTextureAsset = deathTextureAsset;
-            ProjectileTextureAsset = projectileTextureAsset;
-            MaxHealth = maxHealth;
-            MoveSpeed = moveSpeed;
-            ContactDamage = contactDamage;
-            ExperienceReward = experienceReward;
-            AttackRange = attackRange;
-            AttackCooldownSeconds = attackCooldownSeconds;
-            ContactDamageCooldownSeconds = contactDamageCooldownSeconds;
-            AttackStateDurationSeconds = attackStateDurationSeconds;
-            ProjectileReleaseTimeSeconds = projectileReleaseTimeSeconds;
-            AttackDurationSeconds = attackDurationSeconds;
-            SummonEnemyId = summonEnemyId;
-            SummonCooldownSeconds = summonCooldownSeconds;
-            SummonRadius = summonRadius;
-            DeathFrameCount = deathFrameCount;
-            DeathSheetColumnCount = deathSheetColumnCount;
-            DeathSheetRowCount = deathSheetRowCount;
-            DeathAnimationRow = deathAnimationRow;
-            DeathFrameDuration = deathFrameDuration;
-            DeathScale = deathScale;
-            ShadowScale = shadowScale;
-            ShadowOpacity = shadowOpacity;
-            ShadowBottomOffset = shadowBottomOffset;
+            Visuals = visuals;
+            Stats = stats;
+            Locomotion = locomotion;
+            Behavior = behavior;
         }
     }
 }

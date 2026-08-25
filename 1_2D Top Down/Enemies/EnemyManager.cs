@@ -65,7 +65,7 @@ namespace _1_2D_Top_Down
 
             return null;
         }
-        public EnemyHitResult TryHitEnemy(Rectangle projectileBounds,int damage,Vector2 attackPosition,float knockbackForce)
+        public EnemyHitResult TryHitEnemy(Rectangle projectileBounds, CombatHit hit)
         {
             Enemy? enemy = FindIntersectingEnemy(projectileBounds);
 
@@ -74,8 +74,7 @@ namespace _1_2D_Top_Down
                 return EnemyHitResult.Miss();
             }
 
-            enemy.Health.TakeDamage(damage);
-            enemy.ApplyKnockback(attackPosition, knockbackForce);
+            enemy.TakeHit(hit);
 
             if (!enemy.Health.IsDead)
             {
@@ -86,11 +85,21 @@ namespace _1_2D_Top_Down
 
             return EnemyHitResult.Defeat(enemy);
         }
-        public void UpdateEnemies(GameTime gameTime, Player player)
+        public void UpdateEnemies(
+            GameTime gameTime,
+            Player player,
+            Rectangle worldBounds,
+            Vector2 worldTileSize,
+            Func<Rectangle, bool> intersectsMapCollision)
         {
             pendingActions.Clear();
             EnemyUpdateContext context =
-                new EnemyUpdateContext(player, pendingActions);
+                new EnemyUpdateContext(
+                    player,
+                    pendingActions,
+                    worldBounds,
+                    worldTileSize,
+                    intersectsMapCollision);
 
             for (int i = enemies.Count - 1; i >= 0; i--)
             {

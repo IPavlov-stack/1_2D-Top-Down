@@ -8,12 +8,14 @@ namespace _1_2D_Top_Down
         public EnemyManager Enemies { get; } = new();
         public ProjectileManager Projectiles { get; } = new();
         public CollectibleManager Collectibles { get; } = new();
+        public WorldEffectManager WorldEffects { get; } = new();
 
         public void ClearMissionObjects()
         {
             Enemies.Clear();
             Projectiles.Clear();
             Collectibles.Clear();
+            WorldEffects.Clear();
         }
     }
 }

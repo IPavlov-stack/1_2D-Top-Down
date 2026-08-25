@@ -20,6 +20,7 @@ namespace _1_2D_Top_Down
             enemyManager.UpdateSpawnQueue(gameTime,SpawnEnemy);
             TryFinishCurrentWave();
             UpdateEnemies(gameTime);
+            UpdateWorldEffects(gameTime);
             UpdateEnemyProjectiles(gameTime);
             enemyManager.RebuildSpatialGrid();
             UpdatePlayerProjectiles(gameTime);
@@ -36,8 +37,13 @@ namespace _1_2D_Top_Down
         }
         private void UpdateEnemies(GameTime gameTime)
         {
-            enemyManager.UpdateEnemies(gameTime, player);
-            ProcessEnemyActionRequests();
+            enemyManager.UpdateEnemies(
+                gameTime,
+                player,
+                gameMap.WorldBounds,
+                gameMap.WorldTileSize,
+                IntersectsMapCollision);
+            enemyActionProcessor.Process(enemyManager.PendingActions, player);
 
             if (player.Health.IsDead)
             {
@@ -45,35 +51,11 @@ namespace _1_2D_Top_Down
             }
         }
 
-        private void ProcessEnemyActionRequests()
+        private void UpdateWorldEffects(GameTime gameTime)
         {
-            foreach (EnemyActionRequest request in enemyManager.PendingActions)
+            if (worldEffectManager.Update(gameTime, player))
             {
-                switch (request)
-                {
-                    case DamagePlayerRequest damageRequest:
-                        if (!player.Health.IsDead)
-                        {
-                            player.TakeDamage(damageRequest.Damage);
-                        }
-                        break;
-
-                    case ProjectileSpawnRequest projectileRequest:
-                        projectileManager.AddEnemyProjectile(
-                            new EnemyProjectile(
-                                enemyFactory.GetTexture(
-                                    projectileRequest.ProjectileAsset),
-                                projectileRequest.Position,
-                                projectileRequest.Direction));
-                        break;
-
-                    case EnemySpawnRequest spawnRequest:
-                        enemyManager.Add(
-                            enemyFactory.Create(
-                                spawnRequest.EnemyId,
-                                spawnRequest.Position));
-                        break;
-                }
+                gameplaySession.ChangeFlowState(GameFlowState.GameOver);
             }
         }
         private void UpdateEnemyProjectiles(GameTime gameTime)
@@ -100,9 +82,7 @@ namespace _1_2D_Top_Down
         {
             EnemyHitResult hit = enemyManager.TryHitEnemy(
                 projectile.Bounds,
-                player.Stats.Damage,
-                projectile.Bounds.Center.ToVector2(),
-                player.Stats.Knockback);
+                projectile.CreateHit());
 
             if (!hit.HasHit)
             {
@@ -124,9 +104,9 @@ namespace _1_2D_Top_Down
             {
                 PlayRandomDemonDeathSound();
             }
-            else if (defeatedEnemy.Definition.Type == EnemyType.EvilEye)
+            else if (defeatedEnemy.Definition.Type == EnemyType.Lich)
             {
-                PlayRandomEvilEyeDeathSound();
+                PlayRandomLichDeathSound();
             }
 
             return true;
@@ -139,7 +119,7 @@ namespace _1_2D_Top_Down
             deathAnimations.Add(
                 new DeathAnimation(
                     enemyFactory.GetTexture(definition.DeathTextureAsset),
-                    enemy.Bounds.Center.ToVector2(),
+                    enemy.SpriteCenter,
                     definition.DeathFrameCount,
                     definition.DeathSheetColumnCount,
                     definition.DeathSheetRowCount,
@@ -224,18 +204,18 @@ namespace _1_2D_Top_Down
                 0f,
                 0f);
         }
-        private void PlayRandomEvilEyeDeathSound()
+        private void PlayRandomLichDeathSound()
         {
-            if (evilEyeDeathSounds == null ||
-                evilEyeDeathSounds.Length == 0)
+            if (lichDeathSounds == null ||
+                lichDeathSounds.Length == 0)
             {
                 return;
             }
 
             int randomSoundIndex =
-                random.Next(evilEyeDeathSounds.Length);
+                random.Next(lichDeathSounds.Length);
 
-            evilEyeDeathSounds[randomSoundIndex].Play(
+            lichDeathSounds[randomSoundIndex].Play(
                 SoundEffectsVolume,
                 0f,
                 0f);
@@ -300,7 +280,9 @@ namespace _1_2D_Top_Down
                     playerProjectileTexture,
                     startPosition,
                     projectileDirection,
-                    player.Stats.ProjectileSpeed));
+                    player.Stats.ProjectileSpeed,
+                    player.Stats.Damage,
+                    player.Stats.Knockback));
             }
         }
 

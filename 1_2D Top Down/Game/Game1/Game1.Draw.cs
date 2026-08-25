@@ -9,6 +9,10 @@ namespace _1_2D_Top_Down
         private void DrawNormalWorld()
         {
             DrawMap();
+            worldEffectManager.Draw(
+                _spriteBatch,
+                pixelTexture,
+                missionNodeTexture);
             DrawEnemyShadows();
             DrawEnemyShadow(
                 playerShadowTexture,
@@ -56,7 +60,7 @@ namespace _1_2D_Top_Down
 
                 DrawEnemyShadow(
                     enemyFactory.GetTexture(definition.ShadowTextureAsset),
-                    enemy.Bounds,
+                    enemy.MovementBounds,
                     definition.ShadowScale,
                     definition.ShadowOpacity,
                     definition.ShadowBottomOffset);
@@ -111,7 +115,7 @@ namespace _1_2D_Top_Down
         {
             foreach (Enemy enemy in enemies)
             {
-                DrawEnemyHealthBar(enemy.Health, enemy.Bounds);
+                DrawEnemyHealthBar(enemy.Health, enemy.SpriteBounds);
             }
         }
 
@@ -409,52 +413,20 @@ namespace _1_2D_Top_Down
             out Texture2D texture,
             out Rectangle sourceRectangle)
         {
-            switch (enemyType)
-            {
-                case EnemyType.Demon:
-                    texture = enemyFactory.GetTexture(
-                        EnemyDefinitions.Demon.TextureAsset);
+            EnemyDefinition definition = EnemyDefinitions.Get(enemyType);
+            EnemyVisualDefinition visuals = definition.Visuals;
+            EnemyAnimationDefinition animation = visuals.DefaultAnimation;
 
-                    // Demon FLYING sheet: 1 row, 4 frames
-                    sourceRectangle = new Rectangle(
-                        0,
-                        0,
-                        texture.Width / 4,
-                        texture.Height);
+            texture = enemyFactory.GetTexture(definition.TextureAsset);
+            int frameWidth = texture.Width / visuals.SheetColumns;
+            int frameHeight = texture.Height / visuals.SheetRows;
 
-                    return true;
-
-                case EnemyType.EvilEye:
-                    texture = enemyFactory.GetTexture(
-                        EnemyDefinitions.EvilEye.TextureAsset);
-
-                    // Evil Eye: 6 колони и 3 реда
-                    // flying row, frame 1
-                    sourceRectangle = new Rectangle(
-                        0,
-                        0,
-                        texture.Width / 6,
-                        texture.Height / 3);
-
-                    return true;
-
-                case EnemyType.Necromancer:
-                    texture = enemyFactory.GetTexture(
-                        EnemyDefinitions.Necromancer.TextureAsset);
-
-                    sourceRectangle = new Rectangle(
-                        0,
-                        0,
-                        texture.Width / 4,
-                        texture.Height / 3);
-
-                    return true;
-
-                default:
-                    texture = null;
-                    sourceRectangle = Rectangle.Empty;
-                    return false;
-            }
+            sourceRectangle = new Rectangle(
+                0,
+                animation.Row * frameHeight,
+                frameWidth,
+                frameHeight);
+            return true;
         }
         private void DrawWaveProgressUi()
         {

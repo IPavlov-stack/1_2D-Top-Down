@@ -8,26 +8,29 @@ namespace _1_2D_Top_Down
 
     public sealed class DamagePlayerRequest : EnemyActionRequest
     {
-        public int Damage { get; }
+        public CombatHit Hit { get; }
 
-        public DamagePlayerRequest(int damage)
+        public DamagePlayerRequest(CombatHit hit)
         {
-            Damage = damage;
+            Hit = hit;
         }
     }
 
     public sealed class ProjectileSpawnRequest : EnemyActionRequest
     {
-        public string ProjectileAsset { get; }
+        public ProjectileSpec Spec { get; }
+        public string SourceId { get; }
         public Vector2 Position { get; }
         public Vector2 Direction { get; }
 
         public ProjectileSpawnRequest(
-            string projectileAsset,
+            ProjectileSpec spec,
+            string sourceId,
             Vector2 position,
             Vector2 direction)
         {
-            ProjectileAsset = projectileAsset;
+            Spec = spec;
+            SourceId = sourceId;
             Position = position;
             Direction = direction;
         }
@@ -42,6 +45,29 @@ namespace _1_2D_Top_Down
         {
             EnemyId = enemyId;
             Position = position;
+        }
+    }
+
+    public sealed class AreaEffectSpawnRequest : EnemyActionRequest
+    {
+        public AreaEffectDefinition Definition { get; }
+        public Vector2 Center { get; }
+        public Vector2 WorldTileSize { get; }
+        public CombatFaction SourceFaction { get; }
+        public string SourceId { get; }
+
+        public AreaEffectSpawnRequest(
+            AreaEffectDefinition definition,
+            Vector2 center,
+            Vector2 worldTileSize,
+            CombatFaction sourceFaction,
+            string sourceId)
+        {
+            Definition = definition;
+            Center = center;
+            WorldTileSize = worldTileSize;
+            SourceFaction = sourceFaction;
+            SourceId = sourceId;
         }
     }
 }

@@ -5,34 +5,32 @@ namespace _1_2D_Top_Down
 {
     public sealed class KeepDistanceRangedBehavior : IEnemyBehavior
     {
-        private readonly int movementAnimationRow;
-        private readonly int movementFrameCount;
-        private readonly int attackAnimationRow;
-        private readonly int attackFrameCount;
+        private readonly float attackRange;
+        private readonly float attackCooldown;
+        private readonly EnemyAnimationDefinition idleAnimation;
+        private readonly EnemyAnimationDefinition movementAnimation;
+        private readonly EnemyAnimationDefinition attackAnimation;
         private readonly float projectileReleaseTime;
         private readonly float attackDuration;
         private readonly bool rotateDuringAttack;
+        private readonly ProjectileSpec projectile;
 
         private float shootTimer;
         private float attackTimer;
         private bool projectileRequested;
 
         public KeepDistanceRangedBehavior(
-            int movementAnimationRow,
-            int movementFrameCount,
-            int attackAnimationRow,
-            int attackFrameCount,
-            float projectileReleaseTime,
-            float attackDuration,
-            bool rotateDuringAttack = true)
+            KeepDistanceRangedBehaviorDefinition definition)
         {
-            this.movementAnimationRow = movementAnimationRow;
-            this.movementFrameCount = movementFrameCount;
-            this.attackAnimationRow = attackAnimationRow;
-            this.attackFrameCount = attackFrameCount;
-            this.projectileReleaseTime = projectileReleaseTime;
-            this.attackDuration = attackDuration;
-            this.rotateDuringAttack = rotateDuringAttack;
+            attackRange = definition.AttackRange;
+            attackCooldown = definition.AttackCooldown;
+            idleAnimation = definition.IdleAnimation;
+            movementAnimation = definition.MovementAnimation;
+            attackAnimation = definition.AttackAnimation;
+            projectileReleaseTime = definition.ReleaseTime;
+            attackDuration = definition.AttackDuration;
+            rotateDuringAttack = definition.RotateDuringAttack;
+            projectile = definition.Projectile;
         }
 
         public void Update(
@@ -49,32 +47,39 @@ namespace _1_2D_Top_Down
 
             float distance = direction.Length();
 
-            if (distance > enemy.Definition.AttackRange &&
+            enemy.SetFacingDirection(direction);
+
+            if (distance > attackRange &&
                 enemy.CurrentState != EnemyState.Attacking)
             {
                 enemy.ChangeState(EnemyState.Chasing);
 
                 if (direction != Vector2.Zero)
                 {
-                    direction.Normalize();
-                    enemy.Position +=
-                        direction * enemy.Definition.MoveSpeed * deltaTime;
+                    enemy.Motor.Move(
+                        enemy,
+                        direction,
+                        enemy.Definition.MoveSpeed,
+                        EnemyMovementMode.Walk,
+                        deltaTime,
+                        context);
                 }
 
-                enemy.SetAnimation(movementAnimationRow, movementFrameCount);
+                enemy.SetAnimation(movementAnimation);
                 enemy.UpdateAnimation(gameTime);
                 return;
             }
 
             if (enemy.CurrentState != EnemyState.Attacking)
             {
+                enemy.Motor.Stop();
                 enemy.ChangeState(EnemyState.Idle);
-                enemy.SetAnimation(movementAnimationRow, movementFrameCount);
+                enemy.SetAnimation(idleAnimation);
                 enemy.UpdateAnimation(gameTime);
 
                 shootTimer += deltaTime;
 
-                if (shootTimer >= enemy.Definition.AttackCooldownSeconds)
+                if (shootTimer >= attackCooldown)
                 {
                     shootTimer = 0f;
                     attackTimer = 0f;
@@ -87,13 +92,14 @@ namespace _1_2D_Top_Down
                         enemy.SetRotation(GetAttackRotation(direction));
                     }
 
-                    enemy.SetAnimation(attackAnimationRow, attackFrameCount);
+                    enemy.SetAnimation(attackAnimation);
                 }
 
                 return;
             }
 
             attackTimer += deltaTime;
+            enemy.Motor.Stop();
             enemy.UpdateAnimation(gameTime);
 
             if (!projectileRequested &&
@@ -105,7 +111,8 @@ namespace _1_2D_Top_Down
                     direction.Normalize();
 
                 context.RequestProjectile(
-                    enemy.Definition.ProjectileTextureAsset!,
+                    projectile,
+                    enemy.Definition.Id,
                     enemy.SpriteCenter,
                     direction);
             }
@@ -119,7 +126,7 @@ namespace _1_2D_Top_Down
                 enemy.SetRotation(0f);
             }
             enemy.ChangeState(EnemyState.Idle);
-            enemy.SetAnimation(movementAnimationRow, movementFrameCount);
+            enemy.SetAnimation(idleAnimation);
         }
 
         private static float GetAttackRotation(Vector2 direction)

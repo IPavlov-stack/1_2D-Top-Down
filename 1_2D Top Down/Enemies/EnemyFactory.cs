@@ -8,22 +8,31 @@ namespace _1_2D_Top_Down
     public sealed class EnemyFactory
     {
         private readonly Func<string, Texture2D> loadTexture;
+        private readonly EnemyBehaviorRegistry behaviorRegistry;
+        private readonly EnemyDefinitionRegistry definitionRegistry;
         private readonly Dictionary<string, Texture2D> textureCache = new(
             StringComparer.OrdinalIgnoreCase);
 
-        public EnemyFactory(Func<string, Texture2D> loadTexture)
+        public EnemyFactory(
+            Func<string, Texture2D> loadTexture,
+            EnemyBehaviorRegistry? behaviorRegistry = null,
+            EnemyDefinitionRegistry? definitionRegistry = null)
         {
             this.loadTexture = loadTexture;
+            this.behaviorRegistry =
+                behaviorRegistry ?? new EnemyBehaviorRegistry();
+            this.definitionRegistry =
+                definitionRegistry ?? EnemyDefinitions.Registry;
         }
 
         public Enemy Create(EnemyType type, Vector2 position)
         {
-            return Create(EnemyDefinitions.Get(type), position);
+            return Create(definitionRegistry.Get(type), position);
         }
 
         public Enemy Create(string id, Vector2 position)
         {
-            if (!EnemyDefinitions.TryGet(id, out EnemyDefinition? definition))
+            if (!definitionRegistry.TryGet(id, out EnemyDefinition definition))
                 throw new InvalidOperationException($"Unknown enemy definition '{id}'.");
 
             return Create(definition, position);
@@ -44,49 +53,12 @@ namespace _1_2D_Top_Down
         {
             Texture2D texture = GetTexture(definition.TextureAsset);
 
-            return definition.Type switch
-            {
-                EnemyType.Demon => new Demon(
-                    texture,
-                    position,
-                    definition,
-                    new ChaseContactBehavior(
-                        definition.ContactDamageCooldownSeconds,
-                        definition.AttackStateDurationSeconds)),
-                EnemyType.EvilEye => new Evil_Eye(
-                    texture,
-                    position,
-                    definition,
-                    new KeepDistanceRangedBehavior(
-                        movementAnimationRow: 0,
-                        movementFrameCount: 4,
-                        attackAnimationRow: 1,
-                        attackFrameCount: 6,
-                        projectileReleaseTime:
-                            definition.ProjectileReleaseTimeSeconds,
-                        attackDuration:
-                            definition.AttackDurationSeconds)),
-                EnemyType.Necromancer => new Necromancer(
-                    texture,
-                    position,
-                    definition,
-                    new NecromancerBehavior(
-                        new KeepDistanceRangedBehavior(
-                            movementAnimationRow: 0,
-                            movementFrameCount: 4,
-                            attackAnimationRow: 1,
-                            attackFrameCount: 4,
-                            projectileReleaseTime:
-                                definition.ProjectileReleaseTimeSeconds,
-                            attackDuration:
-                                definition.AttackDurationSeconds,
-                            rotateDuringAttack: false),
-                        definition.SummonEnemyId!,
-                        definition.SummonCooldownSeconds,
-                        definition.SummonRadius)),
-                _ => throw new InvalidOperationException(
-                    $"No runtime enemy is registered for '{definition.Id}'.")
-            };
+            return new Enemy(
+                texture,
+                position,
+                definition,
+                behaviorRegistry.Create(definition.Behavior),
+                GetTexture);
         }
     }
 }

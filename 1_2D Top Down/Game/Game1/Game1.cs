@@ -47,6 +47,7 @@ namespace _1_2D_Top_Down
         private Texture2D playerProjectileTexture;
         private GameWorld gameWorld => gameplaySession.World;
         private ProjectileManager projectileManager => gameWorld.Projectiles;
+        private WorldEffectManager worldEffectManager => gameWorld.WorldEffects;
         private IReadOnlyList<PlayerProjectile> projectiles => projectileManager.PlayerProjectiles;
         private Texture2D playerShadowTexture;
 
@@ -64,6 +65,7 @@ namespace _1_2D_Top_Down
         //enemy info
         private EnemyManager enemyManager => gameWorld.Enemies;
         private EnemyFactory enemyFactory;
+        private EnemyActionProcessor enemyActionProcessor;
         private IReadOnlyList<Enemy> enemies => enemyManager.Enemies;
         private List<DeathAnimation> deathAnimations => enemyManager.DeathAnimations;
 
@@ -121,7 +123,7 @@ namespace _1_2D_Top_Down
         private SoundEffect[] coinPickupSounds;
         private SoundEffect[] basicAttackSounds;
         private SoundEffect[] demonDeathSounds;
-        private SoundEffect[] evilEyeDeathSounds;
+        private SoundEffect[] lichDeathSounds;
         private SoundEffect manaCrystalCollectSound;
 
         //music
@@ -180,8 +182,8 @@ namespace _1_2D_Top_Down
             pixelTexture.SetData(new[] { Color.White });
             Texture2D playerTexture = Content.Load<Texture2D>("player/Character");
             playerShadowTexture = Content.Load<Texture2D>("player/shadow_player");
-            enemyFactory = new EnemyFactory(
-                assetName => Content.Load<Texture2D>(assetName));
+            enemyFactory = new EnemyFactory(assetName => Content.Load<Texture2D>(assetName));
+            enemyActionProcessor = new EnemyActionProcessor(enemyManager,projectileManager, worldEffectManager,enemyFactory);
             playerProjectileTexture = Content.Load<Texture2D>("projectiles/magic_projectile2");
             coinTexture = Content.Load<Texture2D>("Collectables/coin");
             manaCrystalTexture = Content.Load<Texture2D>("Collectables/mana_crystal_sheet");
@@ -204,12 +206,12 @@ namespace _1_2D_Top_Down
                 Content.Load<SoundEffect>("Sounds/Enemies/Demon/demon_death3"),
                 Content.Load<SoundEffect>("Sounds/Enemies/Demon/demon_death4")
             };
-            evilEyeDeathSounds = new[]
+            lichDeathSounds = new[]
             {
-                Content.Load<SoundEffect>("Sounds/Enemies/Evil_Eye/evil_eye_death1"),
-                Content.Load<SoundEffect>("Sounds/Enemies/Evil_Eye/evil_eye_death2"),
-                Content.Load<SoundEffect>("Sounds/Enemies/Evil_Eye/evil_eye_death3"),
-                Content.Load<SoundEffect>("Sounds/Enemies/Evil_Eye/evil_eye_death4")
+                Content.Load<SoundEffect>("Sounds/Enemies/Lich/lich_death1"),
+                Content.Load<SoundEffect>("Sounds/Enemies/Lich/lich_death2"),
+                Content.Load<SoundEffect>("Sounds/Enemies/Lich/lich_death3"),
+                Content.Load<SoundEffect>("Sounds/Enemies/Lich/lich_death4")
             };
             manaCrystalCollectSound = Content.Load<SoundEffect>("Sounds/Mana/mana_collect");
             backgroundMusic = Content.Load<Song>("Music/ambient_forest");

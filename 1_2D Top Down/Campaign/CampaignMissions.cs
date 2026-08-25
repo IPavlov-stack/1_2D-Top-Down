@@ -24,7 +24,7 @@
                         6,
                         delayAfterGroupSeconds: 1f),
 
-                    new EnemySpawnGroup(EnemyType.EvilEye, 1)),
+                    new EnemySpawnGroup(EnemyType.Lich, 1)),
 
                 new WaveDefinition(
                     0.20f,
@@ -33,7 +33,7 @@
                         7,
                         delayAfterGroupSeconds: 1.5f),
 
-                    new EnemySpawnGroup(EnemyType.EvilEye, 3),
+                    new EnemySpawnGroup(EnemyType.Lich, 3),
                     new EnemySpawnGroup(EnemyType.Necromancer, 1)),
 
                 new WaveDefinition(
@@ -47,7 +47,7 @@
                         15,
                         delayAfterGroupSeconds: 2f),
 
-                    new EnemySpawnGroup(EnemyType.EvilEye, 3)),
+                    new EnemySpawnGroup(EnemyType.Lich, 3)),
 
                 new WaveDefinition(
                     0.14f,
@@ -56,7 +56,7 @@
                         20,
                         delayAfterGroupSeconds: 2.5f),
 
-                    new EnemySpawnGroup(EnemyType.EvilEye, 5)));
+                    new EnemySpawnGroup(EnemyType.Lich, 5)));
 
         public static MissionDefinition ForestPath { get; } =
             new MissionDefinition(

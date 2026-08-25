@@ -260,6 +260,11 @@ namespace _1_2D_Top_Down
                 }
             }
         }
+
+        public void TakeHit(CombatHit hit)
+        {
+            TakeDamage(hit.Damage);
+        }
         public void ResetDamageEffects()
         {
             damageFlashTimer = 0f;
