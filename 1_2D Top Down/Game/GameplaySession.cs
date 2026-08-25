@@ -51,7 +51,7 @@ namespace _1_2D_Top_Down
             Player.Update(
                 gameTime,
                 Map.WorldBounds,
-                Map.SolidCollisionRectangles,
+                Map.IntersectsCollision,
                 allowInput);
         }
 

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
+using _1_2D_Top_Down;
 
 namespace Tiled
 {
@@ -22,11 +23,16 @@ namespace Tiled
         private const uint TileIdMask = 0x0FFFFFFF;
 
         private readonly List<Rectangle> _rectangles;
+        private readonly List<StaticCollisionShape> _shapes;
         public IReadOnlyList<Rectangle> Rectangles => _rectangles;
+        public IReadOnlyList<StaticCollisionShape> Shapes => _shapes;
 
-        private TiledWaterCollisionLayer(List<Rectangle> rectangles)
+        private TiledWaterCollisionLayer(
+            List<Rectangle> rectangles,
+            List<StaticCollisionShape> shapes)
         {
             _rectangles = rectangles;
+            _shapes = shapes;
         }
 
         public static TiledWaterCollisionLayer FromFile(
@@ -63,10 +69,13 @@ namespace Tiled
             using Stream tilesetStream = TitleContainer.OpenStream(tilesetPath);
             XDocument tilesetDocument = XDocument.Load(tilesetStream);
             Dictionary<int, List<LocalRectangle>> localCollisions = ReadTileCollisions(tilesetDocument.Root!);
+            Dictionary<int, List<IReadOnlyList<Vector2>>> localPolygons =
+                ReadTileCollisionPolygons(tilesetDocument.Root!);
 
             uint[] waterTiles = ReadLayer(map, waterLayerName, columns * rows);
             uint[] groundTiles = ReadLayer(map, groundLayerName, columns * rows);
             List<Rectangle> rectangles = new();
+            List<StaticCollisionShape> shapes = new();
 
             for (int index = 0; index < waterTiles.Length; index++)
             {
@@ -80,24 +89,87 @@ namespace Tiled
                     continue;
 
                 int localTileId = (int)cleanGid - waterFirstGid;
-                if (!localCollisions.TryGetValue(localTileId, out List<LocalRectangle> localRectangles))
+                localCollisions.TryGetValue(localTileId, out List<LocalRectangle> localRectangles);
+                localPolygons.TryGetValue(localTileId, out List<IReadOnlyList<Vector2>> tilePolygons);
+                if (localRectangles == null && tilePolygons == null)
                     continue;
 
                 int column = index % columns;
                 int row = index / columns;
 
-                foreach (LocalRectangle local in localRectangles)
+                foreach (LocalRectangle local in localRectangles ?? Enumerable.Empty<LocalRectangle>())
                 {
                     LocalRectangle transformed = Transform(local, waterGid, tileWidth, tileHeight);
-                    rectangles.Add(new Rectangle(
+                    Rectangle rectangle = new(
                         Round((column * tileWidth + transformed.X) * mapScale),
                         Round((row * tileHeight + transformed.Y) * mapScale),
                         Math.Max(1, Round(transformed.Width * mapScale)),
-                        Math.Max(1, Round(transformed.Height * mapScale))));
+                        Math.Max(1, Round(transformed.Height * mapScale)));
+                    rectangles.Add(rectangle);
+                    shapes.Add(StaticCollisionShape.FromRectangle(rectangle));
+                }
+
+                foreach (IReadOnlyList<Vector2> localPolygon in
+                         tilePolygons ?? Enumerable.Empty<IReadOnlyList<Vector2>>())
+                {
+                    shapes.Add(StaticCollisionShape.FromPolygon(
+                        localPolygon.Select(point =>
+                        {
+                            Vector2 transformed = Transform(point, waterGid, tileWidth, tileHeight);
+                            return new Vector2(
+                                (column * tileWidth + transformed.X) * mapScale,
+                                (row * tileHeight + transformed.Y) * mapScale);
+                        })));
                 }
             }
 
-            return new TiledWaterCollisionLayer(rectangles);
+            return new TiledWaterCollisionLayer(rectangles, shapes);
+        }
+
+        private static Dictionary<int, List<IReadOnlyList<Vector2>>> ReadTileCollisionPolygons(
+            XElement tileset)
+        {
+            Dictionary<int, List<IReadOnlyList<Vector2>>> result = new();
+
+            foreach (XElement tile in tileset.Elements("tile"))
+            {
+                XElement objectGroup = tile.Element("objectgroup");
+                if (objectGroup == null)
+                    continue;
+
+                List<IReadOnlyList<Vector2>> polygons = new();
+                foreach (XElement element in objectGroup.Elements("object"))
+                {
+                    XElement polygon = element.Element("polygon");
+                    string pointsText = (string)polygon?.Attribute("points");
+                    if (string.IsNullOrWhiteSpace(pointsText))
+                        continue;
+
+                    float originX = ReadFloat(element, "x");
+                    float originY = ReadFloat(element, "y");
+                    List<Vector2> points = new();
+                    foreach (string pair in pointsText.Split(
+                        new[] { ' ', '\r', '\n', '\t' },
+                        StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        string[] coordinates = pair.Split(',');
+                        if (coordinates.Length != 2)
+                            throw new InvalidDataException($"Invalid Tiled polygon point '{pair}'.");
+
+                        points.Add(new Vector2(
+                            originX + float.Parse(coordinates[0], CultureInfo.InvariantCulture),
+                            originY + float.Parse(coordinates[1], CultureInfo.InvariantCulture)));
+                    }
+
+                    if (points.Count >= 3)
+                        polygons.Add(points);
+                }
+
+                if (polygons.Count > 0)
+                    result[ReadInt(tile, "id")] = polygons;
+            }
+
+            return result;
         }
 
         private static Dictionary<int, List<LocalRectangle>> ReadTileCollisions(XElement tileset)
@@ -180,6 +252,19 @@ namespace Tiled
                 y = tileHeight - y - height;
 
             return new LocalRectangle(x, y, width, height);
+        }
+
+        private static Vector2 Transform(Vector2 point, uint gid, int tileWidth, int tileHeight)
+        {
+            float x = point.X;
+            float y = point.Y;
+            if ((gid & FlipDiagonalFlag) != 0)
+                (x, y) = (y, x);
+            if ((gid & FlipHorizontalFlag) != 0)
+                x = tileWidth - x;
+            if ((gid & FlipVerticalFlag) != 0)
+                y = tileHeight - y;
+            return new Vector2(x, y);
         }
 
         private static int ReadInt(XElement element, string attributeName)

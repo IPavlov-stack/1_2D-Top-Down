@@ -7,7 +7,7 @@ namespace _1_2D_Top_Down
     {
         private readonly int cellSize;
 
-        private readonly Dictionary<Point, List<Rectangle>> cells = new();
+        private readonly Dictionary<Point, List<StaticCollisionShape>> cells = new();
 
         public StaticCollisionGrid(int cellSize)
         {
@@ -15,12 +15,13 @@ namespace _1_2D_Top_Down
         }
 
         // Извиква се само веднъж, след като картата и collision layers са заредени.
-        public void Build(IEnumerable<Rectangle> collisionRectangles)
+        public void Build(IEnumerable<StaticCollisionShape> collisionShapes)
         {
             cells.Clear();
 
-            foreach (Rectangle rectangle in collisionRectangles)
+            foreach (StaticCollisionShape shape in collisionShapes)
             {
+                Rectangle rectangle = shape.Bounds;
                 int startCellX = rectangle.Left / cellSize;
                 int endCellX = (rectangle.Right - 1) / cellSize;
 
@@ -36,13 +37,13 @@ namespace _1_2D_Top_Down
 
                         if (!cells.TryGetValue(
                                 cellPosition,
-                                out List<Rectangle>? cell))
+                                out List<StaticCollisionShape>? cell))
                         {
-                            cell = new List<Rectangle>();
+                            cell = new List<StaticCollisionShape>();
                             cells.Add(cellPosition, cell);
                         }
 
-                        cell.Add(rectangle);
+                        cell.Add(shape);
                     }
                 }
             }
@@ -62,14 +63,14 @@ namespace _1_2D_Top_Down
                 {
                     if (!cells.TryGetValue(
                             new Point(x, y),
-                            out List<Rectangle>? cell))
+                            out List<StaticCollisionShape>? cell))
                     {
                         continue;
                     }
 
                     for (int i = 0; i < cell.Count; i++)
                     {
-                        if (bounds.Intersects(cell[i]))
+                        if (cell[i].Intersects(bounds))
                         {
                             return true;
                         }

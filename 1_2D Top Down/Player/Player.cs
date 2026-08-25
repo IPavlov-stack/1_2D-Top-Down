@@ -117,7 +117,7 @@ namespace _1_2D_Top_Down
         public void Update(
             GameTime gameTime,
             Rectangle arena,
-            IReadOnlyList<Rectangle> collisionRectangles,
+            Func<Rectangle, bool> intersectsCollision,
             bool canMove)
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -153,8 +153,8 @@ namespace _1_2D_Top_Down
                 // Each axis is tried independently. If X is blocked but Y is
                 // clear, the player still moves along the obstacle instead of
                 // getting stuck against its corner.
-                TryMoveHorizontally(direction.X * movementDistance, arena, collisionRectangles);
-                TryMoveVertically(direction.Y * movementDistance, arena, collisionRectangles);
+                TryMoveHorizontally(direction.X * movementDistance, arena, intersectsCollision);
+                TryMoveVertically(direction.Y * movementDistance, arena, intersectsCollision);
 
                 animationTimer += deltaTime;
 
@@ -204,53 +204,27 @@ namespace _1_2D_Top_Down
         private void TryMoveHorizontally(
             float distance,
             Rectangle arena,
-            IReadOnlyList<Rectangle> collisionRectangles)
+            Func<Rectangle, bool> intersectsCollision)
         {
+            float previousX = Position.X;
             Position.X += distance;
             KeepInsideArena(arena);
 
-            foreach (Rectangle collisionRectangle in collisionRectangles)
-            {
-                if (!MovementBounds.Intersects(collisionRectangle))
-                    continue;
-
-                if (distance > 0f)
-                {
-                    Position.X -= MovementBounds.Right - collisionRectangle.Left;
-                }
-                else if (distance < 0f)
-                {
-                    Position.X += collisionRectangle.Right - MovementBounds.Left;
-                }
-
-                break;
-            }
+            if (intersectsCollision(MovementBounds))
+                Position.X = previousX;
         }
 
         private void TryMoveVertically(
             float distance,
             Rectangle arena,
-            IReadOnlyList<Rectangle> collisionRectangles)
+            Func<Rectangle, bool> intersectsCollision)
         {
+            float previousY = Position.Y;
             Position.Y += distance;
             KeepInsideArena(arena);
 
-            foreach (Rectangle collisionRectangle in collisionRectangles)
-            {
-                if (!MovementBounds.Intersects(collisionRectangle))
-                    continue;
-
-                if (distance > 0f)
-                {
-                    Position.Y -= MovementBounds.Bottom - collisionRectangle.Top;
-                }
-                else if (distance < 0f)
-                {
-                    Position.Y += collisionRectangle.Bottom - MovementBounds.Top;
-                }
-
-                break;
-            }
+            if (intersectsCollision(MovementBounds))
+                Position.Y = previousY;
         }
         private void KeepInsideArena(Rectangle arena)
         {
@@ -269,16 +243,6 @@ namespace _1_2D_Top_Down
                 Position.Y -= movementBounds.Bottom - arena.Bottom;
         }
 
-        private bool IntersectsCollision(IReadOnlyList<Rectangle> collisionRectangles)
-        {
-            foreach (Rectangle collisionRectangle in collisionRectangles)
-            {
-                if (MovementBounds.Intersects(collisionRectangle))
-                    return true;
-            }
-
-            return false;
-        }
         public void TakeDamage(int damage)
         {
             float healthBeforeDamage = Health.CurrentHealth;

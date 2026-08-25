@@ -13,6 +13,7 @@ namespace _1_2D_Top_Down
     {
         private readonly StaticCollisionGrid collisionGrid = new(128);
         private readonly List<Rectangle> solidCollisionRectangles = new();
+        private readonly List<StaticCollisionShape> solidCollisionShapes = new();
         private IReadOnlyList<Vector2> enemySpawnerPoints = new List<Vector2>();
         private IReadOnlyList<EnemySpawnPoint> enemySpawnPoints =
             new List<EnemySpawnPoint>();
@@ -29,6 +30,7 @@ namespace _1_2D_Top_Down
             new List<TiledTileLayer>();
         public TiledPropsLayer PropsLayer { get; private set; }
         public IReadOnlyList<Rectangle> SolidCollisionRectangles => solidCollisionRectangles;
+        public IReadOnlyList<StaticCollisionShape> SolidCollisionShapes => solidCollisionShapes;
         public IReadOnlyList<Vector2> EnemySpawnerPoints => enemySpawnerPoints;
         public IReadOnlyList<EnemySpawnPoint> EnemySpawnPoints => enemySpawnPoints;
         public IReadOnlyList<MissionTrigger> MissionTriggers => missionTriggers;
@@ -111,7 +113,11 @@ namespace _1_2D_Top_Down
             solidCollisionRectangles.Clear();
             solidCollisionRectangles.AddRange(collisionLayer.Rectangles);
             solidCollisionRectangles.AddRange(waterCollisionLayer.Rectangles);
-            collisionGrid.Build(solidCollisionRectangles);
+            solidCollisionShapes.Clear();
+            solidCollisionShapes.AddRange(collisionLayer.Shapes);
+            solidCollisionShapes.AddRange(waterCollisionLayer.Shapes);
+            solidCollisionShapes.AddRange(PropsLayer.CollisionShapes);
+            collisionGrid.Build(solidCollisionShapes);
 
             if (loadEnemySpawners)
             {

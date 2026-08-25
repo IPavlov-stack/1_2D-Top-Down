@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Tiled;
@@ -23,8 +24,13 @@ namespace _1_2D_Top_Down
         {
             if (view.ShowCollisions)
             {
-                foreach (Rectangle bounds in session.Map.SolidCollisionRectangles)
-                    DrawRectangle(spriteBatch, bounds, Color.White);
+                foreach (StaticCollisionShape shape in session.Map.SolidCollisionShapes)
+                {
+                    if (shape.IsPolygon)
+                        DrawPolygon(spriteBatch, shape.Vertices, Color.White);
+                    else
+                        DrawRectangle(spriteBatch, shape.Bounds, Color.White);
+                }
             }
 
             if (view.ShowEntityBounds)
@@ -134,6 +140,33 @@ namespace _1_2D_Top_Down
                     outlineThickness,
                     rectangle.Height),
                 color);
+        }
+
+        private void DrawPolygon(
+            SpriteBatch spriteBatch,
+            System.Collections.Generic.IReadOnlyList<Vector2> vertices,
+            Color color)
+        {
+            for (int index = 0; index < vertices.Count; index++)
+            {
+                Vector2 start = vertices[index];
+                Vector2 end = vertices[(index + 1) % vertices.Count];
+                Vector2 direction = end - start;
+                float length = direction.Length();
+                if (length <= 0f)
+                    continue;
+
+                spriteBatch.Draw(
+                    pixelTexture,
+                    start,
+                    null,
+                    color,
+                    MathF.Atan2(direction.Y, direction.X),
+                    Vector2.Zero,
+                    new Vector2(length, 2f),
+                    SpriteEffects.None,
+                    0f);
+            }
         }
     }
 }
