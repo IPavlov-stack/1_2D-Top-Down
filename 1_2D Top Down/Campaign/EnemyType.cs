@@ -4,6 +4,9 @@
     {
         Demon,
         Lich,
-        Necromancer
+        Necromancer,
+        Beholder,
+        MushroomCharger,
+        Zombie
     }
 }

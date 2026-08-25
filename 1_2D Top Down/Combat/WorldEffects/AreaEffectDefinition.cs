@@ -4,6 +4,84 @@ using Microsoft.Xna.Framework;
 namespace _1_2D_Top_Down
 {
     /// <summary>
+    /// Optional sprite-sheet presentation for an area effect. Its timeline
+    /// starts when the telegraph finishes and the effect becomes active.
+    /// </summary>
+    public sealed class AreaEffectAnimationDefinition
+    {
+        public string TextureAsset { get; }
+        public int SheetColumns { get; }
+        public int SheetRows { get; }
+        public int Row { get; }
+        public int FrameCount { get; }
+        public float FrameDuration { get; }
+        public float VisualScale { get; }
+        public bool Loop { get; }
+        public Vector2 VisualOffsetInTiles { get; }
+
+        public AreaEffectAnimationDefinition(
+            string textureAsset,
+            int sheetColumns,
+            int sheetRows,
+            int frameCount,
+            float frameDuration,
+            int row = 0,
+            float visualScale = 1f,
+            bool loop = false,
+            Vector2 visualOffsetInTiles = default)
+        {
+            if (string.IsNullOrWhiteSpace(textureAsset))
+                throw new ArgumentException(
+                    "An animation texture asset is required.",
+                    nameof(textureAsset));
+            if (sheetColumns <= 0)
+                throw new ArgumentOutOfRangeException(nameof(sheetColumns));
+            if (sheetRows <= 0)
+                throw new ArgumentOutOfRangeException(nameof(sheetRows));
+            if (frameCount <= 0 || frameCount > sheetColumns)
+                throw new ArgumentOutOfRangeException(nameof(frameCount));
+            if (frameDuration <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(frameDuration));
+            if (row < 0 || row >= sheetRows)
+                throw new ArgumentOutOfRangeException(nameof(row));
+            if (visualScale <= 0f)
+                throw new ArgumentOutOfRangeException(nameof(visualScale));
+
+            TextureAsset = textureAsset;
+            SheetColumns = sheetColumns;
+            SheetRows = sheetRows;
+            FrameCount = frameCount;
+            FrameDuration = frameDuration;
+            Row = row;
+            VisualScale = visualScale;
+            Loop = loop;
+            VisualOffsetInTiles = visualOffsetInTiles;
+        }
+    }
+
+    /// <summary>
+    /// Three-part presentation for persistent effects: Start plays once,
+    /// Cycle loops while the effect is dangerous, and Finish plays once after
+    /// damage has stopped.
+    /// </summary>
+    public sealed class AreaEffectAnimationSequenceDefinition
+    {
+        public AreaEffectAnimationDefinition Start { get; }
+        public AreaEffectAnimationDefinition Cycle { get; }
+        public AreaEffectAnimationDefinition Finish { get; }
+
+        public AreaEffectAnimationSequenceDefinition(
+            AreaEffectAnimationDefinition start,
+            AreaEffectAnimationDefinition cycle,
+            AreaEffectAnimationDefinition finish)
+        {
+            Cycle = cycle ?? throw new ArgumentNullException(nameof(cycle));
+            Start = start;
+            Finish = finish;
+        }
+    }
+
+    /// <summary>
     /// Reusable, data-only description of a telegraphed or persistent area.
     /// Dimensions are expressed in map tiles and are converted at spawn time.
     /// </summary>
@@ -23,6 +101,11 @@ namespace _1_2D_Top_Down
         public bool HitOnce { get; }
         public Color TelegraphColor { get; }
         public Color ActiveColor { get; }
+        public AreaEffectAnimationDefinition Animation { get; }
+        public AreaEffectAnimationSequenceDefinition AnimationSequence { get; }
+        public bool DamageOnlyOnActivation { get; }
+        public bool ShowActiveIndicator { get; }
+        public bool PulseActiveIndicator { get; }
 
         private AreaEffectDefinition(
             string id,
@@ -38,7 +121,12 @@ namespace _1_2D_Top_Down
             float knockback,
             bool hitOnce,
             Color telegraphColor,
-            Color activeColor)
+            Color activeColor,
+            AreaEffectAnimationDefinition animation,
+            bool damageOnlyOnActivation,
+            AreaEffectAnimationSequenceDefinition animationSequence,
+            bool showActiveIndicator,
+            bool pulseActiveIndicator)
         {
             if (string.IsNullOrWhiteSpace(id))
                 throw new ArgumentException("An effect id is required.", nameof(id));
@@ -48,6 +136,11 @@ namespace _1_2D_Top_Down
                 throw new ArgumentOutOfRangeException(nameof(activeDuration));
             if (damage < 0)
                 throw new ArgumentOutOfRangeException(nameof(damage));
+            if (animation != null && animationSequence != null)
+            {
+                throw new ArgumentException(
+                    "Use either a single animation or an animation sequence.");
+            }
 
             Id = id;
             Shape = shape;
@@ -67,6 +160,11 @@ namespace _1_2D_Top_Down
             ActiveColor = activeColor == default
                 ? Color.OrangeRed
                 : activeColor;
+            Animation = animation;
+            AnimationSequence = animationSequence;
+            DamageOnlyOnActivation = damageOnlyOnActivation;
+            ShowActiveIndicator = showActiveIndicator;
+            PulseActiveIndicator = pulseActiveIndicator;
         }
 
         public static AreaEffectDefinition Rectangle(
@@ -81,7 +179,12 @@ namespace _1_2D_Top_Down
             bool hitOnce = true,
             float knockback = 0f,
             Color telegraphColor = default,
-            Color activeColor = default)
+            Color activeColor = default,
+            AreaEffectAnimationDefinition animation = null,
+            bool damageOnlyOnActivation = false,
+            AreaEffectAnimationSequenceDefinition animationSequence = null,
+            bool showActiveIndicator = false,
+            bool pulseActiveIndicator = false)
         {
             if (widthInTiles <= 0f)
                 throw new ArgumentOutOfRangeException(nameof(widthInTiles));
@@ -102,7 +205,12 @@ namespace _1_2D_Top_Down
                 knockback,
                 hitOnce,
                 telegraphColor,
-                activeColor);
+                activeColor,
+                animation,
+                damageOnlyOnActivation,
+                animationSequence,
+                showActiveIndicator,
+                pulseActiveIndicator);
         }
 
         public static AreaEffectDefinition Circle(
@@ -116,7 +224,12 @@ namespace _1_2D_Top_Down
             bool hitOnce = true,
             float knockback = 0f,
             Color telegraphColor = default,
-            Color activeColor = default)
+            Color activeColor = default,
+            AreaEffectAnimationDefinition animation = null,
+            bool damageOnlyOnActivation = false,
+            AreaEffectAnimationSequenceDefinition animationSequence = null,
+            bool showActiveIndicator = false,
+            bool pulseActiveIndicator = false)
         {
             if (radiusInTiles <= 0f)
                 throw new ArgumentOutOfRangeException(nameof(radiusInTiles));
@@ -135,7 +248,12 @@ namespace _1_2D_Top_Down
                 knockback,
                 hitOnce,
                 telegraphColor,
-                activeColor);
+                activeColor,
+                animation,
+                damageOnlyOnActivation,
+                animationSequence,
+                showActiveIndicator,
+                pulseActiveIndicator);
         }
     }
 }

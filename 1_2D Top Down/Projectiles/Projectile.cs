@@ -15,6 +15,7 @@ namespace _1_2D_Top_Down
 
         protected int frameCount;
         protected int frameRows;
+        protected int animationRow;
         protected float frameDuration;
 
         protected int currentFrame;
@@ -61,7 +62,8 @@ namespace _1_2D_Top_Down
             DamageType damageType = DamageType.Physical,
             float knockback = 0f,
             bool isReflectable = false,
-            string sourceId = "")
+            string sourceId = "",
+            int animationRow = 0)
         {
             this.texture = texture;
             Position = startPosition;
@@ -72,6 +74,7 @@ namespace _1_2D_Top_Down
 
             this.frameCount = frameCount;
             this.frameRows = frameRows;
+            this.animationRow = animationRow;
             this.frameDuration = frameDuration;
             Faction = faction;
             Damage = damage;
@@ -136,7 +139,7 @@ namespace _1_2D_Top_Down
         {
             Rectangle sourceRectangle = new Rectangle(
                 currentFrame * FrameWidth,
-                0,
+                animationRow * FrameHeight,
                 FrameWidth,
                 FrameHeight);
 

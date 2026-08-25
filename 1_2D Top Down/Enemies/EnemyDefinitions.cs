@@ -1,3 +1,5 @@
+using Microsoft.Xna.Framework;
+
 namespace _1_2D_Top_Down
 {
     public static class EnemyDefinitions
@@ -74,19 +76,166 @@ namespace _1_2D_Top_Down
             usesDirectionalRows: true,
             defaultRow: 0);
 
+        private static readonly EnemyAnimationDefinition BeholderIdle = new(
+            "enemies/Beholder/Tier1/Idle",
+            sheetColumns: 12,
+            sheetRows: 4,
+            frameCount: 12,
+            frameDuration: 0.15f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition BeholderWalk = new(
+            "enemies/Beholder/Tier1/Walk",
+            sheetColumns: 8,
+            sheetRows: 4,
+            frameCount: 8,
+            frameDuration: 0.11f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition BeholderHurt = new(
+            "enemies/Beholder/Tier1/Hurt",
+            sheetColumns: 6,
+            sheetRows: 4,
+            frameCount: 6,
+            frameDuration: 0.09f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition MushroomIdle = new(
+            "enemies/MushroomCharger/Tier1/Idle",
+            sheetColumns: 4,
+            sheetRows: 4,
+            frameCount: 4,
+            frameDuration: 0.16f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition MushroomWalk = new(
+            "enemies/MushroomCharger/Tier1/Walk",
+            sheetColumns: 6,
+            sheetRows: 4,
+            frameCount: 6,
+            frameDuration: 0.11f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition MushroomRun = new(
+            "enemies/MushroomCharger/Tier1/Run",
+            sheetColumns: 6,
+            sheetRows: 4,
+            frameCount: 6,
+            frameDuration: 0.075f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition MushroomHurt = new(
+            "enemies/MushroomCharger/Tier1/Hurt",
+            sheetColumns: 4,
+            sheetRows: 4,
+            frameCount: 4,
+            frameDuration: 0.09f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition ZombieIdle = new(
+            "enemies/Zombie/Tier1/Idle",
+            sheetColumns: 4,
+            sheetRows: 4,
+            frameCount: 4,
+            frameDuration: 0.16f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition ZombieWalk = new(
+            "enemies/Zombie/Tier1/Walk",
+            sheetColumns: 6,
+            sheetRows: 4,
+            frameCount: 6,
+            frameDuration: 0.12f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition ZombieAttack = new(
+            "enemies/Zombie/Tier1/Attack",
+            sheetColumns: 10,
+            sheetRows: 4,
+            frameCount: 10,
+            frameDuration: 0.10f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition ZombieHurt = new(
+            "enemies/Zombie/Tier1/Hurt",
+            sheetColumns: 4,
+            sheetRows: 4,
+            frameCount: 4,
+            frameDuration: 0.09f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly AreaEffectDefinition BeholderExplosion =
+            AreaEffectDefinition.Circle(
+                id: "beholder-explosion",
+                radiusInTiles: 3f,
+                telegraphDuration: 1.0f,
+                activeDuration: 1.0f,
+                damage: 25,
+                damageType: DamageType.Arcane,
+                hitOnce: true,
+                knockback: 1200f,
+                telegraphColor: Color.Red,
+                activeColor: Color.OrangeRed,
+                animation: new AreaEffectAnimationDefinition(
+                    "Effects/Magic/Explosion",
+                    sheetColumns: 10,
+                    sheetRows: 1,
+                    frameCount: 10,
+                    frameDuration: 0.10f,
+                    visualScale: 1.0f),
+                damageOnlyOnActivation: true);
+
+        private static readonly AreaEffectDefinition ZombiePoison =
+            AreaEffectDefinition.Rectangle(
+                id: "zombie-poison",
+                widthInTiles: 1.5f,
+                heightInTiles: 1.5f,
+                telegraphDuration: 0f,
+                activeDuration: 7.5f,
+                damage: 5,
+                damageType: DamageType.Poison,
+                damageInterval: 0.75f,
+                hitOnce: false,
+                activeColor: new Color(45, 220, 80),
+                animation: new AreaEffectAnimationDefinition(
+                    "Effects/Poison/PoisonAoe",
+                    sheetColumns: 10,
+                    sheetRows: 1,
+                    frameCount: 10,
+                    frameDuration: 0.10f,
+                    visualScale: 2.5f,
+                    loop: true,
+                    visualOffsetInTiles: new Vector2(0.02f, -1.2f)),
+                showActiveIndicator: true,
+                pulseActiveIndicator: true);
+
         private static readonly ProjectileSpec LichProjectile = new(
             "projectiles/Lich/Projectile",
             damage: 15,
             DamageType.Arcane,
             CombatFaction.Enemy,
-            speed: 325f,
+            speed: 650f,
             maxTravelDistance: 700f,
             knockback: 0f,
             isReflectable: true,
-            scale: 1.75f,
-            frameCount: 11,
-            frameRows: 1,
-            frameDuration: 0.04f);
+            scale: 1.9f,
+            frameCount: 9,
+            frameRows: 4,
+            frameDuration: 0.12f,
+            animationRow: 3,
+            hitboxWidth: 30f,
+            hitboxHeight: 30f);
 
         private static readonly ProjectileSpec NecromancerProjectile = new(
             "projectiles/mage_arcane_projectile",
@@ -187,6 +336,107 @@ namespace _1_2D_Top_Down
                 summonCooldown: 8f,
                 summonRadius: 110f));
 
+        public static EnemyDefinition Beholder { get; } = new(
+            "beholder",
+            EnemyType.Beholder,
+            new EnemyVisualDefinition(
+                "enemies/Beholder/Tier1/Idle", 12, 4, 0.15f, 2f,
+                BeholderIdle,
+                "enemies/Beholder/Tier1/Shadow", 2f, 0.60f, 4f,
+                "enemies/Beholder/Tier1/Death", 9, 9, 4, 0, 0.12f, 2f,
+                hurtAnimation: BeholderHurt,
+                hitbox: new EnemyHitboxDefinition(
+                    width: 18f,
+                    height: 14f,
+                    centerX: 32f,
+                    bottomY: 51f),
+                hurtbox: new EnemyHitboxDefinition(
+                    width: 34f,
+                    height: 38f,
+                    centerX: 32f,
+                    bottomY: 51f)),
+            new EnemyStatsDefinition(maxHealth: 4, experienceReward: 20),
+            new EnemyLocomotionDefinition(walkSpeed: 90f),
+            new TelegraphedAreaAttackBehaviorDefinition(
+                attackRange: 600f,
+                attackCooldown: 1.8f,
+                attackDuration: 2.0f,
+                idleAnimation: BeholderIdle,
+                movementAnimation: BeholderWalk,
+                attackAnimation: null,
+                areaEffect: BeholderExplosion));
+
+        public static EnemyDefinition MushroomCharger { get; } = new(
+            "mushroom-charger",
+            EnemyType.MushroomCharger,
+            new EnemyVisualDefinition(
+                "enemies/MushroomCharger/Tier1/Idle", 4, 4, 0.16f, 2f,
+                MushroomIdle,
+                "enemies/MushroomCharger/Tier1/Shadow", 2f, 0.60f, 4f,
+                "enemies/MushroomCharger/Tier1/Death", 9, 9, 4, 0, 0.11f, 2f,
+                hurtAnimation: MushroomHurt,
+                hitbox: new EnemyHitboxDefinition(
+                    width: 14f,
+                    height: 10f,
+                    centerX: 32f,
+                    bottomY: 43f),
+                hurtbox: new EnemyHitboxDefinition(
+                    width: 24f,
+                    height: 29f,
+                    centerX: 32f,
+                    bottomY: 43f)),
+            new EnemyStatsDefinition(maxHealth: 5, experienceReward: 18),
+            new EnemyLocomotionDefinition(
+                walkSpeed: 150f,
+                runSpeed: 720f),
+            new ChargerBehaviorDefinition(
+                minimumChargeDistance: 300f,
+                triggerDistance: 800f,
+                acceleration: 700f,
+                lockedChargeDuration: 0.90f,
+                recoveryDuration: 1.5f,
+                chargeCooldown: 2.0f,
+                normalContactDamage: 10,
+                normalContactDamageCooldown: 0.75f,
+                contactDamage: 30,
+                contactKnockback: 1200f,
+                idleAnimation: MushroomIdle,
+                walkAnimation: MushroomWalk,
+                runAnimation: MushroomRun));
+
+        public static EnemyDefinition Zombie { get; } = new(
+            "zombie",
+            EnemyType.Zombie,
+            new EnemyVisualDefinition(
+                "enemies/Zombie/Tier1/Idle", 4, 4, 0.16f, 2.5f,
+                ZombieIdle,
+                "enemies/Zombie/Tier1/Shadow", 2.5f, 0.60f, 0f,
+                "enemies/Zombie/Tier1/Death", 9, 9, 4, 0, 0.11f, 2.5f,
+                hurtAnimation: ZombieHurt,
+                hitbox: new EnemyHitboxDefinition(
+                    width: 14f,
+                    height: 10f,
+                    centerX: 32f,
+                    bottomY: 40f),
+                hurtbox: new EnemyHitboxDefinition(
+                    width: 24f,
+                    height: 34f,
+                    centerX: 32f,
+                    bottomY: 40f)),
+            new EnemyStatsDefinition(maxHealth: 6, experienceReward: 22),
+            new EnemyLocomotionDefinition(walkSpeed: 110f),
+            new PoisonTrailBehaviorDefinition(
+                new ChaseContactBehaviorDefinition(
+                    contactDamage: 12,
+                    damageCooldown: 0.9f,
+                    attackStateDuration: 1.0f,
+                    movementAnimation: ZombieWalk,
+                    attackAnimation: ZombieAttack,
+                    damageReleaseTime: 0.55f),
+                poisonEffect: ZombiePoison,
+                spawnInterval: 0.54f,
+                offsetInTiles: 0.7f));
+
         public static EnemyDefinitionRegistry Registry { get; } =
             CreateRegistry();
 
@@ -202,6 +452,12 @@ namespace _1_2D_Top_Down
             registry.Register(Demon);
             registry.Register(Lich);
             registry.Register(Necromancer);
+            registry.Register(Beholder);
+            registry.Register(
+                MushroomCharger,
+                "MushroomCharger",
+                "Mushroom Charger");
+            registry.Register(Zombie, "Zombie", "Zombie Tier1");
             return registry;
         }
     }

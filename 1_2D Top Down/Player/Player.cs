@@ -15,6 +15,9 @@ namespace _1_2D_Top_Down
         private float shootStateTimer;
         public PlayerState CurrentState { get; private set; } = PlayerState.Idle;
 
+        private const float KnockbackDeceleration = 9f;
+        private readonly Knockback knockback = new(KnockbackDeceleration);
+
         public float MoveSpeed => Stats.MoveSpeed;
         public Texture2D texture;
 
@@ -167,6 +170,12 @@ namespace _1_2D_Top_Down
                         currentFrame = 0;
                 }
             }
+
+            ApplyKnockbackMovement(
+                gameTime,
+                arena,
+                intersectsCollision);
+
             Mana.Update(gameTime);
             UpdateState(deltaTime, isMoving);
         }
@@ -264,6 +273,36 @@ namespace _1_2D_Top_Down
         public void TakeHit(CombatHit hit)
         {
             TakeDamage(hit.Damage);
+
+            if (hit.Knockback <= 0f)
+                return;
+
+            Vector2 direction = Center - hit.HitPosition;
+            if (direction == Vector2.Zero)
+            {
+                // An area effect can be centered exactly on the player. A
+                // deterministic fallback still gives that impact a visible
+                // physical response.
+                direction = Vector2.UnitY;
+            }
+
+            knockback.Apply(direction, hit.Knockback);
+        }
+
+        private void ApplyKnockbackMovement(
+            GameTime gameTime,
+            Rectangle arena,
+            Func<Rectangle, bool> intersectsCollision)
+        {
+            Vector2 movement = knockback.Update(gameTime);
+            TryMoveHorizontally(
+                movement.X,
+                arena,
+                intersectsCollision);
+            TryMoveVertically(
+                movement.Y,
+                arena,
+                intersectsCollision);
         }
         public void ResetDamageEffects()
         {

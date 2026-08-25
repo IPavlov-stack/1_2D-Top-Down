@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,14 +11,17 @@ namespace _1_2D_Top_Down
 
         public IReadOnlyList<WorldAreaEffect> Effects => effects;
 
-        public void Add(AreaEffectSpawnRequest request)
+        public void Add(
+            AreaEffectSpawnRequest request,
+            Func<string, Texture2D> textureResolver = null)
         {
             effects.Add(new WorldAreaEffect(
                 request.Definition,
                 request.Center,
                 request.WorldTileSize,
                 request.SourceFaction,
-                request.SourceId));
+                request.SourceId,
+                textureResolver));
         }
 
         public bool Update(GameTime gameTime, Player player)

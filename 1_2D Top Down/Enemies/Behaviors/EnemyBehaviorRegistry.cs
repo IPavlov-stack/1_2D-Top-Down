@@ -17,8 +17,22 @@ namespace _1_2D_Top_Down
             Register<ChaseContactBehaviorDefinition>(
                 definition => new ChaseContactBehavior(definition));
 
+            Register<PoisonTrailBehaviorDefinition>(
+                definition => new PoisonTrailBehavior(
+                    Create(definition.InnerBehavior),
+                    definition.PoisonEffect,
+                    definition.SpawnInterval,
+                    definition.OffsetInTiles));
+
             Register<KeepDistanceRangedBehaviorDefinition>(
                 definition => new KeepDistanceRangedBehavior(definition));
+
+            Register<TelegraphedAreaAttackBehaviorDefinition>(
+                definition =>
+                    new TelegraphedAreaAttackBehavior(definition));
+
+            Register<ChargerBehaviorDefinition>(
+                definition => new ChargerBehavior(definition));
 
             Register<NecromancerBehaviorDefinition>(
                 definition => new NecromancerBehavior(

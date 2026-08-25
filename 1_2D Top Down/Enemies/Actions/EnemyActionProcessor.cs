@@ -57,7 +57,9 @@ namespace _1_2D_Top_Down
                         break;
 
                     case AreaEffectSpawnRequest areaEffectRequest:
-                        worldEffectManager.Add(areaEffectRequest);
+                        worldEffectManager.Add(
+                            areaEffectRequest,
+                            enemyFactory.GetTexture);
                         break;
 
                     default:

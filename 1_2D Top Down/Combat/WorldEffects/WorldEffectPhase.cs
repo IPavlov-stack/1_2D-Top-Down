@@ -4,6 +4,7 @@ namespace _1_2D_Top_Down
     {
         Telegraph,
         Active,
+        Finishing,
         Finished
     }
 }

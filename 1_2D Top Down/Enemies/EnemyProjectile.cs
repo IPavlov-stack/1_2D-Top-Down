@@ -1,6 +1,7 @@
 ﻿using _1_2D_Top_Down;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace _1_2D_Top_Down
 {
@@ -8,6 +9,8 @@ namespace _1_2D_Top_Down
     public class EnemyProjectile : Projectile
     {
         private readonly float maxTravelDistance;
+        private readonly float hitboxWidth;
+        private readonly float hitboxHeight;
         private float travelledDistance;
         public bool HasReachedMaxTravelDistance => travelledDistance >= maxTravelDistance;
         public EnemyProjectile(
@@ -55,9 +58,12 @@ namespace _1_2D_Top_Down
                 spec.DamageType,
                 spec.Knockback,
                 spec.IsReflectable,
-                sourceId)
+                sourceId,
+                spec.AnimationRow)
         {
             maxTravelDistance = spec.MaxTravelDistance;
+            hitboxWidth = spec.HitboxWidth;
+            hitboxHeight = spec.HitboxHeight;
         }
         public override void Update(GameTime gameTime)
         {
@@ -72,8 +78,12 @@ namespace _1_2D_Top_Down
         {
             get
             {
-                int width = (int)(FrameWidth * scale * 0.5f);
-                int height = (int)(FrameHeight * scale * 0.5f);
+                int width = hitboxWidth > 0f
+                    ? (int)MathF.Round(hitboxWidth)
+                    : (int)(FrameWidth * scale * 0.5f);
+                int height = hitboxHeight > 0f
+                    ? (int)MathF.Round(hitboxHeight)
+                    : (int)(FrameHeight * scale * 0.5f);
 
                 return new Rectangle(
                     (int)(Position.X - width / 2f),

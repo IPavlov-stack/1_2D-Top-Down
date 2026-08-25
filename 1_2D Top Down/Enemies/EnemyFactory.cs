@@ -10,8 +10,7 @@ namespace _1_2D_Top_Down
         private readonly Func<string, Texture2D> loadTexture;
         private readonly EnemyBehaviorRegistry behaviorRegistry;
         private readonly EnemyDefinitionRegistry definitionRegistry;
-        private readonly Dictionary<string, Texture2D> textureCache = new(
-            StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Texture2D> textureCache = new(StringComparer.OrdinalIgnoreCase);
 
         public EnemyFactory(
             Func<string, Texture2D> loadTexture,

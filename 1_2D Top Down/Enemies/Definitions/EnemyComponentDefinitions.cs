@@ -182,6 +182,45 @@ namespace _1_2D_Top_Down
         }
     }
 
+    /// <summary>
+    /// Decorates another behavior and periodically leaves a persistent area
+    /// effect behind the enemy. This keeps locomotion/contact combat reusable.
+    /// </summary>
+    public sealed class PoisonTrailBehaviorDefinition : EnemyBehaviorDefinition
+    {
+        public EnemyBehaviorDefinition InnerBehavior { get; }
+        public AreaEffectDefinition PoisonEffect { get; }
+        public float SpawnInterval { get; }
+        public float OffsetInTiles { get; }
+
+        public PoisonTrailBehaviorDefinition(
+            EnemyBehaviorDefinition innerBehavior,
+            AreaEffectDefinition poisonEffect,
+            float spawnInterval,
+            float offsetInTiles)
+        {
+            if (innerBehavior == null)
+                throw new System.ArgumentNullException(nameof(innerBehavior));
+            if (poisonEffect == null)
+                throw new System.ArgumentNullException(nameof(poisonEffect));
+            if (spawnInterval <= 0f)
+            {
+                throw new System.ArgumentOutOfRangeException(
+                    nameof(spawnInterval));
+            }
+            if (offsetInTiles < 0f)
+            {
+                throw new System.ArgumentOutOfRangeException(
+                    nameof(offsetInTiles));
+            }
+
+            InnerBehavior = innerBehavior;
+            PoisonEffect = poisonEffect;
+            SpawnInterval = spawnInterval;
+            OffsetInTiles = offsetInTiles;
+        }
+    }
+
     public sealed class KeepDistanceRangedBehaviorDefinition : EnemyBehaviorDefinition
     {
         public float AttackRange { get; }
@@ -251,6 +290,104 @@ namespace _1_2D_Top_Down
             SummonEnemyId = summonEnemyId;
             SummonCooldown = summonCooldown;
             SummonRadius = summonRadius;
+        }
+    }
+
+    /// <summary>
+    /// Stops within casting range and places a telegraphed area attack at the
+    /// target's position. The target point is captured when casting starts,
+    /// allowing the player to evade before the active phase.
+    /// </summary>
+    public sealed class TelegraphedAreaAttackBehaviorDefinition
+        : EnemyBehaviorDefinition
+    {
+        public float AttackRange { get; }
+        public float AttackCooldown { get; }
+        public float AttackDuration { get; }
+        public EnemyAnimationDefinition IdleAnimation { get; }
+        public EnemyAnimationDefinition MovementAnimation { get; }
+        public EnemyAnimationDefinition AttackAnimation { get; }
+        public AreaEffectDefinition AreaEffect { get; }
+
+        public TelegraphedAreaAttackBehaviorDefinition(
+            float attackRange,
+            float attackCooldown,
+            float attackDuration,
+            EnemyAnimationDefinition idleAnimation,
+            EnemyAnimationDefinition movementAnimation,
+            EnemyAnimationDefinition attackAnimation,
+            AreaEffectDefinition areaEffect)
+        {
+            AttackRange = attackRange;
+            AttackCooldown = attackCooldown;
+            AttackDuration = attackDuration;
+            IdleAnimation = idleAnimation;
+            MovementAnimation = movementAnimation;
+            AttackAnimation = attackAnimation;
+            AreaEffect = areaEffect;
+        }
+    }
+
+    /// <summary>
+    /// Chases normally, accelerates while steering toward the target, then
+    /// locks its final direction at maximum speed for a committed charge.
+    /// </summary>
+    public sealed class ChargerBehaviorDefinition : EnemyBehaviorDefinition
+    {
+        public float MinimumChargeDistance { get; }
+        public float TriggerDistance { get; }
+        public float Acceleration { get; }
+        public float LockedChargeDuration { get; }
+        public float RecoveryDuration { get; }
+        public float ChargeCooldown { get; }
+        public int NormalContactDamage { get; }
+        public float NormalContactDamageCooldown { get; }
+        public int ContactDamage { get; }
+        public float ContactKnockback { get; }
+        public EnemyAnimationDefinition IdleAnimation { get; }
+        public EnemyAnimationDefinition WalkAnimation { get; }
+        public EnemyAnimationDefinition RunAnimation { get; }
+
+        public ChargerBehaviorDefinition(
+            float minimumChargeDistance,
+            float triggerDistance,
+            float acceleration,
+            float lockedChargeDuration,
+            float recoveryDuration,
+            float chargeCooldown,
+            int normalContactDamage,
+            float normalContactDamageCooldown,
+            int contactDamage,
+            float contactKnockback,
+            EnemyAnimationDefinition idleAnimation,
+            EnemyAnimationDefinition walkAnimation,
+            EnemyAnimationDefinition runAnimation)
+        {
+            if (minimumChargeDistance < 0f)
+            {
+                throw new System.ArgumentOutOfRangeException(
+                    nameof(minimumChargeDistance));
+            }
+            if (triggerDistance <= minimumChargeDistance)
+            {
+                throw new System.ArgumentOutOfRangeException(
+                    nameof(triggerDistance),
+                    "Trigger distance must exceed the minimum charge distance.");
+            }
+
+            MinimumChargeDistance = minimumChargeDistance;
+            TriggerDistance = triggerDistance;
+            Acceleration = acceleration;
+            LockedChargeDuration = lockedChargeDuration;
+            RecoveryDuration = recoveryDuration;
+            ChargeCooldown = chargeCooldown;
+            NormalContactDamage = normalContactDamage;
+            NormalContactDamageCooldown = normalContactDamageCooldown;
+            ContactDamage = contactDamage;
+            ContactKnockback = contactKnockback;
+            IdleAnimation = idleAnimation;
+            WalkAnimation = walkAnimation;
+            RunAnimation = runAnimation;
         }
     }
 }

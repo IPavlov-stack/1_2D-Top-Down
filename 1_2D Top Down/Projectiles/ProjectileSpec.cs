@@ -13,7 +13,10 @@ namespace _1_2D_Top_Down
         public float Scale { get; }
         public int FrameCount { get; }
         public int FrameRows { get; }
+        public int AnimationRow { get; }
         public float FrameDuration { get; }
+        public float HitboxWidth { get; }
+        public float HitboxHeight { get; }
 
         public ProjectileSpec(
             string assetName,
@@ -27,7 +30,10 @@ namespace _1_2D_Top_Down
             float scale,
             int frameCount,
             int frameRows,
-            float frameDuration)
+            float frameDuration,
+            int animationRow = 0,
+            float hitboxWidth = 0f,
+            float hitboxHeight = 0f)
         {
             AssetName = assetName;
             Damage = damage;
@@ -40,7 +46,10 @@ namespace _1_2D_Top_Down
             Scale = scale;
             FrameCount = frameCount;
             FrameRows = frameRows;
+            AnimationRow = animationRow;
             FrameDuration = frameDuration;
+            HitboxWidth = hitboxWidth;
+            HitboxHeight = hitboxHeight;
         }
     }
 }
