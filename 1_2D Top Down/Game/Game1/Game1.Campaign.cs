@@ -250,7 +250,7 @@ namespace _1_2D_Top_Down
             foreach (MissionTrigger trigger in gameMap.MissionTriggers)
             {
                 if (trigger.IsActivated ||
-                    !player.Bounds.Intersects(trigger.Bounds))
+                    !player.MovementBounds.Intersects(trigger.Bounds))
                 {
                     continue;
                 }

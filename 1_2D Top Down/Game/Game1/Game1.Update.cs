@@ -25,7 +25,6 @@ namespace _1_2D_Top_Down
             UpdatePlayerProjectiles(gameTime);
             enemyManager.UpdateDeathAnimations(gameTime);
             UpdateCollectibles(gameTime);
-            UpdatePlayerResourceAnimations(gameTime);
         }
         private void RestartGame()
         {
@@ -149,64 +148,6 @@ namespace _1_2D_Top_Down
                     definition.DeathScale));
         }
 
-        private void UpdatePlayerResourceAnimations(GameTime gameTime)
-        {
-            float healthPercent =
-                player.Health.CurrentHealth / (float)player.Health.MaxHealth;
-
-            float manaPercent =
-                player.Mana.CurrentMana / player.Mana.MaxMana;
-
-            int targetHealthFrame = GetResourceFrame(healthPercent);
-            int targetManaFrame = GetResourceFrame(manaPercent);
-
-            AnimateResourceFrame(
-                ref displayedHealthFrame,
-                ref healthFrameTimer,
-                targetHealthFrame,
-                gameTime);
-
-            AnimateResourceFrame(
-                ref displayedManaFrame,
-                ref manaFrameTimer,
-                targetManaFrame,
-                gameTime);
-        }
-
-        private int GetResourceFrame(float percent)
-        {
-            percent = MathHelper.Clamp(percent, 0f, 1f);
-
-            int filledSteps = (int)MathF.Ceiling(
-                percent * ResourceFrameCount);
-
-            return Math.Clamp(
-                ResourceFrameCount - filledSteps,
-                0,
-                ResourceFrameCount - 1);
-        }
-
-        private void AnimateResourceFrame(
-            ref int displayedFrame,
-            ref float timer,
-            int targetFrame,
-            GameTime gameTime)
-        {
-            if (displayedFrame == targetFrame)
-            {
-                timer = 0f;
-                return;
-            }
-
-            timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            if (timer < ResourceFrameDuration)
-                return;
-
-            timer = 0f;
-            displayedFrame += Math.Sign(targetFrame - displayedFrame);
-        }
-
         private bool IntersectsMapCollision(Rectangle bounds)
         {
             return gameMap.IntersectsCollision(bounds);
@@ -313,7 +254,7 @@ namespace _1_2D_Top_Down
                 return;
             }
 
-            Vector2 startPosition = player.Bounds.Center.ToVector2();
+            Vector2 startPosition = player.Hurtbox.Center.ToVector2();
 
             Vector2 mouseWorldPosition = camera.ScreenToWorld(mouse.Position.ToVector2());
             Vector2 direction = mouseWorldPosition - startPosition;
@@ -389,7 +330,7 @@ namespace _1_2D_Top_Down
 
             collectibleManager.Update(
                 gameTime,
-                player.Bounds,
+                player.Hurtbox,
                 playerCanReceiveMana,
                 onCoinCollected: _ =>
                 {

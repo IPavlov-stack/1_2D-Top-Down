@@ -44,7 +44,7 @@ namespace _1_2D_Top_Down
                 (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             Vector2 direction =
-                context.Target.Bounds.Center.ToVector2() -
+                context.Target.Hurtbox.Center.ToVector2() -
                 enemy.SpriteCenter;
 
             float distance = direction.Length();

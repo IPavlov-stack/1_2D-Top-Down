@@ -89,7 +89,6 @@ namespace _1_2D_Top_Down
                 enemyManager.RebuildSpatialGrid();
                 UpdatePlayerProjectiles(gameTime);
                 UpdateEnemyProjectiles(gameTime);
-                UpdatePlayerResourceAnimations(gameTime);
                 if (allowInput)
                 {
                     UpdateWaveIntermissionInput(mouse);

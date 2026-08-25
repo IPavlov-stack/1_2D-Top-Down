@@ -78,7 +78,7 @@ namespace _1_2D_Top_Down
                     continue;
                 }
 
-                if (!projectile.Bounds.Intersects(player.Bounds))
+                if (!projectile.Bounds.Intersects(player.Hurtbox))
                 {
                     continue;
                 }

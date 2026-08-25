@@ -12,7 +12,7 @@ namespace _1_2D_Top_Down
             DrawEnemyShadows();
             DrawEnemyShadow(
                 playerShadowTexture,
-                player.Bounds,
+                player.MovementBounds,
                 scale: 0.34f,
                 opacity: 0.70f,
                 bottomOffset: 3f);
@@ -23,16 +23,19 @@ namespace _1_2D_Top_Down
             foreach (ManaCrystal manaCrystal in manaCrystals)
                 manaCrystal.Draw(_spriteBatch);
 
-            player.Draw(_spriteBatch);
-            gameMap.PropsLayer.DrawInFrontOfPlayer(
-                _spriteBatch,
-                player.Bounds.Bottom);
+            worldRenderQueue.Clear();
+            worldRenderQueue.Add(player);
+
+            foreach (Enemy enemy in enemies)
+                worldRenderQueue.Add(enemy);
+
+            gameMap.PropsLayer.AddYSortedItems(worldRenderQueue);
+            worldRenderQueue.Draw(_spriteBatch);
+
+            gameMap.PropsLayer.DrawInFront(_spriteBatch);
 
             foreach (Projectile projectile in projectiles)
                 projectile.Draw(_spriteBatch);
-
-            foreach (Enemy enemy in enemies)
-                enemy.Draw(_spriteBatch);
 
             foreach (DeathAnimation deathAnimation in deathAnimations)
                 deathAnimation.Draw(_spriteBatch);
@@ -208,112 +211,22 @@ namespace _1_2D_Top_Down
             foreach (TiledTileLayer layer in gameMap.OverGroundLayers)
                 layer.Draw(_spriteBatch);
 
-            gameMap.PropsLayer.DrawBehindPlayer(
-                _spriteBatch,
-                player.Bounds.Bottom);
+            gameMap.PropsLayer.DrawBehind(_spriteBatch);
         }
 
         private void DrawPlayerResourceUi()
         {
-            Vector2 screenBottomCenter = new Vector2(
-                GraphicsDevice.Viewport.Width / 2f,
-                GraphicsDevice.Viewport.Height);
-
             float healthPercent =
                 player.Health.CurrentHealth / (float)player.Health.MaxHealth;
 
             float manaPercent =
                 player.Mana.CurrentMana / player.Mana.MaxMana;
 
-            DrawResourceMeter(
-                healthMeterFrameTexture,
-                healthMeterFillTexture,
-                screenBottomCenter,
-                HealthMeterOffsetFromBottomCenter,
-                HealthFillOffset,
+            resourceBarsHud.Draw(
+                _spriteBatch,
                 healthPercent,
-                HealthMeterScale,
-                player.IsHealthFlashingWhite);
-
-            DrawResourceMeter(
-                manaMeterFrameTexture,
-                manaMeterFillTexture,
-                screenBottomCenter,
-                ManaMeterOffsetFromBottomCenter,
-                ManaFillOffset,
                 manaPercent,
-                ManaMeterScale,
-                false);
-        }
-
-        private void DrawResourceMeter(
-            Texture2D frameTexture,
-            Texture2D fillTexture,
-            Vector2 screenBottomCenter,
-            Vector2 frameOffset,
-            Vector2 fillOffset,
-            float percent,
-            float scale,
-            bool flashWhite)
-        {
-            percent = MathHelper.Clamp(percent, 0f, 1f);
-
-            Vector2 framePosition =
-                screenBottomCenter + frameOffset;
-
-            framePosition.X -= frameTexture.Width * scale / 2f;
-
-            // Рамката се рисува цяла.
-            _spriteBatch.Draw(
-                frameTexture,
-                framePosition,
-                null,
-                Color.White,
-                0f,
-                Vector2.Zero,
-                scale,
-                SpriteEffects.None,
-                0f);
-
-            int visibleFillWidth =
-                (int)(fillTexture.Width * percent);
-
-            if (visibleFillWidth <= 0)
-                return;
-
-            Rectangle fillSourceRectangle = new Rectangle(
-                0,
-                0,
-                visibleFillWidth,
-                fillTexture.Height);
-
-            Vector2 fillPosition = framePosition + fillOffset * scale;
-
-            // Рисуваме само частта, отговаряща на health/mana процента.
-            _spriteBatch.Draw(
-                fillTexture,
-                fillPosition,
-                fillSourceRectangle,
-                Color.White,
-                0f,
-                Vector2.Zero,
-                scale,
-                SpriteEffects.None,
-                0f);
-
-            if (flashWhite)
-            {
-                Rectangle flashBounds = new Rectangle(
-                    (int)fillPosition.X,
-                    (int)fillPosition.Y,
-                    (int)(visibleFillWidth * scale),
-                    (int)(fillTexture.Height * scale));
-
-                _spriteBatch.Draw(
-                    pixelTexture,
-                    flashBounds,
-                    Color.White);
-            }
+                player.IsHealthFlashingWhite);
         }
         private void DrawWaveIntermissionUi()
         {
@@ -552,7 +465,7 @@ namespace _1_2D_Top_Down
             _spriteBatch.DrawString(
                 boldpixels,
                 waveText,
-                new Vector2(24, 24),
+                new Vector2(24, resourceBarsHud.Bottom + 12),
                 Color.White);
         }
         private void DrawNineSlicePanel(

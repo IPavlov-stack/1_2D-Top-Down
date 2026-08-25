@@ -37,7 +37,7 @@ namespace _1_2D_Top_Down
                     : EnemyState.Chasing);
 
             Vector2 direction =
-                context.Target.Bounds.Center.ToVector2() -
+                context.Target.Hurtbox.Center.ToVector2() -
                 enemy.Bounds.Center.ToVector2();
 
             if (direction != Vector2.Zero)
@@ -50,7 +50,7 @@ namespace _1_2D_Top_Down
             enemy.UpdateAnimation(gameTime);
 
             if (contactDamageTimer < contactDamageCooldown ||
-                !context.Target.Bounds.Intersects(enemy.Bounds))
+                !context.Target.Hurtbox.Intersects(enemy.Bounds))
             {
                 return;
             }

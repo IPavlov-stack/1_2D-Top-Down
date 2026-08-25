@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameLibrary.Graphics;
+using _1_2D_Top_Down;
 
 namespace Tiled
 {
@@ -24,6 +25,7 @@ namespace Tiled
         private readonly int _gridTileWidth;
         private readonly int _gridTileHeight;
         private readonly List<PropObject> _props;
+        private readonly List<IYSortedWorldDrawable> _ySortedProps = new();
         private readonly float _mapScale;
 
         private TiledPropsLayer(TextureAtlas atlas, List<PropObject> props, float mapScale)
@@ -31,6 +33,7 @@ namespace Tiled
             _atlas = atlas;
             _props = props;
             _mapScale = mapScale;
+            BuildYSortedProps();
         }
 
         private TiledPropsLayer(
@@ -45,6 +48,7 @@ namespace Tiled
             _gridTileHeight = gridTileHeight;
             _props = props;
             _mapScale = mapScale;
+            BuildYSortedProps();
         }
 
         public static TiledPropsLayer FromFile(
@@ -152,33 +156,36 @@ namespace Tiled
                 mapScale);
         }
 
-        /// <summary>
-        /// Draws props whose base is above (or level with) the player's feet.
-        /// They belong behind the player.
-        /// </summary>
-        public void DrawBehindPlayer(SpriteBatch spriteBatch, int playerFeetY)
+        public void DrawBehind(SpriteBatch spriteBatch)
         {
             foreach (PropObject prop in _props)
             {
-                if (prop.DrawMode == PropDrawMode.Behind ||
-                    (prop.DrawMode == PropDrawMode.YSort &&
-                     Round(prop.Y * _mapScale) <= playerFeetY))
+                if (prop.DrawMode == PropDrawMode.Behind)
                     DrawProp(spriteBatch, prop);
             }
         }
 
-        /// <summary>
-        /// Draws props whose base is below the player's feet. They cover the
-        /// player while the player is visually behind them.
-        /// </summary>
-        public void DrawInFrontOfPlayer(SpriteBatch spriteBatch, int playerFeetY)
+        public void AddYSortedItems(WorldRenderQueue renderQueue)
+        {
+            foreach (IYSortedWorldDrawable prop in _ySortedProps)
+                renderQueue.Add(prop);
+        }
+
+        public void DrawInFront(SpriteBatch spriteBatch)
         {
             foreach (PropObject prop in _props)
             {
-                if (prop.DrawMode == PropDrawMode.Front ||
-                    (prop.DrawMode == PropDrawMode.YSort &&
-                     Round(prop.Y * _mapScale) > playerFeetY))
+                if (prop.DrawMode == PropDrawMode.Front)
                     DrawProp(spriteBatch, prop);
+            }
+        }
+
+        private void BuildYSortedProps()
+        {
+            foreach (PropObject prop in _props)
+            {
+                if (prop.DrawMode == PropDrawMode.YSort)
+                    _ySortedProps.Add(new YSortedProp(this, prop));
             }
         }
 
@@ -309,6 +316,25 @@ namespace Tiled
                 Y = y;
                 Width = width;
                 Height = height;
+            }
+        }
+
+        private sealed class YSortedProp : IYSortedWorldDrawable
+        {
+            private readonly TiledPropsLayer owner;
+            private readonly PropObject prop;
+
+            public YSortedProp(TiledPropsLayer owner, PropObject prop)
+            {
+                this.owner = owner;
+                this.prop = prop;
+            }
+
+            public int SortY => Round(prop.Y * owner._mapScale);
+
+            public void Draw(SpriteBatch spriteBatch)
+            {
+                owner.DrawProp(spriteBatch, prop);
             }
         }
     }

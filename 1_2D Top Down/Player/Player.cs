@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace _1_2D_Top_Down
 {
-    public class Player
+    public class Player : IYSortedWorldDrawable
     {
         // Combat
         public const float BasicAttackManaCost = 8f;
@@ -44,28 +44,61 @@ namespace _1_2D_Top_Down
         public PlayerProfile Profile { get; }
         public PlayerStats Stats { get; }
 
-        public Rectangle Bounds
+        public Rectangle SpriteBounds
         {
             get
             {
                 int spriteWidth = (int)(FrameWidth * Scale);
                 int spriteHeight = (int)(FrameHeight * Scale);
 
-                int hitboxWidth = (int)(spriteWidth * 0.7f);
-                int hitboxHeight = (int)(spriteHeight * 0.7f);
+                return new Rectangle(
+                    (int)Position.X,
+                    (int)Position.Y,
+                    spriteWidth,
+                    spriteHeight);
+            }
+        }
 
-                int offsetX = (spriteWidth - hitboxWidth) / 2;
-                int offsetY = (spriteHeight - hitboxHeight) / 2;
+        public Rectangle MovementBounds
+        {
+            get
+            {
+                Rectangle spriteBounds = SpriteBounds;
+                int hitboxWidth = (int)(spriteBounds.Width * 0.50f);
+                int hitboxHeight = (int)(spriteBounds.Height * 0.24f);
+                int offsetX = (spriteBounds.Width - hitboxWidth) / 2;
 
                 return new Rectangle(
-                    (int)Position.X + offsetX,
-                    (int)Position.Y + offsetY,
+                    spriteBounds.X + offsetX,
+                    spriteBounds.Bottom - hitboxHeight,
                     hitboxWidth,
                     hitboxHeight);
             }
         }
 
-        public Vector2 Center => new Vector2(Bounds.Center.X, Bounds.Center.Y);
+        public Rectangle Hurtbox
+        {
+            get
+            {
+                Rectangle spriteBounds = SpriteBounds;
+                int hitboxWidth = (int)(spriteBounds.Width * 0.60f);
+                int hitboxHeight = (int)(spriteBounds.Height * 0.70f);
+                int offsetX = (spriteBounds.Width - hitboxWidth) / 2;
+                int offsetY = (int)(spriteBounds.Height * 0.18f);
+
+                return new Rectangle(
+                    spriteBounds.X + offsetX,
+                    spriteBounds.Y + offsetY,
+                    hitboxWidth,
+                    hitboxHeight);
+            }
+        }
+
+        // Temporary compatibility alias for systems that still need the
+        // player's combat body rather than its movement footprint.
+        public Rectangle Bounds => Hurtbox;
+        public int SortY => MovementBounds.Bottom;
+        public Vector2 Center => Hurtbox.Center.ToVector2();
 
         public Player(Texture2D texture, Vector2 startPosition, PlayerProfile profile)
         {
@@ -178,16 +211,16 @@ namespace _1_2D_Top_Down
 
             foreach (Rectangle collisionRectangle in collisionRectangles)
             {
-                if (!Bounds.Intersects(collisionRectangle))
+                if (!MovementBounds.Intersects(collisionRectangle))
                     continue;
 
                 if (distance > 0f)
                 {
-                    Position.X -= Bounds.Right - collisionRectangle.Left;
+                    Position.X -= MovementBounds.Right - collisionRectangle.Left;
                 }
                 else if (distance < 0f)
                 {
-                    Position.X += collisionRectangle.Right - Bounds.Left;
+                    Position.X += collisionRectangle.Right - MovementBounds.Left;
                 }
 
                 break;
@@ -204,16 +237,16 @@ namespace _1_2D_Top_Down
 
             foreach (Rectangle collisionRectangle in collisionRectangles)
             {
-                if (!Bounds.Intersects(collisionRectangle))
+                if (!MovementBounds.Intersects(collisionRectangle))
                     continue;
 
                 if (distance > 0f)
                 {
-                    Position.Y -= Bounds.Bottom - collisionRectangle.Top;
+                    Position.Y -= MovementBounds.Bottom - collisionRectangle.Top;
                 }
                 else if (distance < 0f)
                 {
-                    Position.Y += collisionRectangle.Bottom - Bounds.Top;
+                    Position.Y += collisionRectangle.Bottom - MovementBounds.Top;
                 }
 
                 break;
@@ -221,18 +254,26 @@ namespace _1_2D_Top_Down
         }
         private void KeepInsideArena(Rectangle arena)
         {
-            float playerWidth = FrameWidth * Scale;
-            float playerHeight = FrameHeight * Scale;
+            Rectangle movementBounds = MovementBounds;
 
-            Position.X = Math.Clamp(Position.X, arena.Left, arena.Right - playerWidth);
-            Position.Y = Math.Clamp(Position.Y, arena.Top, arena.Bottom - playerHeight);
+            if (movementBounds.Left < arena.Left)
+                Position.X += arena.Left - movementBounds.Left;
+            else if (movementBounds.Right > arena.Right)
+                Position.X -= movementBounds.Right - arena.Right;
+
+            movementBounds = MovementBounds;
+
+            if (movementBounds.Top < arena.Top)
+                Position.Y += arena.Top - movementBounds.Top;
+            else if (movementBounds.Bottom > arena.Bottom)
+                Position.Y -= movementBounds.Bottom - arena.Bottom;
         }
 
         private bool IntersectsCollision(IReadOnlyList<Rectangle> collisionRectangles)
         {
             foreach (Rectangle collisionRectangle in collisionRectangles)
             {
-                if (Bounds.Intersects(collisionRectangle))
+                if (MovementBounds.Intersects(collisionRectangle))
                     return true;
             }
 

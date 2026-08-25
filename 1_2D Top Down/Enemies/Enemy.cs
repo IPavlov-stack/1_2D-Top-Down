@@ -4,7 +4,7 @@ using System;
 
 namespace _1_2D_Top_Down
 {
-    public class Enemy
+    public class Enemy : IYSortedWorldDrawable
     {
         protected Texture2D texture;
         private readonly IEnemyBehavior behavior;
@@ -83,6 +83,8 @@ namespace _1_2D_Top_Down
             framesInCurrentAnimation = frameCount;
             Health = new Health(definition.MaxHealth);
         }
+
+        public int SortY => Bounds.Bottom;
         public void Update(GameTime gameTime, EnemyUpdateContext context)
         {
             UpdateKnockback(gameTime);

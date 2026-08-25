@@ -29,7 +29,18 @@ namespace _1_2D_Top_Down
 
             if (view.ShowEntityBounds)
             {
-                DrawRectangle(spriteBatch, session.Player.Bounds, Color.DodgerBlue);
+                DrawRectangle(
+                    spriteBatch,
+                    session.Player.SpriteBounds,
+                    Color.White);
+                DrawRectangle(
+                    spriteBatch,
+                    session.Player.Hurtbox,
+                    Color.Red);
+                DrawRectangle(
+                    spriteBatch,
+                    session.Player.MovementBounds,
+                    Color.DodgerBlue);
 
                 foreach (Enemy enemy in session.World.Enemies.Enemies)
                     DrawRectangle(spriteBatch, enemy.Bounds, Color.Red);

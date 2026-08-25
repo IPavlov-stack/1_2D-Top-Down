@@ -11,21 +11,7 @@ namespace _1_2D_Top_Down
         private readonly GameplayPanelManager gameplayPanelManager = new();
         private HotbarHud hotbarHud;
         private QuickMenuHud quickMenuHud;
-
-        private const float HealthMeterScale = 0.55f;
-        private const float ManaMeterScale = 0.55f;
-        // =================
-        // = X:  + right,  =
-        // =     - left    =
-        // = Y:  + down,   =
-        // =     - up      =
-        // =================
-        private static readonly Vector2 HealthMeterOffsetFromBottomCenter = new Vector2(-200f, -175);
-        private static readonly Vector2 ManaMeterOffsetFromBottomCenter = new Vector2(200f, -175f);
-
-        // Позиция на филл текстурата вътре в рамката
-        private static readonly Vector2 HealthFillOffset = new Vector2(85f, 44f);
-        private static readonly Vector2 ManaFillOffset =  new Vector2(85f, 44f);
+        private ResourceBarsHud resourceBarsHud;
 
         // bottom HUD panel
         private const float BottomHudPanelScale = 0.55f;
@@ -83,6 +69,10 @@ namespace _1_2D_Top_Down
                 spellsPanelTexture,
                 pixelTexture,
                 boldpixels);
+
+            resourceBarsHud = new ResourceBarsHud(
+                resourceBarsTexture,
+                pixelTexture);
 
             quickMenuHud = new QuickMenuHud(
                 () => GraphicsDevice.Viewport.Bounds,

@@ -27,6 +27,7 @@ namespace _1_2D_Top_Down
         private GameFlowState nextGameFlowState;
         private readonly ScreenManager screenManager = new();
         private readonly OverlayManager overlayManager = new();
+        private readonly WorldRenderQueue worldRenderQueue = new();
         private readonly ScreenTransitionManager transitionManager = new(0.8f);
         private PauseOverlay pauseOverlay;
 
@@ -87,22 +88,7 @@ namespace _1_2D_Top_Down
         private Texture2D spellsPanelTexture;
         private readonly Dictionary<string, Texture2D> shopUpgradeIcons = new();
 
-        private const int ResourceFrameCount = 9;
-        private const int ResourceFrameWidth = 63;
-        private const int ResourceFrameHeight = 10;
-        private const float ResourceFrameDuration = 0.08f;
-
-        private int displayedHealthFrame;
-        private int displayedManaFrame;
-
-        private float healthFrameTimer;
-        private float manaFrameTimer;
-
-        private Texture2D healthMeterFrameTexture;
-        private Texture2D healthMeterFillTexture;
-
-        private Texture2D manaMeterFrameTexture;
-        private Texture2D manaMeterFillTexture;
+        private Texture2D resourceBarsTexture;
 
         private Texture2D bottomHudPanelTexture;
         private Texture2D panel9SliceTexture;
@@ -235,10 +221,7 @@ namespace _1_2D_Top_Down
             questPanelTexture = Content.Load<Texture2D>("UI/UI_QuestPanel");
             spellsPanelTexture = Content.Load<Texture2D>("UI/UI_SpellsPanel");
             bottomHudPanelTexture = Content.Load<Texture2D>("UI/bottom_hud_panel");
-            healthMeterFrameTexture = Content.Load<Texture2D>("UI/health_meter_frame");
-            healthMeterFillTexture = Content.Load<Texture2D>("UI/health_meter_fill");
-            manaMeterFrameTexture = Content.Load<Texture2D>("UI/mana_meter_frame");
-            manaMeterFillTexture = Content.Load<Texture2D>("UI/mana_meter_fill");
+            resourceBarsTexture = Content.Load<Texture2D>("UI/resource_bars");
             panel9SliceTexture = Content.Load<Texture2D>("UI/nine slice 256x256 17gap/panel_9slice");
             inventorySlotTexture = Content.Load<Texture2D>("UI/panel_inventory_slot");
             uiCoinTexture = Content.Load<Texture2D>("UI/inventory icons/UI_coin");
