@@ -4,6 +4,7 @@
     {
         Idle,
         Walk,
+        Dash,
         Shoot
     }
 }

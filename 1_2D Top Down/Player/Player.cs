@@ -18,6 +18,20 @@ namespace _1_2D_Top_Down
         private const float KnockbackDeceleration = 9f;
         private readonly Knockback knockback = new(KnockbackDeceleration);
 
+        private static readonly DashMovementDefinition DashDefinition = new(
+            initialSpeed: 850f,
+            distance: 170f,
+            cooldown: 1.0f,
+            slideDuration: 0.12f,
+            slideEasePower: 1.5f);
+        private readonly DashMotion dashMotion;
+        private Vector2 lastMovementDirection = Vector2.UnitY;
+        private float dashCooldownRemaining;
+        private bool wasDashKeyDown;
+
+        public bool IsDashing => dashMotion.IsActive;
+        public float DashCooldownRemaining => dashCooldownRemaining;
+
         public float MoveSpeed => Stats.MoveSpeed;
         public Texture2D texture;
 
@@ -112,6 +126,8 @@ namespace _1_2D_Top_Down
             Stats = new PlayerStats();
             Health = new Health(Stats.MaxHealth, Stats.HealthRegen);
             Mana = new Mana(Stats.MaxMana, Stats.ManaRegen);
+            dashMotion = new DashMotion(DashDefinition);
+            wasDashKeyDown = IsDashKeyDown(Keyboard.GetState());
         }
         public void GainExperience(int amount)
         {
@@ -126,6 +142,9 @@ namespace _1_2D_Top_Down
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             bool isMoving = false;
+            dashCooldownRemaining = MathF.Max(
+                0f,
+                dashCooldownRemaining - deltaTime);
             healthFlashTimeLeft = MathF.Max( 0f, healthFlashTimeLeft - (float)gameTime.ElapsedGameTime.TotalSeconds);
             Health.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
             if (damageFlashTimer > 0f)
@@ -134,41 +153,63 @@ namespace _1_2D_Top_Down
             }
             damageFlashTimer = MathF.Max( 0f, damageFlashTimer - (float)gameTime.ElapsedGameTime.TotalSeconds);
             KeyboardState keyboard = Keyboard.GetState();
-            if (canMove)
+            bool dashKeyDown = IsDashKeyDown(keyboard);
+            bool dashPressed = dashKeyDown && !wasDashKeyDown;
+            wasDashKeyDown = dashKeyDown;
+
+            if (!canMove && dashMotion.IsActive)
+                dashMotion.Stop();
+
+            if (canMove && dashMotion.IsActive)
             {
-
-                Vector2 direction = Vector2.Zero;
-
-                if (keyboard.IsKeyDown(Keys.Left) || keyboard.IsKeyDown(Keys.A))
-                    direction.X -= 1f;
-                if (keyboard.IsKeyDown(Keys.Right) || keyboard.IsKeyDown(Keys.D))
-                    direction.X += 1f;
-                if (keyboard.IsKeyDown(Keys.Up) || keyboard.IsKeyDown(Keys.W))
-                    direction.Y -= 1f;
-                if (keyboard.IsKeyDown(Keys.Down) || keyboard.IsKeyDown(Keys.S))
-                    direction.Y += 1f;
+                isMoving = true;
+                dashMotion.Update(
+                    deltaTime,
+                    movement => TryMoveDash(
+                        movement,
+                        arena,
+                        intersectsCollision));
+                UpdateMovementAnimation(deltaTime);
+            }
+            else if (canMove)
+            {
+                Vector2 direction = GetMovementDirection(keyboard);
 
                 if (direction != Vector2.Zero)
-                    direction.Normalize();
-                isMoving = direction != Vector2.Zero;
-
-                float movementDistance = Stats.MoveSpeed * deltaTime;
-                // Each axis is tried independently. If X is blocked but Y is
-                // clear, the player still moves along the obstacle instead of
-                // getting stuck against its corner.
-                TryMoveHorizontally(direction.X * movementDistance, arena, intersectsCollision);
-                TryMoveVertically(direction.Y * movementDistance, arena, intersectsCollision);
-
-                animationTimer += deltaTime;
-
-                if (animationTimer >= FrameDuration)
                 {
-                    currentFrame++;
-                    animationTimer = 0f;
-
-                    if (currentFrame >= FrameCount)
-                        currentFrame = 0;
+                    direction.Normalize();
+                    lastMovementDirection = direction;
                 }
+
+                if (dashPressed && dashCooldownRemaining <= 0f)
+                {
+                    BeginDash();
+                    isMoving = true;
+                    dashMotion.Update(
+                        deltaTime,
+                        movement => TryMoveDash(
+                            movement,
+                            arena,
+                            intersectsCollision));
+                }
+                else
+                {
+                    isMoving = direction != Vector2.Zero;
+
+                    float movementDistance = Stats.MoveSpeed * deltaTime;
+                    // Each axis is tried independently. If X is blocked but Y
+                    // is clear, the player still moves along the obstacle.
+                    TryMoveHorizontally(
+                        direction.X * movementDistance,
+                        arena,
+                        intersectsCollision);
+                    TryMoveVertically(
+                        direction.Y * movementDistance,
+                        arena,
+                        intersectsCollision);
+                }
+
+                UpdateMovementAnimation(deltaTime);
             }
 
             ApplyKnockbackMovement(
@@ -177,7 +218,49 @@ namespace _1_2D_Top_Down
                 intersectsCollision);
 
             Mana.Update(gameTime);
-            UpdateState(deltaTime, isMoving);
+            UpdateState(deltaTime, isMoving, dashMotion.IsActive);
+        }
+
+        private static bool IsDashKeyDown(KeyboardState keyboard) =>
+            keyboard.IsKeyDown(Keys.LeftShift) ||
+            keyboard.IsKeyDown(Keys.RightShift);
+
+        private static Vector2 GetMovementDirection(
+            KeyboardState keyboard)
+        {
+            Vector2 direction = Vector2.Zero;
+
+            if (keyboard.IsKeyDown(Keys.Left) || keyboard.IsKeyDown(Keys.A))
+                direction.X -= 1f;
+            if (keyboard.IsKeyDown(Keys.Right) || keyboard.IsKeyDown(Keys.D))
+                direction.X += 1f;
+            if (keyboard.IsKeyDown(Keys.Up) || keyboard.IsKeyDown(Keys.W))
+                direction.Y -= 1f;
+            if (keyboard.IsKeyDown(Keys.Down) || keyboard.IsKeyDown(Keys.S))
+                direction.Y += 1f;
+
+            return direction;
+        }
+
+        private void BeginDash()
+        {
+            dashMotion.Begin(lastMovementDirection);
+            dashCooldownRemaining = DashDefinition.Cooldown;
+            ChangeState(PlayerState.Dash);
+        }
+
+        private void UpdateMovementAnimation(float deltaTime)
+        {
+            animationTimer += deltaTime;
+
+            if (animationTimer < FrameDuration)
+                return;
+
+            animationTimer -= FrameDuration;
+            currentFrame++;
+
+            if (currentFrame >= FrameCount)
+                currentFrame = 0;
         }
         public void Draw(SpriteBatch spriteBatch)
         {
@@ -234,6 +317,30 @@ namespace _1_2D_Top_Down
 
             if (intersectsCollision(MovementBounds))
                 Position.Y = previousY;
+        }
+
+        private bool TryMoveDash(
+            Vector2 movement,
+            Rectangle arena,
+            Func<Rectangle, bool> intersectsCollision)
+        {
+            Vector2 previousPosition = Position;
+            Position += movement;
+            Rectangle movementBounds = MovementBounds;
+
+            bool outsideArena =
+                movementBounds.Left < arena.Left ||
+                movementBounds.Right > arena.Right ||
+                movementBounds.Top < arena.Top ||
+                movementBounds.Bottom > arena.Bottom;
+
+            if (outsideArena || intersectsCollision(movementBounds))
+            {
+                Position = previousPosition;
+                return false;
+            }
+
+            return true;
         }
         private void KeepInsideArena(Rectangle arena)
         {
@@ -309,6 +416,15 @@ namespace _1_2D_Top_Down
             damageFlashTimer = 0f;
             healthFlashTimeLeft = 0f;
         }
+
+        public void ResetMovementAbilities()
+        {
+            dashMotion.Stop();
+            dashCooldownRemaining = 0f;
+            lastMovementDirection = Vector2.UnitY;
+            wasDashKeyDown = IsDashKeyDown(Keyboard.GetState());
+            knockback.Clear();
+        }
         public void AddStatBonus(PlayerStatType stat, float amount)
         {
             Stats.Add(stat, amount);
@@ -333,8 +449,15 @@ namespace _1_2D_Top_Down
 
         private void UpdateState(
             float deltaTime,
-            bool isMoving)
+            bool isMoving,
+            bool isDashing)
         {
+            if (isDashing)
+            {
+                ChangeState(PlayerState.Dash);
+                return;
+            }
+
             if (CurrentState == PlayerState.Shoot)
             {
                 shootStateTimer -= deltaTime;

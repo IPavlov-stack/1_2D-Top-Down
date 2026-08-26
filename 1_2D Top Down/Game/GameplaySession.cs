@@ -41,6 +41,7 @@ namespace _1_2D_Top_Down
 
             Player.Health.Reset();
             Player.ResetDamageEffects();
+            Player.ResetMovementAbilities();
             Player.Position = spawnPosition;
         }
 

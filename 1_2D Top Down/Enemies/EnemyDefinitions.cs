@@ -462,7 +462,7 @@ namespace _1_2D_Top_Down
                 walkSpeed: 150f,
                 runSpeed: 720f),
             new ChargerBehaviorDefinition(
-                minimumChargeDistance: 300f,
+                minimumChargeDistance: 250f,
                 triggerDistance: 800f,
                 lockedChargeDuration: 0.90f,
                 recoveryDuration: 1.5f,
@@ -605,9 +605,14 @@ namespace _1_2D_Top_Down
             new EnemyLocomotionDefinition(walkSpeed: 0f),
             new DashOnlyBehaviorDefinition(
                 dash: new DashMovementDefinition(
-                    initialSpeed: 900f,
-                    distance: 270f,
-                    cooldown: 1.8f,
+                    //animation time is 8 frames * 0.08s = 0.64s now, so t <= 0.64 for clear animations
+                    //S = V * t 
+                    //t = t1 + t2
+                    //t1 = S / V = distance / initialSpeed ~= 0.22
+                    //t2 = slideDuration
+                    initialSpeed: 682f,
+                    distance: 150f,
+                    cooldown: 1.2f,
                     slideDuration: 0.4f,
                     slideEasePower: 1.0f),
                 contactDamage: 12,
