@@ -115,29 +115,47 @@ namespace _1_2D_Top_Down
                 ? definition.RunAnimation
                 : definition.WalkAnimation);
 
+            if (context.Target.Hurtbox.Intersects(enemy.Hurtbox))
+            {
+                TryApplyContactDamage(enemy, context);
+                BeginAttack(enemy);
+                return;
+            }
+
             if (direction != Vector2.Zero)
             {
-                enemy.Motor.Move(
+                enemy.Motor.MoveSteered(
                     enemy,
                     direction,
                     speed,
                     shouldRun
                         ? EnemyMovementMode.Run
                         : EnemyMovementMode.Walk,
+                    shouldRun
+                        ? definition.RunSteering
+                        : definition.WalkSteering,
                     deltaTime,
-                    context);
+                    context,
+                    () => context.Target.Hurtbox.Intersects(
+                        enemy.Hurtbox));
             }
             else
             {
-                enemy.Motor.Stop();
+                enemy.Motor.MoveSteered(
+                    enemy,
+                    Vector2.Zero,
+                    0f,
+                    EnemyMovementMode.Walk,
+                    definition.WalkSteering,
+                    deltaTime,
+                    context);
             }
 
             enemy.UpdateAnimation(gameTime);
 
-            if (contactDamageTimer >=
-                    definition.ContactDamageCooldown &&
-                context.Target.Hurtbox.Intersects(enemy.Hurtbox))
+            if (context.Target.Hurtbox.Intersects(enemy.Hurtbox))
             {
+                TryApplyContactDamage(enemy, context);
                 BeginAttack(enemy);
             }
         }
@@ -154,21 +172,15 @@ namespace _1_2D_Top_Down
             enemy.SetAnimation(definition.AttackAnimation);
             enemy.UpdateAnimation(gameTime, loop: false);
 
+            // Remaining on top of the ghost is dangerous even before or
+            // after the dedicated attack release frame.
+            TryApplyContactDamage(enemy, context);
+
             if (!attackDamageRequested &&
                 phaseTimer >= definition.DamageReleaseTime)
             {
                 attackDamageRequested = true;
-
-                if (context.Target.Hurtbox.Intersects(enemy.Hurtbox))
-                {
-                    context.RequestPlayerDamage(new CombatHit(
-                        definition.ContactDamage,
-                        DamageType.Physical,
-                        CombatFaction.Enemy,
-                        enemy.Definition.Id,
-                        enemy.Hurtbox.Center.ToVector2(),
-                        definition.ContactKnockback));
-                }
+                TryApplyContactDamage(enemy, context);
             }
 
             if (phaseTimer < definition.AttackDuration)
@@ -257,10 +269,30 @@ namespace _1_2D_Top_Down
             phase = TeleportPhase.Attacking;
             phaseTimer = 0f;
             attackDamageRequested = false;
-            contactDamageTimer = 0f;
             enemy.Motor.Stop();
             enemy.ChangeState(EnemyState.Attacking);
             enemy.SetAnimation(definition.AttackAnimation);
+        }
+
+        private void TryApplyContactDamage(
+            Enemy enemy,
+            EnemyUpdateContext context)
+        {
+            if (definition.ContactDamage <= 0 ||
+                contactDamageTimer < definition.ContactDamageCooldown ||
+                !context.Target.Hurtbox.Intersects(enemy.Hurtbox))
+            {
+                return;
+            }
+
+            context.RequestPlayerDamage(new CombatHit(
+                definition.ContactDamage,
+                DamageType.Physical,
+                CombatFaction.Enemy,
+                enemy.Definition.Id,
+                enemy.Hurtbox.Center.ToVector2(),
+                definition.ContactKnockback));
+            contactDamageTimer = 0f;
         }
 
         private void TryTeleportBehind(

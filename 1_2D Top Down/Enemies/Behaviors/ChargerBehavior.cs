@@ -9,7 +9,7 @@ namespace _1_2D_Top_Down
     /// </summary>
     public sealed class ChargerBehavior : IEnemyBehavior
     {
-        private const float MaximumMovementStep = 8f;
+        private const float MaximumSpeedDifference = 0.5f;
 
         private enum ChargePhase
         {
@@ -23,7 +23,6 @@ namespace _1_2D_Top_Down
 
         private ChargePhase phase = ChargePhase.Chasing;
         private float cooldownTimer;
-        private float currentChargeSpeed;
         private float lockedTimer;
         private float recoveryTimer;
         private float normalContactDamageTimer;
@@ -103,17 +102,25 @@ namespace _1_2D_Top_Down
 
             if (direction != Vector2.Zero)
             {
-                enemy.Motor.Move(
+                enemy.Motor.MoveSteered(
                     enemy,
                     direction,
                     enemy.Definition.Locomotion.WalkSpeed,
                     EnemyMovementMode.Walk,
+                    definition.ChaseSteering,
                     deltaTime,
                     context);
             }
             else
             {
-                enemy.Motor.Stop();
+                enemy.Motor.MoveSteered(
+                    enemy,
+                    Vector2.Zero,
+                    0f,
+                    EnemyMovementMode.Walk,
+                    definition.ChaseSteering,
+                    deltaTime,
+                    context);
             }
 
             enemy.SetAnimation(definition.WalkAnimation);
@@ -136,8 +143,6 @@ namespace _1_2D_Top_Down
             }
 
             phase = ChargePhase.Accelerating;
-            currentChargeSpeed =
-                enemy.Definition.Locomotion.WalkSpeed;
             enemy.ChangeState(EnemyState.Attacking);
             enemy.SetAnimation(definition.RunAnimation);
         }
@@ -153,17 +158,24 @@ namespace _1_2D_Top_Down
             enemy.SetFacingDirection(direction);
             enemy.SetAnimation(definition.RunAnimation);
 
-            currentChargeSpeed = MathF.Min(
-                enemy.Definition.Locomotion.RunSpeed,
-                currentChargeSpeed + definition.Acceleration * deltaTime);
-
-            bool blocked = MoveCharge(
-                enemy,
-                direction,
-                currentChargeSpeed,
-                deltaTime,
-                context,
-                out bool hitPlayer);
+            bool hitPlayer = context.Target.Hurtbox.Intersects(
+                enemy.Hurtbox);
+            bool blocked = false;
+            if (!hitPlayer)
+            {
+                blocked = enemy.Motor.MoveSteered(
+                    enemy,
+                    direction,
+                    enemy.Definition.Locomotion.RunSpeed,
+                    EnemyMovementMode.Run,
+                    definition.ChargeSteering,
+                    deltaTime,
+                    context,
+                    () => context.Target.Hurtbox.Intersects(
+                        enemy.Hurtbox));
+                hitPlayer = context.Target.Hurtbox.Intersects(
+                    enemy.Hurtbox);
+            }
             enemy.UpdateAnimation(gameTime);
 
             if (hitPlayer)
@@ -179,13 +191,16 @@ namespace _1_2D_Top_Down
                 return;
             }
 
-            if (currentChargeSpeed <
-                enemy.Definition.Locomotion.RunSpeed)
+            float maximumChargeSpeed = MathF.Min(
+                enemy.Definition.Locomotion.RunSpeed,
+                definition.ChargeSteering.MaxSpeed);
+            if (enemy.Motor.Speed + MaximumSpeedDifference <
+                maximumChargeSpeed)
             {
                 return;
             }
 
-            lockedDirection = direction;
+            lockedDirection = enemy.Motor.Velocity;
             if (lockedDirection == Vector2.Zero)
                 lockedDirection = Vector2.UnitY;
             else
@@ -206,13 +221,24 @@ namespace _1_2D_Top_Down
             enemy.SetFacingDirection(lockedDirection);
             enemy.SetAnimation(definition.RunAnimation);
 
-            bool blocked = MoveCharge(
-                enemy,
-                lockedDirection,
-                enemy.Definition.Locomotion.RunSpeed,
-                deltaTime,
-                context,
-                out bool hitPlayer);
+            bool hitPlayer = context.Target.Hurtbox.Intersects(
+                enemy.Hurtbox);
+            bool blocked = false;
+            if (!hitPlayer)
+            {
+                blocked = enemy.Motor.MoveSteered(
+                    enemy,
+                    lockedDirection,
+                    enemy.Definition.Locomotion.RunSpeed,
+                    EnemyMovementMode.Run,
+                    definition.ChargeSteering,
+                    deltaTime,
+                    context,
+                    () => context.Target.Hurtbox.Intersects(
+                        enemy.Hurtbox));
+                hitPlayer = context.Target.Hurtbox.Intersects(
+                    enemy.Hurtbox);
+            }
             enemy.UpdateAnimation(gameTime);
 
             if (hitPlayer)
@@ -236,9 +262,18 @@ namespace _1_2D_Top_Down
             float deltaTime)
         {
             recoveryTimer += deltaTime;
-            enemy.Motor.Stop();
+            enemy.Motor.MoveSteered(
+                enemy,
+                Vector2.Zero,
+                0f,
+                EnemyMovementMode.Run,
+                definition.ChargeSteering,
+                deltaTime,
+                context);
             enemy.ChangeState(EnemyState.Idle);
-            enemy.SetAnimation(definition.IdleAnimation);
+            enemy.SetAnimation(enemy.Motor.IsMoving
+                ? definition.RunAnimation
+                : definition.IdleAnimation);
             enemy.UpdateAnimation(gameTime);
             TryApplyNormalContactDamage(enemy, context);
 
@@ -247,68 +282,7 @@ namespace _1_2D_Top_Down
 
             phase = ChargePhase.Chasing;
             cooldownTimer = 0f;
-            currentChargeSpeed = 0f;
             lockedTimer = 0f;
-        }
-
-        private bool MoveCharge(
-            Enemy enemy,
-            Vector2 direction,
-            float speed,
-            float deltaTime,
-            EnemyUpdateContext context,
-            out bool hitPlayer)
-        {
-            hitPlayer = context.Target.Hurtbox.Intersects(
-                enemy.Hurtbox);
-
-            if (direction == Vector2.Zero ||
-                speed <= 0f ||
-                deltaTime <= 0f)
-            {
-                enemy.Motor.Stop();
-                return false;
-            }
-
-            float totalDistance = speed * deltaTime;
-            int steps = Math.Max(
-                1,
-                (int)MathF.Ceiling(
-                    totalDistance / MaximumMovementStep));
-            float stepTime = deltaTime / steps;
-            float expectedStepDistance = totalDistance / steps;
-
-            for (int i = 0; i < steps; i++)
-            {
-                Vector2 previousPosition = enemy.Position;
-                enemy.Motor.Move(
-                    enemy,
-                    direction,
-                    speed,
-                    EnemyMovementMode.Run,
-                    stepTime,
-                    context);
-
-                if (context.Target.Hurtbox.Intersects(enemy.Hurtbox))
-                {
-                    hitPlayer = true;
-                    return false;
-                }
-
-                float actualDistance = Vector2.Distance(
-                    previousPosition,
-                    enemy.Position);
-
-                // A charge ends when collision resolution prevents most of
-                // the requested movement. This also catches world boundaries.
-                if (actualDistance + 0.5f <
-                    expectedStepDistance * 0.85f)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private void HitPlayer(
@@ -353,9 +327,10 @@ namespace _1_2D_Top_Down
         {
             phase = ChargePhase.Recovering;
             recoveryTimer = 0f;
-            enemy.Motor.Stop();
             enemy.ChangeState(EnemyState.Idle);
-            enemy.SetAnimation(definition.IdleAnimation);
+            enemy.SetAnimation(enemy.Motor.IsMoving
+                ? definition.RunAnimation
+                : definition.IdleAnimation);
         }
     }
 }

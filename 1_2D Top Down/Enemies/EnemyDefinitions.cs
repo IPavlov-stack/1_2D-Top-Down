@@ -437,7 +437,6 @@ namespace _1_2D_Top_Down
             new ChargerBehaviorDefinition(
                 minimumChargeDistance: 300f,
                 triggerDistance: 800f,
-                acceleration: 700f,
                 lockedChargeDuration: 0.90f,
                 recoveryDuration: 1.5f,
                 chargeCooldown: 2.0f,
@@ -447,7 +446,21 @@ namespace _1_2D_Top_Down
                 contactKnockback: 1200f,
                 idleAnimation: MushroomIdle,
                 walkAnimation: MushroomWalk,
-                runAnimation: MushroomRun));
+                runAnimation: MushroomRun,
+                chaseSteering: new EnemySteeringDefinition(
+                    acceleration: 900f,
+                    deceleration: 1100f,
+                    maxSpeed: 150f,
+                    turnSpeedDegrees: 540f,
+                    collisionResponse:
+                        EnemySteeringCollisionResponse.Slide),
+                chargeSteering: new EnemySteeringDefinition(
+                    acceleration: 700f,
+                    deceleration: 850f,
+                    maxSpeed: 720f,
+                    turnSpeedDegrees: 115f,
+                    collisionResponse:
+                        EnemySteeringCollisionResponse.Stop)));
 
         public static EnemyDefinition Zombie { get; } = new(
             "zombie",
@@ -521,7 +534,21 @@ namespace _1_2D_Top_Down
                 idleAnimation: GhostIdle,
                 walkAnimation: GhostWalk,
                 runAnimation: GhostRun,
-                attackAnimation: GhostAttack));
+                attackAnimation: GhostAttack,
+                walkSteering: new EnemySteeringDefinition(
+                    acceleration: 420f,
+                    deceleration: 320f,
+                    maxSpeed: 160f,
+                    turnSpeedDegrees: 260f,
+                    collisionResponse:
+                        EnemySteeringCollisionResponse.Slide),
+                runSteering: new EnemySteeringDefinition(
+                    acceleration: 650f,
+                    deceleration: 400f,
+                    maxSpeed: 460f,
+                    turnSpeedDegrees: 150f,
+                    collisionResponse:
+                        EnemySteeringCollisionResponse.Slide)));
 
         public static EnemyDefinitionRegistry Registry { get; } =
             CreateRegistry();

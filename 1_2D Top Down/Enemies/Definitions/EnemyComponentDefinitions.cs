@@ -336,7 +336,6 @@ namespace _1_2D_Top_Down
     {
         public float MinimumChargeDistance { get; }
         public float TriggerDistance { get; }
-        public float Acceleration { get; }
         public float LockedChargeDuration { get; }
         public float RecoveryDuration { get; }
         public float ChargeCooldown { get; }
@@ -347,11 +346,12 @@ namespace _1_2D_Top_Down
         public EnemyAnimationDefinition IdleAnimation { get; }
         public EnemyAnimationDefinition WalkAnimation { get; }
         public EnemyAnimationDefinition RunAnimation { get; }
+        public EnemySteeringDefinition ChaseSteering { get; }
+        public EnemySteeringDefinition ChargeSteering { get; }
 
         public ChargerBehaviorDefinition(
             float minimumChargeDistance,
             float triggerDistance,
-            float acceleration,
             float lockedChargeDuration,
             float recoveryDuration,
             float chargeCooldown,
@@ -361,7 +361,9 @@ namespace _1_2D_Top_Down
             float contactKnockback,
             EnemyAnimationDefinition idleAnimation,
             EnemyAnimationDefinition walkAnimation,
-            EnemyAnimationDefinition runAnimation)
+            EnemyAnimationDefinition runAnimation,
+            EnemySteeringDefinition chaseSteering,
+            EnemySteeringDefinition chargeSteering)
         {
             if (minimumChargeDistance < 0f)
             {
@@ -377,7 +379,6 @@ namespace _1_2D_Top_Down
 
             MinimumChargeDistance = minimumChargeDistance;
             TriggerDistance = triggerDistance;
-            Acceleration = acceleration;
             LockedChargeDuration = lockedChargeDuration;
             RecoveryDuration = recoveryDuration;
             ChargeCooldown = chargeCooldown;
@@ -388,6 +389,12 @@ namespace _1_2D_Top_Down
             IdleAnimation = idleAnimation;
             WalkAnimation = walkAnimation;
             RunAnimation = runAnimation;
+            ChaseSteering = chaseSteering ??
+                throw new System.ArgumentNullException(
+                    nameof(chaseSteering));
+            ChargeSteering = chargeSteering ??
+                throw new System.ArgumentNullException(
+                    nameof(chargeSteering));
         }
     }
 
@@ -414,6 +421,8 @@ namespace _1_2D_Top_Down
         public EnemyAnimationDefinition WalkAnimation { get; }
         public EnemyAnimationDefinition RunAnimation { get; }
         public EnemyAnimationDefinition AttackAnimation { get; }
+        public EnemySteeringDefinition WalkSteering { get; }
+        public EnemySteeringDefinition RunSteering { get; }
 
         public TeleportChaserBehaviorDefinition(
             float runTriggerDistance,
@@ -431,7 +440,9 @@ namespace _1_2D_Top_Down
             EnemyAnimationDefinition idleAnimation,
             EnemyAnimationDefinition walkAnimation,
             EnemyAnimationDefinition runAnimation,
-            EnemyAnimationDefinition attackAnimation)
+            EnemyAnimationDefinition attackAnimation,
+            EnemySteeringDefinition walkSteering,
+            EnemySteeringDefinition runSteering)
         {
             if (runTriggerDistance <= teleportTriggerDistance)
             {
@@ -478,6 +489,12 @@ namespace _1_2D_Top_Down
             WalkAnimation = walkAnimation;
             RunAnimation = runAnimation;
             AttackAnimation = attackAnimation;
+            WalkSteering = walkSteering ??
+                throw new System.ArgumentNullException(
+                    nameof(walkSteering));
+            RunSteering = runSteering ??
+                throw new System.ArgumentNullException(
+                    nameof(runSteering));
         }
     }
 }
