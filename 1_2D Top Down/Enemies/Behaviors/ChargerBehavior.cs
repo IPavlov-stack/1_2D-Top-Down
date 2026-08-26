@@ -7,7 +7,9 @@ namespace _1_2D_Top_Down
     /// A committed sprint behavior with readable counterplay: the enemy first
     /// homes while accelerating, then loses steering at maximum speed.
     /// </summary>
-    public sealed class ChargerBehavior : IEnemyBehavior
+    public sealed class ChargerBehavior :
+        IEnemyBehavior,
+        IEnemyHitReactionPolicy
     {
         private const float MaximumSpeedDifference = 0.5f;
 
@@ -27,6 +29,10 @@ namespace _1_2D_Top_Down
         private float recoveryTimer;
         private float normalContactDamageTimer;
         private Vector2 lockedDirection = Vector2.UnitY;
+
+        public bool IsKnockbackImmune =>
+            phase == ChargePhase.Accelerating ||
+            phase == ChargePhase.Locked;
 
         public ChargerBehavior(ChargerBehaviorDefinition definition)
         {
@@ -159,7 +165,7 @@ namespace _1_2D_Top_Down
             enemy.SetAnimation(definition.RunAnimation);
 
             bool hitPlayer = context.Target.Hurtbox.Intersects(
-                enemy.Hurtbox);
+                enemy.ContactHitbox);
             bool blocked = false;
             if (!hitPlayer)
             {
@@ -172,9 +178,9 @@ namespace _1_2D_Top_Down
                     deltaTime,
                     context,
                     () => context.Target.Hurtbox.Intersects(
-                        enemy.Hurtbox));
+                        enemy.ContactHitbox));
                 hitPlayer = context.Target.Hurtbox.Intersects(
-                    enemy.Hurtbox);
+                    enemy.ContactHitbox);
             }
             enemy.UpdateAnimation(gameTime);
 
@@ -222,7 +228,7 @@ namespace _1_2D_Top_Down
             enemy.SetAnimation(definition.RunAnimation);
 
             bool hitPlayer = context.Target.Hurtbox.Intersects(
-                enemy.Hurtbox);
+                enemy.ContactHitbox);
             bool blocked = false;
             if (!hitPlayer)
             {
@@ -235,9 +241,9 @@ namespace _1_2D_Top_Down
                     deltaTime,
                     context,
                     () => context.Target.Hurtbox.Intersects(
-                        enemy.Hurtbox));
+                        enemy.ContactHitbox));
                 hitPlayer = context.Target.Hurtbox.Intersects(
-                    enemy.Hurtbox);
+                    enemy.ContactHitbox);
             }
             enemy.UpdateAnimation(gameTime);
 
@@ -294,7 +300,7 @@ namespace _1_2D_Top_Down
                 DamageType.Physical,
                 CombatFaction.Enemy,
                 enemy.Definition.Id,
-                enemy.Hurtbox.Center.ToVector2(),
+                enemy.ContactHitbox.Center.ToVector2(),
                 definition.ContactKnockback));
 
             // Prevent the following recovery frame from immediately adding a
@@ -309,7 +315,8 @@ namespace _1_2D_Top_Down
             if (definition.NormalContactDamage <= 0 ||
                 normalContactDamageTimer <
                     definition.NormalContactDamageCooldown ||
-                !context.Target.Hurtbox.Intersects(enemy.Hurtbox))
+                !context.Target.Hurtbox.Intersects(
+                    enemy.ContactHitbox))
             {
                 return;
             }
@@ -319,7 +326,7 @@ namespace _1_2D_Top_Down
                 DamageType.Physical,
                 CombatFaction.Enemy,
                 enemy.Definition.Id,
-                enemy.Hurtbox.Center.ToVector2()));
+                enemy.ContactHitbox.Center.ToVector2()));
             normalContactDamageTimer = 0f;
         }
 

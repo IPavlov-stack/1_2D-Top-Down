@@ -57,14 +57,15 @@ namespace _1_2D_Top_Down
                 {
                     attackDamageRequested = true;
 
-                    if (context.Target.Hurtbox.Intersects(enemy.Hurtbox))
+                    if (context.Target.Hurtbox.Intersects(
+                        enemy.ContactHitbox))
                     {
                         context.RequestPlayerDamage(new CombatHit(
                             contactDamage,
                             DamageType.Physical,
                             CombatFaction.Enemy,
                             enemy.Definition.Id,
-                            enemy.Hurtbox.Center.ToVector2()));
+                            enemy.ContactHitbox.Center.ToVector2()));
                         contactDamageTimer = 0f;
                     }
                 }
@@ -97,7 +98,8 @@ namespace _1_2D_Top_Down
             enemy.UpdateAnimation(gameTime);
 
             if (contactDamageTimer < contactDamageCooldown ||
-                !context.Target.Hurtbox.Intersects(enemy.Bounds))
+                !context.Target.Hurtbox.Intersects(
+                    enemy.ContactHitbox))
             {
                 return;
             }

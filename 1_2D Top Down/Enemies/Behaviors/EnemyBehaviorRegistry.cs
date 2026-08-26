@@ -37,6 +37,9 @@ namespace _1_2D_Top_Down
             Register<TeleportChaserBehaviorDefinition>(
                 definition => new TeleportChaserBehavior(definition));
 
+            Register<DashOnlyBehaviorDefinition>(
+                definition => new DashOnlyBehavior(definition));
+
             Register<NecromancerBehaviorDefinition>(
                 definition => new NecromancerBehavior(
                     Create(definition.Ranged),

@@ -42,6 +42,10 @@ namespace _1_2D_Top_Down
 
         public EnemyState CurrentState { get; private set; } = EnemyState.Idle;
 
+        private bool IsKnockbackImmune =>
+            behavior is IEnemyHitReactionPolicy policy &&
+            policy.IsKnockbackImmune;
+
         private const float KnockbackDeceleration = 9f;
         private readonly Knockback knockback = new Knockback(KnockbackDeceleration);
 
@@ -58,6 +62,14 @@ namespace _1_2D_Top_Down
         public Rectangle Hurtbox =>
             GetConfiguredBounds(Definition.Visuals.Hurtbox) ??
             GetLegacyBounds();
+
+        /// <summary>
+        /// Offensive body used by touch and body-impact attacks. Definitions
+        /// without a dedicated contact shape retain their previous Hurtbox.
+        /// </summary>
+        public Rectangle ContactHitbox =>
+            GetConfiguredBounds(Definition.Visuals.ContactHitbox) ??
+            Hurtbox;
 
         // Compatibility alias for gameplay systems that need the combat body.
         public Rectangle Bounds => Hurtbox;
@@ -281,10 +293,14 @@ namespace _1_2D_Top_Down
                  SpriteEffects.None,
                  0f);
         }
+
         public void ApplyKnockback(
-    Vector2 attackPosition,
-    float force)
+            Vector2 attackPosition,
+            float force)
         {
+            if (IsKnockbackImmune)
+                return;
+
             Vector2 direction =
                 Bounds.Center.ToVector2() - attackPosition;
 
@@ -293,13 +309,17 @@ namespace _1_2D_Top_Down
 
         public void TakeHit(CombatHit hit)
         {
+            bool suppressHitReaction = IsKnockbackImmune;
             Health.TakeDamage(hit.Damage);
-            ApplyKnockback(hit.HitPosition, hit.Knockback);
+            if (!suppressHitReaction)
+                ApplyKnockback(hit.HitPosition, hit.Knockback);
 
             EnemyAnimationDefinition hurtAnimation =
                 Definition.Visuals.HurtAnimation;
 
-            if (!Health.IsDead && hurtAnimation != null)
+            if (!suppressHitReaction &&
+                !Health.IsDead &&
+                hurtAnimation != null)
             {
                 hurtStateTimer = MathF.Max(
                     hurtStateTimer,
@@ -319,6 +339,12 @@ namespace _1_2D_Top_Down
 
         private void UpdateKnockback(GameTime gameTime, EnemyUpdateContext context)
         {
+            if (IsKnockbackImmune)
+            {
+                knockback.Clear();
+                return;
+            }
+
             Motor.MoveDelta(this, knockback.Update(gameTime), context);
         }
 

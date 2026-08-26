@@ -8,6 +8,7 @@
         Beholder,
         MushroomCharger,
         Zombie,
-        Ghost
+        Ghost,
+        Slime
     }
 }

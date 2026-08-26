@@ -220,6 +220,33 @@ namespace _1_2D_Top_Down
             usesDirectionalRows: true,
             defaultRow: 0);
 
+        private static readonly EnemyAnimationDefinition SlimeIdle = new(
+            "enemies/Slime/Tier1/Idle",
+            sheetColumns: 6,
+            sheetRows: 4,
+            frameCount: 6,
+            frameDuration: 0.14f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition SlimeDash = new(
+            "enemies/Slime/Tier1/Run",
+            sheetColumns: 8,
+            sheetRows: 4,
+            frameCount: 8,
+            frameDuration: 0.08f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition SlimeHurt = new(
+            "enemies/Slime/Tier1/Hurt",
+            sheetColumns: 5,
+            sheetRows: 4,
+            frameCount: 5,
+            frameDuration: 0.08f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
         private static readonly AreaEffectDefinition BeholderExplosion =
             AreaEffectDefinition.Circle(
                 id: "beholder-explosion",
@@ -458,7 +485,7 @@ namespace _1_2D_Top_Down
                     acceleration: 700f,
                     deceleration: 850f,
                     maxSpeed: 720f,
-                    turnSpeedDegrees: 115f,
+                    turnSpeedDegrees: 110f,
                     collisionResponse:
                         EnemySteeringCollisionResponse.Stop)));
 
@@ -550,6 +577,45 @@ namespace _1_2D_Top_Down
                     collisionResponse:
                         EnemySteeringCollisionResponse.Slide)));
 
+        public static EnemyDefinition Slime { get; } = new(
+            "slime",
+            EnemyType.Slime,
+            new EnemyVisualDefinition(
+                "enemies/Slime/Tier1/Idle", 6, 4, 0.14f, 2.5f,
+                SlimeIdle,
+                "enemies/Slime/Tier1/Shadow", 2.5f, 0.55f, 1f,
+                "enemies/Slime/Tier1/Death", 10, 10, 4, 0, 0.09f, 2.5f,
+                hurtAnimation: SlimeHurt,
+                hitbox: new EnemyHitboxDefinition(
+                    width: 8f,
+                    height: 6f,
+                    centerX: 32f,
+                    bottomY: 40f),
+                hurtbox: new EnemyHitboxDefinition(
+                    width: 18f,
+                    height: 16f,
+                    centerX: 32f,
+                    bottomY: 40f),
+                contactHitbox: new EnemyHitboxDefinition(
+                    width: 12f,
+                    height: 8f,
+                    centerX: 32f,
+                    bottomY: 40f)),
+            new EnemyStatsDefinition(maxHealth: 4, experienceReward: 16),
+            new EnemyLocomotionDefinition(walkSpeed: 0f),
+            new DashOnlyBehaviorDefinition(
+                dash: new DashMovementDefinition(
+                    initialSpeed: 900f,
+                    distance: 270f,
+                    cooldown: 1.8f,
+                    slideDuration: 0.4f,
+                    slideEasePower: 1.0f),
+                contactDamage: 12,
+                contactDamageCooldown: 0.8f,
+                contactKnockback: 250f,
+                idleAnimation: SlimeIdle,
+                runAnimation: SlimeDash));
+
         public static EnemyDefinitionRegistry Registry { get; } =
             CreateRegistry();
 
@@ -570,6 +636,7 @@ namespace _1_2D_Top_Down
                 MushroomCharger,"MushroomCharger", "Mushroom Charger");
             registry.Register(Zombie, "Zombie", "Zombie Tier1");
             registry.Register(Ghost, "Ghost", "Ghost Tier1");
+            registry.Register(Slime, "Slime", "Slime Tier1");
             return registry;
         }
     }

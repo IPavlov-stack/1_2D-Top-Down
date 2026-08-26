@@ -21,6 +21,11 @@ namespace _1_2D_Top_Down
             velocity = direction * force;
         }
 
+        public void Clear()
+        {
+            velocity = Vector2.Zero;
+        }
+
         public Vector2 Update(GameTime gameTime)
         {
             float deltaTime =

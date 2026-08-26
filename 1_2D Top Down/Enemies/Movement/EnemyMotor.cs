@@ -133,13 +133,20 @@ namespace _1_2D_Top_Down
                 stopCondition);
         }
 
-        public void MoveDelta(
+        public bool MoveDelta(
             Enemy enemy,
             Vector2 delta,
             EnemyUpdateContext context)
         {
-            TryMoveAxis(enemy, new Vector2(delta.X, 0f), context);
-            TryMoveAxis(enemy, new Vector2(0f, delta.Y), context);
+            bool movedX = TryMoveAxis(
+                enemy,
+                new Vector2(delta.X, 0f),
+                context);
+            bool movedY = TryMoveAxis(
+                enemy,
+                new Vector2(0f, delta.Y),
+                context);
+            return movedX && movedY;
         }
 
         public bool TryTeleport(

@@ -102,6 +102,7 @@ namespace _1_2D_Top_Down
         public EnemyAnimationDefinition HurtAnimation { get; }
         public EnemyHitboxDefinition Hitbox { get; }
         public EnemyHitboxDefinition Hurtbox { get; }
+        public EnemyHitboxDefinition ContactHitbox { get; }
 
         public EnemyVisualDefinition(
             string textureAsset, int sheetColumns, int sheetRows,
@@ -115,7 +116,8 @@ namespace _1_2D_Top_Down
             float deathScale,
             EnemyAnimationDefinition hurtAnimation = null,
             EnemyHitboxDefinition hitbox = null,
-            EnemyHitboxDefinition hurtbox = null)
+            EnemyHitboxDefinition hurtbox = null,
+            EnemyHitboxDefinition contactHitbox = null)
         {
             TextureAsset = textureAsset;
             SheetColumns = sheetColumns;
@@ -137,6 +139,7 @@ namespace _1_2D_Top_Down
             HurtAnimation = hurtAnimation;
             Hitbox = hitbox;
             Hurtbox = hurtbox;
+            ContactHitbox = contactHitbox;
         }
     }
 
@@ -495,6 +498,53 @@ namespace _1_2D_Top_Down
             RunSteering = runSteering ??
                 throw new System.ArgumentNullException(
                     nameof(runSteering));
+        }
+    }
+
+    /// <summary>
+    /// Remains stationary between direction-locked powered dashes followed
+    /// by an ease-out slide.
+    /// </summary>
+    public sealed class DashOnlyBehaviorDefinition
+        : EnemyBehaviorDefinition
+    {
+        public DashMovementDefinition Dash { get; }
+        public int ContactDamage { get; }
+        public float ContactDamageCooldown { get; }
+        public float ContactKnockback { get; }
+        public EnemyAnimationDefinition IdleAnimation { get; }
+        public EnemyAnimationDefinition RunAnimation { get; }
+
+        public DashOnlyBehaviorDefinition(
+            DashMovementDefinition dash,
+            int contactDamage,
+            float contactDamageCooldown,
+            float contactKnockback,
+            EnemyAnimationDefinition idleAnimation,
+            EnemyAnimationDefinition runAnimation)
+        {
+            if (contactDamage < 0)
+            {
+                throw new System.ArgumentOutOfRangeException(
+                    nameof(contactDamage));
+            }
+            if (contactDamageCooldown < 0f)
+            {
+                throw new System.ArgumentOutOfRangeException(
+                    nameof(contactDamageCooldown));
+            }
+
+            Dash = dash ??
+                throw new System.ArgumentNullException(nameof(dash));
+            ContactDamage = contactDamage;
+            ContactDamageCooldown = contactDamageCooldown;
+            ContactKnockback = System.MathF.Max(0f, contactKnockback);
+            IdleAnimation = idleAnimation ??
+                throw new System.ArgumentNullException(
+                    nameof(idleAnimation));
+            RunAnimation = runAnimation ??
+                throw new System.ArgumentNullException(
+                    nameof(runAnimation));
         }
     }
 }

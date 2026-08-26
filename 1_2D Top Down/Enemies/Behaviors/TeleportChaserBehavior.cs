@@ -7,7 +7,9 @@ namespace _1_2D_Top_Down
     /// Distance-based walk/run pursuit with a readable fade teleport to the
     /// side opposite the enemy's current position relative to the player.
     /// </summary>
-    public sealed class TeleportChaserBehavior : IEnemyBehavior
+    public sealed class TeleportChaserBehavior :
+        IEnemyBehavior,
+        IEnemyHitReactionPolicy
     {
         private enum TeleportPhase
         {
@@ -34,7 +36,11 @@ namespace _1_2D_Top_Down
         private float runLockoutTimer;
         private float contactDamageTimer;
         private bool attackDamageRequested;
+        private bool isRunning;
         private Vector2 capturedPlayerToGhost = Vector2.UnitX;
+
+        public bool IsKnockbackImmune =>
+            phase == TeleportPhase.Chasing && isRunning;
 
         public TeleportChaserBehavior(
             TeleportChaserBehaviorDefinition definition)
@@ -106,6 +112,7 @@ namespace _1_2D_Top_Down
             bool canRun = runLockoutTimer <= 0f;
             bool shouldRun =
                 canRun && distance <= definition.RunTriggerDistance;
+            isRunning = shouldRun;
             float speed = shouldRun
                 ? enemy.Definition.Locomotion.RunSpeed
                 : enemy.Definition.Locomotion.WalkSpeed;
@@ -115,7 +122,8 @@ namespace _1_2D_Top_Down
                 ? definition.RunAnimation
                 : definition.WalkAnimation);
 
-            if (context.Target.Hurtbox.Intersects(enemy.Hurtbox))
+            if (context.Target.Hurtbox.Intersects(
+                enemy.ContactHitbox))
             {
                 TryApplyContactDamage(enemy, context);
                 BeginAttack(enemy);
@@ -137,7 +145,7 @@ namespace _1_2D_Top_Down
                     deltaTime,
                     context,
                     () => context.Target.Hurtbox.Intersects(
-                        enemy.Hurtbox));
+                        enemy.ContactHitbox));
             }
             else
             {
@@ -153,7 +161,8 @@ namespace _1_2D_Top_Down
 
             enemy.UpdateAnimation(gameTime);
 
-            if (context.Target.Hurtbox.Intersects(enemy.Hurtbox))
+            if (context.Target.Hurtbox.Intersects(
+                enemy.ContactHitbox))
             {
                 TryApplyContactDamage(enemy, context);
                 BeginAttack(enemy);
@@ -251,6 +260,7 @@ namespace _1_2D_Top_Down
             Vector2 playerCenter,
             Vector2 ghostCenter)
         {
+            isRunning = false;
             capturedPlayerToGhost = ghostCenter - playerCenter;
             if (capturedPlayerToGhost == Vector2.Zero)
                 capturedPlayerToGhost = Vector2.UnitX;
@@ -266,6 +276,7 @@ namespace _1_2D_Top_Down
 
         private void BeginAttack(Enemy enemy)
         {
+            isRunning = false;
             phase = TeleportPhase.Attacking;
             phaseTimer = 0f;
             attackDamageRequested = false;
@@ -280,7 +291,8 @@ namespace _1_2D_Top_Down
         {
             if (definition.ContactDamage <= 0 ||
                 contactDamageTimer < definition.ContactDamageCooldown ||
-                !context.Target.Hurtbox.Intersects(enemy.Hurtbox))
+                !context.Target.Hurtbox.Intersects(
+                    enemy.ContactHitbox))
             {
                 return;
             }
@@ -290,7 +302,7 @@ namespace _1_2D_Top_Down
                 DamageType.Physical,
                 CombatFaction.Enemy,
                 enemy.Definition.Id,
-                enemy.Hurtbox.Center.ToVector2(),
+                enemy.ContactHitbox.Center.ToVector2(),
                 definition.ContactKnockback));
             contactDamageTimer = 0f;
         }
