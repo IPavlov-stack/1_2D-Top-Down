@@ -33,17 +33,21 @@ namespace _1_2D_Top_Down
         public float DashCooldownRemaining => dashCooldownRemaining;
 
         public float MoveSpeed => Stats.MoveSpeed;
-        public Texture2D texture;
-
-        private const int FrameCount = 4;
-        private const float FrameDuration = 0.15f;
+        private readonly Func<string, Texture2D> textureResolver;
+        private Texture2D texture;
+        private PlayerAnimationDefinition currentAnimation;
+        private Vector2 facingDirection = Vector2.UnitY;
+        private int animationRow;
 
         private int currentFrame;
         private float animationTimer;
-        private int FrameWidth => texture.Width / FrameCount;
-        private int FrameHeight => texture.Height;
+        private int FrameWidth =>
+            texture.Width / currentAnimation.SheetColumns;
+        private int FrameHeight =>
+            texture.Height / currentAnimation.SheetRows;
 
-        private const float Scale = 1.3f;
+        public PlayerVisualDefinition Visuals { get; private set; }
+        public Texture2D ShadowTexture { get; private set; }
 
         public Vector2 Position;
         public Vector2 playerPosition = new Vector2(400, 500);
@@ -65,8 +69,8 @@ namespace _1_2D_Top_Down
         {
             get
             {
-                int spriteWidth = (int)(FrameWidth * Scale);
-                int spriteHeight = (int)(FrameHeight * Scale);
+                int spriteWidth = (int)(FrameWidth * Visuals.Scale);
+                int spriteHeight = (int)(FrameHeight * Visuals.Scale);
 
                 return new Rectangle(
                     (int)Position.X,
@@ -117,9 +121,14 @@ namespace _1_2D_Top_Down
         public int SortY => MovementBounds.Bottom;
         public Vector2 Center => Hurtbox.Center.ToVector2();
 
-        public Player(Texture2D texture, Vector2 startPosition, PlayerProfile profile)
+        public Player(
+            PlayerVisualDefinition visuals,
+            Func<string, Texture2D> textureResolver,
+            Vector2 startPosition,
+            PlayerProfile profile)
         {
-            this.texture = texture;
+            this.textureResolver = textureResolver ??
+                throw new ArgumentNullException(nameof(textureResolver));
             Position = startPosition;
             Profile = profile ?? throw new ArgumentNullException(nameof(profile));
 
@@ -128,6 +137,16 @@ namespace _1_2D_Top_Down
             Mana = new Mana(Stats.MaxMana, Stats.ManaRegen);
             dashMotion = new DashMotion(DashDefinition);
             wasDashKeyDown = IsDashKeyDown(Keyboard.GetState());
+            SetVisuals(visuals);
+        }
+
+        public void SetVisuals(PlayerVisualDefinition visuals)
+        {
+            Visuals = visuals ??
+                throw new ArgumentNullException(nameof(visuals));
+            ShadowTexture = textureResolver(Visuals.ShadowTextureAsset);
+            currentAnimation = null;
+            SetAnimation(Visuals.Idle);
         }
         public void GainExperience(int amount)
         {
@@ -169,7 +188,6 @@ namespace _1_2D_Top_Down
                         movement,
                         arena,
                         intersectsCollision));
-                UpdateMovementAnimation(deltaTime);
             }
             else if (canMove)
             {
@@ -179,6 +197,7 @@ namespace _1_2D_Top_Down
                 {
                     direction.Normalize();
                     lastMovementDirection = direction;
+                    SetFacingDirection(direction);
                 }
 
                 if (dashPressed && dashCooldownRemaining <= 0f)
@@ -209,7 +228,6 @@ namespace _1_2D_Top_Down
                         intersectsCollision);
                 }
 
-                UpdateMovementAnimation(deltaTime);
             }
 
             ApplyKnockbackMovement(
@@ -219,6 +237,7 @@ namespace _1_2D_Top_Down
 
             Mana.Update(gameTime);
             UpdateState(deltaTime, isMoving, dashMotion.IsActive);
+            UpdateVisualAnimation(deltaTime);
         }
 
         private static bool IsDashKeyDown(KeyboardState keyboard) =>
@@ -246,21 +265,73 @@ namespace _1_2D_Top_Down
         {
             dashMotion.Begin(lastMovementDirection);
             dashCooldownRemaining = DashDefinition.Cooldown;
+            SetFacingDirection(dashMotion.Direction);
             ChangeState(PlayerState.Dash);
         }
 
-        private void UpdateMovementAnimation(float deltaTime)
+        private void UpdateVisualAnimation(float deltaTime)
         {
+            PlayerAnimationDefinition targetAnimation = CurrentState switch
+            {
+                PlayerState.Walk => Visuals.Walk,
+                PlayerState.Dash => Visuals.Run,
+                PlayerState.Shoot => Visuals.Attack,
+                _ => Visuals.Idle
+            };
+            SetAnimation(targetAnimation);
+
             animationTimer += deltaTime;
 
-            if (animationTimer < FrameDuration)
+            if (animationTimer < currentAnimation.FrameDuration)
                 return;
 
-            animationTimer -= FrameDuration;
+            animationTimer -= currentAnimation.FrameDuration;
             currentFrame++;
 
-            if (currentFrame >= FrameCount)
-                currentFrame = 0;
+            if (currentFrame < currentAnimation.FrameCount)
+                return;
+
+            currentFrame = currentAnimation.Loop
+                ? 0
+                : currentAnimation.FrameCount - 1;
+        }
+
+        private void SetFacingDirection(Vector2 direction)
+        {
+            if (direction == Vector2.Zero)
+                return;
+
+            facingDirection = direction;
+        }
+
+        private void SetAnimation(PlayerAnimationDefinition animation)
+        {
+            int targetRow = ResolveDirectionalRow(facingDirection);
+            bool animationChanged =
+                !ReferenceEquals(currentAnimation, animation);
+            bool rowChanged = animationRow != targetRow;
+
+            if (animationChanged)
+            {
+                currentAnimation = animation;
+                texture = textureResolver(animation.TextureAsset);
+            }
+
+            if (!animationChanged && !rowChanged)
+                return;
+
+            animationRow = targetRow;
+            currentFrame = 0;
+            animationTimer = 0f;
+        }
+
+        private static int ResolveDirectionalRow(Vector2 direction)
+        {
+            // The swordsman sheets use: right, front, left, back.
+            if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
+                return direction.X < 0f ? 2 : 0;
+
+            return direction.Y < 0f ? 3 : 1;
         }
         public void Draw(SpriteBatch spriteBatch)
         {
@@ -278,7 +349,7 @@ namespace _1_2D_Top_Down
             }
             Rectangle sourceRectangle = new Rectangle(
                 currentFrame * FrameWidth,
-                0,
+                animationRow * FrameHeight,
                 FrameWidth,
                 FrameHeight);
 
@@ -289,7 +360,7 @@ namespace _1_2D_Top_Down
                 Color.White,
                 0f,
                 Vector2.Zero,
-                Scale,
+                Visuals.Scale,
                 SpriteEffects.None,
                 0f);
         }
@@ -422,8 +493,11 @@ namespace _1_2D_Top_Down
             dashMotion.Stop();
             dashCooldownRemaining = 0f;
             lastMovementDirection = Vector2.UnitY;
+            facingDirection = Vector2.UnitY;
             wasDashKeyDown = IsDashKeyDown(Keyboard.GetState());
             knockback.Clear();
+            ChangeState(PlayerState.Idle);
+            SetAnimation(Visuals.Idle);
         }
         public void AddStatBonus(PlayerStatType stat, float amount)
         {

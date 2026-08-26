@@ -988,7 +988,7 @@
    </properties>
    <point/>
   </object>
-  <object id="43" name="EnemySpawn" x="520.667" y="238">
+  <object id="43" name="EnemySpawn" x="519.334" y="259.333">
    <properties>
     <property name="EnemyType" value="Slime"/>
    </properties>

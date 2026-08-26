@@ -15,11 +15,11 @@ namespace _1_2D_Top_Down
                 missionNodeTexture);
             DrawEnemyShadows();
             DrawEnemyShadow(
-                playerShadowTexture,
+                player.ShadowTexture,
                 player.MovementBounds,
-                scale: 0.34f,
-                opacity: 0.70f,
-                bottomOffset: 3f);
+                player.Visuals.ShadowScale,
+                player.Visuals.ShadowOpacity,
+                player.Visuals.ShadowBottomOffset);
 
             foreach (Coin coin in coins)
                 coin.Draw(_spriteBatch);

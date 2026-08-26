@@ -50,7 +50,6 @@ namespace _1_2D_Top_Down
         private ProjectileManager projectileManager => gameWorld.Projectiles;
         private WorldEffectManager worldEffectManager => gameWorld.WorldEffects;
         private IReadOnlyList<PlayerProjectile> projectiles => projectileManager.PlayerProjectiles;
-        private Texture2D playerShadowTexture;
 
         //collectables info
         private const int CoinDropChancePercent = 35;
@@ -181,8 +180,6 @@ namespace _1_2D_Top_Down
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             pixelTexture = new Texture2D(GraphicsDevice, 1, 1);
             pixelTexture.SetData(new[] { Color.White });
-            Texture2D playerTexture = Content.Load<Texture2D>("player/Character");
-            playerShadowTexture = Content.Load<Texture2D>("player/shadow_player");
             enemyFactory = new EnemyFactory(assetName => Content.Load<Texture2D>(assetName));
             enemyActionProcessor = new EnemyActionProcessor(enemyManager,projectileManager, worldEffectManager,enemyFactory);
             playerProjectileTexture = Content.Load<Texture2D>("projectiles/magic_projectile2");
@@ -255,7 +252,8 @@ namespace _1_2D_Top_Down
             playerStartPosition = gameMap.PlayerSpawnPosition;
             gameplaySession.SetPlayer(
                 new Player(
-                    playerTexture,
+                    PlayerVisualDefinitions.MeleeLevel1,
+                    assetName => Content.Load<Texture2D>(assetName),
                     playerStartPosition,
                     new PlayerProfile()));
             LoadShopUpgradeIcons();
