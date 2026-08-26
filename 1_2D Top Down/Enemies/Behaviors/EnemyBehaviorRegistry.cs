@@ -34,6 +34,9 @@ namespace _1_2D_Top_Down
             Register<ChargerBehaviorDefinition>(
                 definition => new ChargerBehavior(definition));
 
+            Register<TeleportChaserBehaviorDefinition>(
+                definition => new TeleportChaserBehavior(definition));
+
             Register<NecromancerBehaviorDefinition>(
                 definition => new NecromancerBehavior(
                     Create(definition.Ranged),

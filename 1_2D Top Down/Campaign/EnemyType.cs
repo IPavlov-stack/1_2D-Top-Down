@@ -7,6 +7,7 @@
         Necromancer,
         Beholder,
         MushroomCharger,
-        Zombie
+        Zombie,
+        Ghost
     }
 }

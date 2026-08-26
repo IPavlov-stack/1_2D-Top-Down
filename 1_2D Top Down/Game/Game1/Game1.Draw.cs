@@ -62,7 +62,7 @@ namespace _1_2D_Top_Down
                     enemyFactory.GetTexture(definition.ShadowTextureAsset),
                     enemy.MovementBounds,
                     definition.ShadowScale,
-                    definition.ShadowOpacity,
+                    definition.ShadowOpacity * enemy.RenderOpacity,
                     definition.ShadowBottomOffset);
             }
         }

@@ -16,7 +16,8 @@ namespace _1_2D_Top_Down
         //game info
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private Color BackgroundColor = new Color(119, 167, 255); // sky blue-ish
+        private Color BackgroundColor = new Color(141, 142, 143); 
+                                        //new Color(119, 167, 255); // sky blue-ish
         private Texture2D pixelTexture;
         private bool IsGameplayActive => gameFlowState == GameFlowState.Playing;
         private const int WindowSizeX = 1920;

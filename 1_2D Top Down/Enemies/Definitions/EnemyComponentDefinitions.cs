@@ -390,4 +390,94 @@ namespace _1_2D_Top_Down
             RunAnimation = runAnimation;
         }
     }
+
+    /// <summary>
+    /// Chases at walk/run speed and fades through a collision-safe teleport
+    /// to the opposite side of the target.
+    /// </summary>
+    public sealed class TeleportChaserBehaviorDefinition
+        : EnemyBehaviorDefinition
+    {
+        public float RunTriggerDistance { get; }
+        public float TeleportTriggerDistance { get; }
+        public float TeleportExitDistance { get; }
+        public float TeleportCooldown { get; }
+        public float FadeOutDuration { get; }
+        public float FadeInDuration { get; }
+        public float PostTeleportRunLockout { get; }
+        public int ContactDamage { get; }
+        public float ContactDamageCooldown { get; }
+        public float ContactKnockback { get; }
+        public float AttackDuration { get; }
+        public float DamageReleaseTime { get; }
+        public EnemyAnimationDefinition IdleAnimation { get; }
+        public EnemyAnimationDefinition WalkAnimation { get; }
+        public EnemyAnimationDefinition RunAnimation { get; }
+        public EnemyAnimationDefinition AttackAnimation { get; }
+
+        public TeleportChaserBehaviorDefinition(
+            float runTriggerDistance,
+            float teleportTriggerDistance,
+            float teleportExitDistance,
+            float teleportCooldown,
+            float fadeOutDuration,
+            float fadeInDuration,
+            float postTeleportRunLockout,
+            int contactDamage,
+            float contactDamageCooldown,
+            float contactKnockback,
+            float attackDuration,
+            float damageReleaseTime,
+            EnemyAnimationDefinition idleAnimation,
+            EnemyAnimationDefinition walkAnimation,
+            EnemyAnimationDefinition runAnimation,
+            EnemyAnimationDefinition attackAnimation)
+        {
+            if (runTriggerDistance <= teleportTriggerDistance)
+            {
+                throw new System.ArgumentOutOfRangeException(
+                    nameof(runTriggerDistance),
+                    "Run distance must exceed teleport distance.");
+            }
+            if (teleportTriggerDistance <= 0f)
+            {
+                throw new System.ArgumentOutOfRangeException(
+                    nameof(teleportTriggerDistance));
+            }
+            if (teleportExitDistance <= 0f)
+            {
+                throw new System.ArgumentOutOfRangeException(
+                    nameof(teleportExitDistance));
+            }
+            if (teleportCooldown < 0f || fadeOutDuration <= 0f ||
+                fadeInDuration <= 0f || postTeleportRunLockout < 0f)
+            {
+                throw new System.ArgumentOutOfRangeException(
+                    nameof(teleportCooldown));
+            }
+            if (attackDuration <= 0f || damageReleaseTime < 0f ||
+                damageReleaseTime > attackDuration)
+            {
+                throw new System.ArgumentOutOfRangeException(
+                    nameof(damageReleaseTime));
+            }
+
+            RunTriggerDistance = runTriggerDistance;
+            TeleportTriggerDistance = teleportTriggerDistance;
+            TeleportExitDistance = teleportExitDistance;
+            TeleportCooldown = teleportCooldown;
+            FadeOutDuration = fadeOutDuration;
+            FadeInDuration = fadeInDuration;
+            PostTeleportRunLockout = postTeleportRunLockout;
+            ContactDamage = contactDamage;
+            ContactDamageCooldown = contactDamageCooldown;
+            ContactKnockback = contactKnockback;
+            AttackDuration = attackDuration;
+            DamageReleaseTime = damageReleaseTime;
+            IdleAnimation = idleAnimation;
+            WalkAnimation = walkAnimation;
+            RunAnimation = runAnimation;
+            AttackAnimation = attackAnimation;
+        }
+    }
 }

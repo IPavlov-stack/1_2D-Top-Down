@@ -48,6 +48,27 @@ namespace _1_2D_Top_Down
             TryMoveAxis(enemy, new Vector2(0f, delta.Y), context);
         }
 
+        public bool TryTeleport(
+            Enemy enemy,
+            Vector2 destinationCenter,
+            EnemyUpdateContext context)
+        {
+            Vector2 previousPosition = enemy.Position;
+            enemy.Position +=
+                destinationCenter -
+                enemy.MovementBounds.Center.ToVector2();
+            KeepInsideWorld(enemy, context.WorldBounds);
+
+            if (context.IntersectsMapCollision(enemy.MovementBounds))
+            {
+                enemy.Position = previousPosition;
+                return false;
+            }
+
+            Stop();
+            return true;
+        }
+
         private static void TryMoveAxis(
             Enemy enemy,
             Vector2 delta,

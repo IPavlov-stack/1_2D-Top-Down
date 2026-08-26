@@ -5,6 +5,7 @@
         Idle,
         Chasing,
         Attacking,
+        Teleporting,
         Hurt,
         Knockback,
         Dead

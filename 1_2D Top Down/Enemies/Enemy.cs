@@ -38,6 +38,7 @@ namespace _1_2D_Top_Down
         public Health Health { get; }
         public EnemyMotor Motor { get; } = new();
         public int ExperienceReward => Definition.ExperienceReward;
+        public float RenderOpacity { get; private set; } = 1f;
 
         public EnemyState CurrentState { get; private set; } = EnemyState.Idle;
 
@@ -273,7 +274,7 @@ namespace _1_2D_Top_Down
                  texture,
                  SpriteCenter,
                  sourceRectangle,
-                 Color.White,
+                 Color.White * RenderOpacity,
                  rotation,
                  new Vector2(FrameWidth / 2f, FrameHeight / 2f),
                  scale,
@@ -309,6 +310,11 @@ namespace _1_2D_Top_Down
         internal void SetRotation(float value)
         {
             rotation = value;
+        }
+
+        internal void SetRenderOpacity(float value)
+        {
+            RenderOpacity = MathHelper.Clamp(value, 0f, 1f);
         }
 
         private void UpdateKnockback(GameTime gameTime, EnemyUpdateContext context)

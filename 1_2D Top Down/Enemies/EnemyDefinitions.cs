@@ -175,6 +175,51 @@ namespace _1_2D_Top_Down
             usesDirectionalRows: true,
             defaultRow: 0);
 
+        private static readonly EnemyAnimationDefinition GhostIdle = new(
+            "enemies/Ghost/Tier1/Idle",
+            sheetColumns: 4,
+            sheetRows: 4,
+            frameCount: 4,
+            frameDuration: 0.16f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition GhostWalk = new(
+            "enemies/Ghost/Tier1/Walk",
+            sheetColumns: 6,
+            sheetRows: 4,
+            frameCount: 6,
+            frameDuration: 0.11f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition GhostRun = new(
+            "enemies/Ghost/Tier1/Run",
+            sheetColumns: 6,
+            sheetRows: 4,
+            frameCount: 6,
+            frameDuration: 0.075f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition GhostAttack = new(
+            "enemies/Ghost/Tier1/Attack",
+            sheetColumns: 12,
+            sheetRows: 4,
+            frameCount: 12,
+            frameDuration: 0.07f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
+        private static readonly EnemyAnimationDefinition GhostHurt = new(
+            "enemies/Ghost/Tier1/Hurt",
+            sheetColumns: 4,
+            sheetRows: 4,
+            frameCount: 4,
+            frameDuration: 0.09f,
+            usesDirectionalRows: true,
+            defaultRow: 0);
+
         private static readonly AreaEffectDefinition BeholderExplosion =
             AreaEffectDefinition.Circle(
                 id: "beholder-explosion",
@@ -437,6 +482,47 @@ namespace _1_2D_Top_Down
                 spawnInterval: 0.54f,
                 offsetInTiles: 0.7f));
 
+        public static EnemyDefinition Ghost { get; } = new(
+            "ghost",
+            EnemyType.Ghost,
+            new EnemyVisualDefinition(
+                "enemies/Ghost/Tier1/Idle", 4, 4, 0.16f, 2.5f,
+                GhostIdle,
+                "enemies/Ghost/Tier1/Shadow", 2.5f, 0.48f, 5f,
+                "enemies/Ghost/Tier1/Death", 9, 9, 4, 0, 0.11f, 2.5f,
+                hurtAnimation: GhostHurt,
+                hitbox: new EnemyHitboxDefinition(
+                    width: 14f,
+                    height: 10f,
+                    centerX: 32f,
+                    bottomY: 38f),
+                hurtbox: new EnemyHitboxDefinition(
+                    width: 24f,
+                    height: 34f,
+                    centerX: 32f,
+                    bottomY: 38f)),
+            new EnemyStatsDefinition(maxHealth: 5, experienceReward: 25),
+            new EnemyLocomotionDefinition(
+                walkSpeed: 160f,
+                runSpeed: 460f),
+            new TeleportChaserBehaviorDefinition(
+                runTriggerDistance: 450f,
+                teleportTriggerDistance: 155f,
+                teleportExitDistance: 180f,
+                teleportCooldown: 2f,
+                fadeOutDuration: 0.30f,
+                fadeInDuration: 0.35f,
+                postTeleportRunLockout: 0.85f,
+                contactDamage: 15,
+                contactDamageCooldown: 0.9f,
+                contactKnockback: 250f,
+                attackDuration: 0.84f,
+                damageReleaseTime: 0.42f,
+                idleAnimation: GhostIdle,
+                walkAnimation: GhostWalk,
+                runAnimation: GhostRun,
+                attackAnimation: GhostAttack));
+
         public static EnemyDefinitionRegistry Registry { get; } =
             CreateRegistry();
 
@@ -454,10 +540,9 @@ namespace _1_2D_Top_Down
             registry.Register(Necromancer);
             registry.Register(Beholder);
             registry.Register(
-                MushroomCharger,
-                "MushroomCharger",
-                "Mushroom Charger");
+                MushroomCharger,"MushroomCharger", "Mushroom Charger");
             registry.Register(Zombie, "Zombie", "Zombie Tier1");
+            registry.Register(Ghost, "Ghost", "Ghost Tier1");
             return registry;
         }
     }
