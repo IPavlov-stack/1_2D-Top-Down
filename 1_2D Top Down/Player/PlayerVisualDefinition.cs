@@ -27,6 +27,12 @@ namespace _1_2D_Top_Down
         public float ShadowScale { get; }
         public float ShadowOpacity { get; }
         public float ShadowBottomOffset { get; }
+        public float FootAnchorX { get; }
+        public float FootAnchorY { get; }
+        public float MovementHitboxWidth { get; }
+        public float MovementHitboxHeight { get; }
+        public float HurtboxWidth { get; }
+        public float HurtboxHeight { get; }
 
         public PlayerVisualDefinition(
             int level,
@@ -46,7 +52,13 @@ namespace _1_2D_Top_Down
             string deathShadowTextureAsset,
             float shadowScale,
             float shadowOpacity,
-            float shadowBottomOffset)
+            float shadowBottomOffset,
+            float footAnchorX,
+            float footAnchorY,
+            float movementHitboxWidth,
+            float movementHitboxHeight,
+            float hurtboxWidth,
+            float hurtboxHeight)
         {
             if (level <= 0)
                 throw new ArgumentOutOfRangeException(nameof(level));
@@ -76,6 +88,12 @@ namespace _1_2D_Top_Down
             ShadowScale = MathF.Max(0f, shadowScale);
             ShadowOpacity = Math.Clamp(shadowOpacity, 0f, 1f);
             ShadowBottomOffset = shadowBottomOffset;
+            FootAnchorX = footAnchorX;
+            FootAnchorY = footAnchorY;
+            MovementHitboxWidth = MathF.Max(1f, movementHitboxWidth);
+            MovementHitboxHeight = MathF.Max(1f, movementHitboxHeight);
+            HurtboxWidth = MathF.Max(1f, hurtboxWidth);
+            HurtboxHeight = MathF.Max(1f, hurtboxHeight);
         }
     }
 }

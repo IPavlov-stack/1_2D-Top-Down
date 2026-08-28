@@ -20,6 +20,7 @@ namespace _1_2D_Top_Down
         private float delayBetweenSpawnGroups;
         public bool HasFinishedSpawningWave { get; private set; }
         private readonly List<Enemy> nearbyEnemies = new();
+        private readonly List<EnemyHitResult> meleeHitResults = new();
         private readonly List<Enemy> enemies = new();
         private readonly List<EnemyActionRequest> pendingActions = new();
         public IReadOnlyList<Enemy> Enemies => enemies;
@@ -29,6 +30,7 @@ namespace _1_2D_Top_Down
         public void Clear()
         {
             enemies.Clear();
+            meleeHitResults.Clear();
             pendingActions.Clear();
             DeathAnimations.Clear();
 
@@ -84,6 +86,38 @@ namespace _1_2D_Top_Down
             enemies.Remove(enemy);
 
             return EnemyHitResult.Defeat(enemy);
+        }
+
+        public IReadOnlyList<EnemyHitResult> ApplyMeleeAttack(
+            MeleeAttack attack)
+        {
+            meleeHitResults.Clear();
+            enemySpatialGrid.QueryNearby(
+                attack.BroadphaseBounds,
+                nearbyEnemies);
+
+            foreach (Enemy enemy in nearbyEnemies)
+            {
+                if (enemy.Health.IsDead ||
+                    !attack.BroadphaseBounds.Intersects(enemy.Hurtbox) ||
+                    !attack.Intersects(enemy.Hurtbox))
+                {
+                    continue;
+                }
+
+                enemy.TakeHit(attack.Hit);
+
+                if (!enemy.Health.IsDead)
+                {
+                    meleeHitResults.Add(EnemyHitResult.Hit(enemy));
+                    continue;
+                }
+
+                enemies.Remove(enemy);
+                meleeHitResults.Add(EnemyHitResult.Defeat(enemy));
+            }
+
+            return meleeHitResults;
         }
         public void UpdateEnemies(
             GameTime gameTime,

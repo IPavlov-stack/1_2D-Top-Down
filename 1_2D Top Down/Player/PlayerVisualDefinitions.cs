@@ -39,8 +39,13 @@ namespace _1_2D_Top_Down
 
             return new PlayerVisualDefinition(
                 level: level,
-                scale: 1.3f,
-                idle: Clip(root, "Idle", 12, 0.12f),
+                scale: 2.2f,
+                idle: Clip(
+                    root,
+                    "Idle",
+                    12,
+                    0.12f,
+                    frameCountsByRow: new[] { 12, 12, 12, 4 }),
                 walk: Clip(root, "Walk", 6, 0.10f),
                 run: Clip(root, "Run", 8, 0.07f),
                 attack: Clip(
@@ -74,9 +79,15 @@ namespace _1_2D_Top_Down
                 death: Clip(root, "Death", 7, 0.10f, loop: false),
                 shadowTextureAsset: $"{root}/Shadow",
                 deathShadowTextureAsset: $"{root}/DeathShadow",
-                shadowScale: 1.3f,
+                shadowScale: 2.2f,
                 shadowOpacity: 0.65f,
-                shadowBottomOffset: 0f);
+                shadowBottomOffset: -4f,
+                footAnchorX: 32f,
+                footAnchorY: 44f,
+                movementHitboxWidth: 15f,
+                movementHitboxHeight: 7f,
+                hurtboxWidth: 18f,
+                hurtboxHeight: 29f);
         }
 
         private static PlayerAnimationDefinition Clip(
@@ -84,13 +95,15 @@ namespace _1_2D_Top_Down
             string name,
             int columns,
             float frameDuration,
-            bool loop = true) =>
+            bool loop = true,
+            int[] frameCountsByRow = null) =>
             new(
                 $"{root}/{name}",
                 sheetColumns: columns,
                 sheetRows: 4,
                 frameCount: columns,
                 frameDuration: frameDuration,
-                loop: loop);
+                loop: loop,
+                frameCountsByRow: frameCountsByRow);
     }
 }

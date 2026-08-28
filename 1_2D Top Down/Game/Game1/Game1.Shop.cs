@@ -14,10 +14,17 @@ namespace _1_2D_Top_Down
 
             foreach (ShopItemDefinition definition in ShopDefinitions.All)
             {
-                shopItems.Add(
-                    new ShopItem(
-                        definition,
-                        shopUpgradeIcons[definition.IconId]));
+                ShopItem item = new(
+                    definition,
+                    shopUpgradeIcons[definition.IconId]);
+                int purchasedCount =
+                    activePlayerProfile.GetShopPurchaseCount(definition.Id);
+                item.RestorePurchasedCount(purchasedCount);
+
+                for (int purchase = 0; purchase < purchasedCount; purchase++)
+                    definition.Effect.Apply(player);
+
+                shopItems.Add(item);
             }
 
         }
@@ -36,6 +43,9 @@ namespace _1_2D_Top_Down
             item.Definition.Effect.Apply(player);
 
             item.RegisterPurchase();
+            activePlayerProfile.SetShopPurchaseCount(
+                item.Id,
+                item.PurchasedCount);
 
             return ShopPurchaseResult.Success;
         }

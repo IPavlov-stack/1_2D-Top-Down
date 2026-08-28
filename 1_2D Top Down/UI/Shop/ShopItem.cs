@@ -38,5 +38,17 @@ namespace _1_2D_Top_Down
             if (!IsSoldOut)
                 PurchasedCount++;
         }
+
+        public void RestorePurchasedCount(int purchasedCount)
+        {
+            PurchasedCount = System.Math.Max(0, purchasedCount);
+
+            if (MaxPurchases >= 0)
+            {
+                PurchasedCount = System.Math.Min(
+                    PurchasedCount,
+                    MaxPurchases);
+            }
+        }
     }
 }

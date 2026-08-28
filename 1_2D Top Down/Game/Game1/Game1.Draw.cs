@@ -38,9 +38,6 @@ namespace _1_2D_Top_Down
 
             gameMap.PropsLayer.DrawInFront(_spriteBatch);
 
-            foreach (Projectile projectile in projectiles)
-                projectile.Draw(_spriteBatch);
-
             foreach (DeathAnimation deathAnimation in deathAnimations)
                 deathAnimation.Draw(_spriteBatch);
 

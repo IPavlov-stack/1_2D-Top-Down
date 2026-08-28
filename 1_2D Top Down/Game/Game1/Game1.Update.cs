@@ -23,7 +23,7 @@ namespace _1_2D_Top_Down
             UpdateWorldEffects(gameTime);
             UpdateEnemyProjectiles(gameTime);
             enemyManager.RebuildSpatialGrid();
-            UpdatePlayerProjectiles(gameTime);
+            ResolvePlayerMeleeAttack();
             enemyManager.UpdateDeathAnimations(gameTime);
             UpdateCollectibles(gameTime);
         }
@@ -69,47 +69,28 @@ namespace _1_2D_Top_Down
                 gameplaySession.ChangeFlowState(GameFlowState.GameOver);
             }
         }
-        private void UpdatePlayerProjectiles(GameTime gameTime)
+        private void ResolvePlayerMeleeAttack()
         {
-            projectileManager.UpdatePlayerProjectiles(
-                gameTime,
-                gameMap.WorldBounds,
-                IntersectsMapCollision,
-                TryHitNearbyEnemy);
+            if (!player.TryConsumeMeleeAttack(out MeleeAttack attack))
+                return;
+
+            foreach (EnemyHitResult hit in
+                     enemyManager.ApplyMeleeAttack(attack))
+            {
+                if (hit.HasDefeatedEnemy)
+                    HandleDefeatedEnemy(hit.Enemy!);
+            }
         }
 
-        private bool TryHitNearbyEnemy(PlayerProjectile projectile)
+        private void HandleDefeatedEnemy(Enemy defeatedEnemy)
         {
-            EnemyHitResult hit = enemyManager.TryHitEnemy(
-                projectile.Bounds,
-                projectile.CreateHit());
-
-            if (!hit.HasHit)
-            {
-                return false;
-            }
-
-            if (!hit.HasDefeatedEnemy)
-            {
-                return true;
-            }
-
-            Enemy defeatedEnemy = hit.Enemy!;
-
             HandleEnemyDeath(defeatedEnemy);
-
             CreateEnemyDeathAnimation(defeatedEnemy);
 
             if (defeatedEnemy.Definition.Type == EnemyType.Demon)
-            {
                 PlayRandomDemonDeathSound();
-            }
             else if (defeatedEnemy.Definition.Type == EnemyType.Lich)
-            {
                 PlayRandomLichDeathSound();
-            }
-
-            return true;
         }
 
         private void CreateEnemyDeathAnimation(Enemy enemy)
@@ -220,7 +201,7 @@ namespace _1_2D_Top_Down
                 0f,
                 0f);
         }
-        private void HandlePlayerShooting(
+        private void HandlePlayerMeleeAttack(
             MouseState mouse,
             KeyboardState keyboard)
         {
@@ -234,56 +215,17 @@ namespace _1_2D_Top_Down
                 return;
             }
 
-            Vector2 startPosition = player.Hurtbox.Center.ToVector2();
+            Vector2 direction = player.FacingDirection;
 
-            Vector2 mouseWorldPosition = camera.ScreenToWorld(mouse.Position.ToVector2());
-            Vector2 direction = mouseWorldPosition - startPosition;
-
-            if (direction != Vector2.Zero)
+            if (clickedLeftButton)
             {
-                direction.Normalize();
-
-                if (player.Mana.TrySpend(Player.BasicAttackManaCost))
-                {
-                    player.EnterShootState();
-
-                    SpawnPlayerProjectiles(
-                        startPosition,
-                        direction);
-                    PlayRandomBasicAttackSound();
-                }
+                Vector2 mouseWorldPosition =
+                    camera.ScreenToWorld(mouse.Position.ToVector2());
+                direction = mouseWorldPosition - player.Center;
             }
-        }
-        private void SpawnPlayerProjectiles(Vector2 startPosition, Vector2 baseDirection)
-        {
-            int projectileCount = Math.Max(
-                1,
-                player.Stats.ProjectileCount);
 
-            float spreadAngleRadians = MathHelper.ToRadians(
-                player.Stats.ProjectileSpreadAngleDegrees);
-
-            float middleProjectileIndex =
-                (projectileCount - 1) / 2f;
-
-            for (int i = 0; i < projectileCount; i++)
-            {
-                float angle =
-                    (i - middleProjectileIndex) *
-                    spreadAngleRadians;
-
-                Vector2 projectileDirection = Vector2.Transform(
-                    baseDirection,
-                    Matrix.CreateRotationZ(angle));
-
-                projectileManager.AddPlayerProjectile(new PlayerProjectile(
-                    playerProjectileTexture,
-                    startPosition,
-                    projectileDirection,
-                    player.Stats.ProjectileSpeed,
-                    player.Stats.Damage,
-                    player.Stats.Knockback));
-            }
+            if (player.TryBeginMeleeAttack(direction))
+                PlayRandomBasicAttackSound();
         }
 
         private void UpdateWaveIntermissionInput(MouseState mouse)

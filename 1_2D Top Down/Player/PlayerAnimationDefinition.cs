@@ -10,6 +10,7 @@ namespace _1_2D_Top_Down
         public int FrameCount { get; }
         public float FrameDuration { get; }
         public bool Loop { get; }
+        private readonly int[] frameCountsByRow;
 
         public PlayerAnimationDefinition(
             string textureAsset,
@@ -17,7 +18,8 @@ namespace _1_2D_Top_Down
             int sheetRows,
             int frameCount,
             float frameDuration,
-            bool loop = true)
+            bool loop = true,
+            int[] frameCountsByRow = null)
         {
             if (string.IsNullOrWhiteSpace(textureAsset))
                 throw new ArgumentException(
@@ -31,6 +33,25 @@ namespace _1_2D_Top_Down
                 throw new ArgumentOutOfRangeException(nameof(frameCount));
             if (frameDuration <= 0f)
                 throw new ArgumentOutOfRangeException(nameof(frameDuration));
+            if (frameCountsByRow != null)
+            {
+                if (frameCountsByRow.Length != sheetRows)
+                {
+                    throw new ArgumentException(
+                        "Directional frame counts must match the sheet rows.",
+                        nameof(frameCountsByRow));
+                }
+
+                foreach (int directionalFrameCount in frameCountsByRow)
+                {
+                    if (directionalFrameCount <= 0 ||
+                        directionalFrameCount > sheetColumns)
+                    {
+                        throw new ArgumentOutOfRangeException(
+                            nameof(frameCountsByRow));
+                    }
+                }
+            }
 
             TextureAsset = textureAsset;
             SheetColumns = sheetColumns;
@@ -38,6 +59,17 @@ namespace _1_2D_Top_Down
             FrameCount = frameCount;
             FrameDuration = frameDuration;
             Loop = loop;
+            this.frameCountsByRow = frameCountsByRow == null
+                ? null
+                : (int[])frameCountsByRow.Clone();
+        }
+
+        public int GetFrameCount(int row)
+        {
+            if (row < 0 || row >= SheetRows)
+                throw new ArgumentOutOfRangeException(nameof(row));
+
+            return frameCountsByRow?[row] ?? FrameCount;
         }
     }
 }

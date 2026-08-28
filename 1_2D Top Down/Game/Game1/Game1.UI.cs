@@ -227,6 +227,8 @@ namespace _1_2D_Top_Down
             if (amount <= 0)
                 return;
 
+            activePlayerProfile.AddResource(resourceId, amount);
+
             foreach (InventoryResource resource in inventoryResources)
             {
                 if (resource.Id == resourceId)
@@ -258,8 +260,13 @@ namespace _1_2D_Top_Down
                 if (resource.Id != resourceId)
                     continue;
 
-                if (!resource.TryRemove(amount))
+                if (resource.Amount < amount)
                     return false;
+
+                if (!activePlayerProfile.TrySpendResource(resourceId, amount))
+                    return false;
+
+                resource.TryRemove(amount);
 
                 // При количество 0 слотът се освобождава.
                 if (resource.Amount == 0)

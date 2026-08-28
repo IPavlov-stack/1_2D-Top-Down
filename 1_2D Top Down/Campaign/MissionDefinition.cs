@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
 
+#nullable enable
+
 namespace _1_2D_Top_Down
 {
     public sealed class MissionDefinition
     {
+        public string Id { get; }
         public string Name { get; }
         public MissionType Type { get; }
         public string? MapFileName { get; }
@@ -14,7 +17,7 @@ namespace _1_2D_Top_Down
             string name,
             MissionType type,
             params WaveDefinition[] waves)
-            : this(name, type, null, MapThemes.OriginalForestId, waves)
+            : this(name, name, type, null, MapThemes.OriginalForestId, waves)
         {
         }
 
@@ -23,7 +26,13 @@ namespace _1_2D_Top_Down
             MissionType type,
             string? mapFileName,
             params WaveDefinition[] waves)
-            : this(name, type, mapFileName, MapThemes.OriginalForestId, waves)
+            : this(
+                name,
+                name,
+                type,
+                mapFileName,
+                MapThemes.OriginalForestId,
+                waves)
         {
         }
 
@@ -33,7 +42,19 @@ namespace _1_2D_Top_Down
             string? mapFileName,
             string mapThemeId,
             params WaveDefinition[] waves)
+            : this(name, name, type, mapFileName, mapThemeId, waves)
         {
+        }
+
+        public MissionDefinition(
+            string id,
+            string name,
+            MissionType type,
+            string? mapFileName,
+            string mapThemeId,
+            params WaveDefinition[] waves)
+        {
+            Id = id;
             Name = name;
             Type = type;
             MapFileName = mapFileName;

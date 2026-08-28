@@ -87,7 +87,6 @@ namespace _1_2D_Top_Down
                 UpdateDeathAnimations(gameTime);
                 UpdateCollectibles(gameTime);
                 enemyManager.RebuildSpatialGrid();
-                UpdatePlayerProjectiles(gameTime);
                 UpdateEnemyProjectiles(gameTime);
                 if (allowInput)
                 {
@@ -100,7 +99,7 @@ namespace _1_2D_Top_Down
             {
                 bool gameplayUiClickHandled = HandleGameplayUIInput(keyboard, mouse);
                 if (!gameplayUiClickHandled)
-                    HandlePlayerShooting(mouse, keyboard);
+                    HandlePlayerMeleeAttack(mouse, keyboard);
             }
 
             UpdateGameObjects(gameTime, allowInput);

@@ -1,5 +1,7 @@
 ﻿using System;
 
+#nullable enable
+
 namespace _1_2D_Top_Down
 {
     public sealed class Experience
@@ -18,6 +20,7 @@ namespace _1_2D_Top_Down
             CurrentExperience / (float)ExperienceToNextLevel;
 
         public event Action<int>? LevelUp;
+        public event Action? Changed;
 
         public void AddExperience(int amount)
         {
@@ -35,6 +38,8 @@ namespace _1_2D_Top_Down
 
                 LevelUp?.Invoke(Level);
             }
+
+            Changed?.Invoke();
         }
 
         public void Reset()
@@ -42,6 +47,23 @@ namespace _1_2D_Top_Down
             Level = 1;
             CurrentExperience = 0;
             TotalExperience = 0;
+            Changed?.Invoke();
+        }
+
+        internal void Restore(
+            int level,
+            int currentExperience,
+            long totalExperience)
+        {
+            Level = Math.Max(1, level);
+            CurrentExperience = Math.Max(0, currentExperience);
+            TotalExperience = Math.Max(0, totalExperience);
+
+            while (CurrentExperience >= ExperienceToNextLevel)
+            {
+                CurrentExperience -= ExperienceToNextLevel;
+                Level++;
+            }
         }
 
         private static int CalculateExperienceRequirement(int level)

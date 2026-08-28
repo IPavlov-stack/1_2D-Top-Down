@@ -16,6 +16,7 @@ namespace _1_2D_Top_Down
         private static bool IsScreenFlowState(GameFlowState state)
         {
             return state == GameFlowState.MainMenu ||
+                   state == GameFlowState.ProfileSelection ||
                    state == GameFlowState.Options ||
                    state == GameFlowState.Campaign;
         }
@@ -25,6 +26,7 @@ namespace _1_2D_Top_Down
             return state switch
             {
                 GameFlowState.MainMenu => ScreenIds.MainMenu,
+                GameFlowState.ProfileSelection => ScreenIds.ProfileSelection,
                 GameFlowState.Options => ScreenIds.Options,
                 GameFlowState.Campaign => ScreenIds.CampaignMap,
                 _ => throw new System.ArgumentOutOfRangeException(nameof(state), state, "The state is not a UI screen.")
@@ -36,6 +38,7 @@ namespace _1_2D_Top_Down
             return screenId switch
             {
                 ScreenIds.MainMenu => GameFlowState.MainMenu,
+                ScreenIds.ProfileSelection => GameFlowState.ProfileSelection,
                 ScreenIds.Options => GameFlowState.Options,
                 ScreenIds.CampaignMap => GameFlowState.Campaign,
                 _ => throw new System.ArgumentOutOfRangeException(nameof(screenId), screenId, "Unknown screen ID.")
@@ -112,6 +115,11 @@ namespace _1_2D_Top_Down
         }
 
         internal void DrawMainMenuScreen() => DrawMainMenu();
+        internal void UpdateProfileSelectionScreen() =>
+            HandleProfileSelectionInput(
+                Keyboard.GetState(),
+                Mouse.GetState());
+        internal void DrawProfileSelectionScreen() => DrawProfileSelection();
         internal void DrawOptionsScreen() => DrawOptions();
         internal void DrawCampaignMapScreen() => DrawCampaign();
     }

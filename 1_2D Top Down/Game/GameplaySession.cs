@@ -1,6 +1,8 @@
 using System;
 using Microsoft.Xna.Framework;
 
+#nullable enable
+
 namespace _1_2D_Top_Down
 {
     /// <summary>
@@ -8,6 +10,8 @@ namespace _1_2D_Top_Down
     /// </summary>
     public sealed class GameplaySession
     {
+        public event Action<MissionDefinition>? MissionCompleted;
+
         public GameplaySession(MissionDefinition initialMission)
         {
             ArgumentNullException.ThrowIfNull(initialMission);
@@ -19,7 +23,7 @@ namespace _1_2D_Top_Down
 
         public GameMap Map { get; } = new();
 
-        public Player Player { get; private set; }
+        public Player Player { get; private set; } = null!;
 
         public MissionRuntime Mission { get; }
 
@@ -32,6 +36,12 @@ namespace _1_2D_Top_Down
             if (Player != null)
                 throw new InvalidOperationException("The gameplay player is already initialized.");
 
+            Player = player;
+        }
+
+        public void ReplacePlayer(Player player)
+        {
+            ArgumentNullException.ThrowIfNull(player);
             Player = player;
         }
 
@@ -73,11 +83,13 @@ namespace _1_2D_Top_Down
         {
             ArgumentNullException.ThrowIfNull(missionEvent);
 
+            bool wasCompleted = Mission.IsCompleted;
             Mission.Publish(missionEvent);
 
-            if (!Mission.IsCompleted)
+            if (wasCompleted || !Mission.IsCompleted)
                 return false;
 
+            RegisterMissionCompletion();
             ChangeFlowState(GameFlowState.MissionComplete);
             
             return true;
@@ -85,6 +97,7 @@ namespace _1_2D_Top_Down
 
         public bool TryFinishCurrentWave(bool hasFinishedSpawningWave, int activeEnemyCount)
         {
+            bool wasCompleted = Mission.IsCompleted;
             if (!Mission.TryCompleteWave( hasFinishedSpawningWave, activeEnemyCount))
             {
                 return false;
@@ -93,6 +106,10 @@ namespace _1_2D_Top_Down
             ChangeFlowState( Mission.IsCompleted
                     ? GameFlowState.MissionComplete
                     : GameFlowState.WaveIntermission);
+
+            if (!wasCompleted && Mission.IsCompleted)
+                RegisterMissionCompletion();
+
             return true;
         }
 
@@ -118,6 +135,13 @@ namespace _1_2D_Top_Down
                 throw new InvalidOperationException(
                     "The gameplay player has not been initialized.");
             }
+        }
+
+        private void RegisterMissionCompletion()
+        {
+            EnsurePlayerInitialized();
+            Player.Profile.CompleteMission(Mission.Definition.Id);
+            MissionCompleted?.Invoke(Mission.Definition);
         }
     }
 }

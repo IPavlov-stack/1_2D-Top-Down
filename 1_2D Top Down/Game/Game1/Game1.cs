@@ -24,6 +24,9 @@ namespace _1_2D_Top_Down
         private const int WindowSizeY = 1080;
         private readonly GameplaySession gameplaySession =
             new GameplaySession(CampaignMissions.ForestOutskirts);
+        private readonly PlayerProfileStore playerProfileStore = new();
+        private PlayerProfile activePlayerProfile;
+        private bool hasPersistentActiveProfile;
         private GameFlowState gameFlowState => gameplaySession.FlowState;
         private GameFlowState nextGameFlowState;
         private readonly ScreenManager screenManager = new();
@@ -45,11 +48,9 @@ namespace _1_2D_Top_Down
         //player info
         private Player player => gameplaySession.Player;
         private Vector2 playerStartPosition;
-        private Texture2D playerProjectileTexture;
         private GameWorld gameWorld => gameplaySession.World;
         private ProjectileManager projectileManager => gameWorld.Projectiles;
         private WorldEffectManager worldEffectManager => gameWorld.WorldEffects;
-        private IReadOnlyList<PlayerProjectile> projectiles => projectileManager.PlayerProjectiles;
 
         //collectables info
         private const int CoinDropChancePercent = 35;
@@ -151,6 +152,7 @@ namespace _1_2D_Top_Down
 
         public Game1()
         {
+            Exiting += HandleGameExiting;
             _graphics = new GraphicsDeviceManager(this);
             _graphics.PreferredBackBufferWidth = WindowSizeX;
             _graphics.PreferredBackBufferHeight = WindowSizeY;
@@ -168,6 +170,7 @@ namespace _1_2D_Top_Down
 
         protected override void Initialize()
         {
+            Window.TextInput += HandleProfileTextInput;
             camera = new Camera2D();
             cameraController = new CameraController(
                 camera,
@@ -182,7 +185,6 @@ namespace _1_2D_Top_Down
             pixelTexture.SetData(new[] { Color.White });
             enemyFactory = new EnemyFactory(assetName => Content.Load<Texture2D>(assetName));
             enemyActionProcessor = new EnemyActionProcessor(enemyManager,projectileManager, worldEffectManager,enemyFactory);
-            playerProjectileTexture = Content.Load<Texture2D>("projectiles/magic_projectile2");
             coinTexture = Content.Load<Texture2D>("Collectables/coin");
             manaCrystalTexture = Content.Load<Texture2D>("Collectables/mana_crystal_sheet");
             coinPickupSounds = new[]
@@ -250,12 +252,11 @@ namespace _1_2D_Top_Down
                 loadEnemySpawners: initialMission.Type == MissionType.Survival,
                 loadMissionData: initialMission.Type == MissionType.Adventure);
             playerStartPosition = gameMap.PlayerSpawnPosition;
+            activePlayerProfile = LoadOrCreateActivePlayerProfile();
             gameplaySession.SetPlayer(
-                new Player(
-                    PlayerVisualDefinitions.MeleeLevel1,
-                    assetName => Content.Load<Texture2D>(assetName),
-                    playerStartPosition,
-                    new PlayerProfile()));
+                CreatePlayerForProfile(activePlayerProfile));
+            AttachActivePlayerProfile();
+            RestoreProfileInventoryResources();
             LoadShopUpgradeIcons();
             InitializeShopItems();
             InitializeGameplayPanels();
@@ -270,6 +271,7 @@ namespace _1_2D_Top_Down
             PlayMusic(mainMenuMusic);
 
             screenManager.Register(new MainMenuScreen(this));
+            screenManager.Register(new ProfileSelectionScreen(this));
             screenManager.Register(new OptionsScreen(this));
             screenManager.Register(new CampaignMapScreen(this));
             screenManager.Register(new GameplayScreen(this));
@@ -320,6 +322,7 @@ namespace _1_2D_Top_Down
         }
         protected override void Update(GameTime gameTime)
         {
+            UpdateProfileAutosave(gameTime);
             gameMap.Update(gameTime);
 
             KeyboardState keyboard = Keyboard.GetState();

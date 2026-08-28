@@ -4,6 +4,7 @@
     {
         public static MissionDefinition ForestOutskirts { get; } =
            new MissionDefinition(
+                "chapter1.mission01",
                 "Forest Outskirts",
                 MissionType.Survival,
                 "Maps/Chapter1/Mission01.tmx",
@@ -60,9 +61,17 @@
 
         public static MissionDefinition ForestPath { get; } =
             new MissionDefinition(
+                "chapter1.mission02",
                 "Forest Path",
                 MissionType.Adventure,
                 "Maps/Chapter1/Mission02.tmx",
                 MapThemes.Chapter1Id);
+
+        public static System.Collections.Generic.IReadOnlyList<MissionDefinition>
+            All { get; } = new[]
+            {
+                ForestOutskirts,
+                ForestPath
+            };
     }
 }

@@ -2,17 +2,30 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Collections.Generic;
 
 namespace _1_2D_Top_Down
 {
     public class Player : IYSortedWorldDrawable
     {
         // Combat
-        public const float BasicAttackManaCost = 8f;
-        private const float ShootStateDuration = 0.20f;
-
-        private float shootStateTimer;
+        private const float BasicAttackRange = 60f;
+        private const float BasicAttackArcDegrees = 90f;
+        private const float BasicAttackReleaseProgress = 0.45f;
+        private const float AttackLungeMinimumAngleDegrees = 5f;
+        private const float AttackLungeMaximumAngleDegrees = 18f;
+        private float attackElapsed;
+        private float attackDuration;
+        private Vector2 attackDirection = Vector2.UnitY;
+        private bool hasReleasedAttack;
+        private bool hasPendingMeleeAttack;
+        private static readonly DashMovementDefinition AttackLungeDefinition =
+            new(
+                initialSpeed: 500f,
+                distance: 6f,
+                cooldown: 0f,
+                slideDuration: 0.06f,
+                slideEasePower: 2f);
+        private readonly DashMotion attackLungeMotion;
         public PlayerState CurrentState { get; private set; } = PlayerState.Idle;
 
         private const float KnockbackDeceleration = 9f;
@@ -30,7 +43,9 @@ namespace _1_2D_Top_Down
         private bool wasDashKeyDown;
 
         public bool IsDashing => dashMotion.IsActive;
+        public bool IsAttackLunging => attackLungeMotion.IsActive;
         public float DashCooldownRemaining => dashCooldownRemaining;
+        public Vector2 FacingDirection => facingDirection;
 
         public float MoveSpeed => Stats.MoveSpeed;
         private readonly Func<string, Texture2D> textureResolver;
@@ -45,6 +60,8 @@ namespace _1_2D_Top_Down
             texture.Width / currentAnimation.SheetColumns;
         private int FrameHeight =>
             texture.Height / currentAnimation.SheetRows;
+        private int CurrentAnimationFrameCount =>
+            currentAnimation.GetFrameCount(animationRow);
 
         public PlayerVisualDefinition Visuals { get; private set; }
         public Texture2D ShadowTexture { get; private set; }
@@ -84,16 +101,9 @@ namespace _1_2D_Top_Down
         {
             get
             {
-                Rectangle spriteBounds = SpriteBounds;
-                int hitboxWidth = (int)(spriteBounds.Width * 0.50f);
-                int hitboxHeight = (int)(spriteBounds.Height * 0.24f);
-                int offsetX = (spriteBounds.Width - hitboxWidth) / 2;
-
-                return new Rectangle(
-                    spriteBounds.X + offsetX,
-                    spriteBounds.Bottom - hitboxHeight,
-                    hitboxWidth,
-                    hitboxHeight);
+                return CreateFootAnchoredBounds(
+                    Visuals.MovementHitboxWidth,
+                    Visuals.MovementHitboxHeight);
             }
         }
 
@@ -101,22 +111,37 @@ namespace _1_2D_Top_Down
         {
             get
             {
-                Rectangle spriteBounds = SpriteBounds;
-                int hitboxWidth = (int)(spriteBounds.Width * 0.60f);
-                int hitboxHeight = (int)(spriteBounds.Height * 0.70f);
-                int offsetX = (spriteBounds.Width - hitboxWidth) / 2;
-                int offsetY = (int)(spriteBounds.Height * 0.18f);
-
-                return new Rectangle(
-                    spriteBounds.X + offsetX,
-                    spriteBounds.Y + offsetY,
-                    hitboxWidth,
-                    hitboxHeight);
+                return CreateFootAnchoredBounds(
+                    Visuals.HurtboxWidth,
+                    Visuals.HurtboxHeight);
             }
         }
 
+        public Vector2 FootPosition => Position + new Vector2(
+            Visuals.FootAnchorX * Visuals.Scale,
+            Visuals.FootAnchorY * Visuals.Scale);
+
+        private Rectangle CreateFootAnchoredBounds(
+            float sourceWidth,
+            float sourceHeight)
+        {
+            Vector2 foot = FootPosition;
+            int width = Math.Max(
+                1,
+                (int)MathF.Round(sourceWidth * Visuals.Scale));
+            int height = Math.Max(
+                1,
+                (int)MathF.Round(sourceHeight * Visuals.Scale));
+
+            return new Rectangle(
+                (int)MathF.Round(foot.X) - width / 2,
+                (int)MathF.Round(foot.Y) - height,
+                width,
+                height);
+        }
+
         // Temporary compatibility alias for systems that still need the
-        // player's combat body rather than its movement footprint.
+        // players combat body rather than its movement footprint.
         public Rectangle Bounds => Hurtbox;
         public int SortY => MovementBounds.Bottom;
         public Vector2 Center => Hurtbox.Center.ToVector2();
@@ -136,6 +161,7 @@ namespace _1_2D_Top_Down
             Health = new Health(Stats.MaxHealth, Stats.HealthRegen);
             Mana = new Mana(Stats.MaxMana, Stats.ManaRegen);
             dashMotion = new DashMotion(DashDefinition);
+            attackLungeMotion = new DashMotion(AttackLungeDefinition);
             wasDashKeyDown = IsDashKeyDown(Keyboard.GetState());
             SetVisuals(visuals);
         }
@@ -176,10 +202,27 @@ namespace _1_2D_Top_Down
             bool dashPressed = dashKeyDown && !wasDashKeyDown;
             wasDashKeyDown = dashKeyDown;
 
-            if (!canMove && dashMotion.IsActive)
+            bool isAttacking = CurrentState == PlayerState.Attacking;
+
+            if (!canMove && attackLungeMotion.IsActive)
+                attackLungeMotion.Stop();
+
+            if (canMove && isAttacking && attackLungeMotion.IsActive)
+            {
+                attackLungeMotion.Update(
+                    deltaTime,
+                    movement => TryMoveDash(
+                        movement,
+                        arena,
+                        intersectsCollision));
+            }
+
+            bool canControlMovement = canMove && !isAttacking;
+
+            if (!canControlMovement && dashMotion.IsActive)
                 dashMotion.Stop();
 
-            if (canMove && dashMotion.IsActive)
+            if (canControlMovement && dashMotion.IsActive)
             {
                 isMoving = true;
                 dashMotion.Update(
@@ -189,7 +232,7 @@ namespace _1_2D_Top_Down
                         arena,
                         intersectsCollision));
             }
-            else if (canMove)
+            else if (canControlMovement)
             {
                 Vector2 direction = GetMovementDirection(keyboard);
 
@@ -275,12 +318,15 @@ namespace _1_2D_Top_Down
             {
                 PlayerState.Walk => Visuals.Walk,
                 PlayerState.Dash => Visuals.Run,
-                PlayerState.Shoot => Visuals.Attack,
+                PlayerState.Attacking => Visuals.Attack,
                 _ => Visuals.Idle
             };
             SetAnimation(targetAnimation);
 
-            animationTimer += deltaTime;
+            float animationSpeed = CurrentState == PlayerState.Attacking
+                ? Stats.AttackSpeed
+                : 1f;
+            animationTimer += deltaTime * animationSpeed;
 
             if (animationTimer < currentAnimation.FrameDuration)
                 return;
@@ -288,12 +334,12 @@ namespace _1_2D_Top_Down
             animationTimer -= currentAnimation.FrameDuration;
             currentFrame++;
 
-            if (currentFrame < currentAnimation.FrameCount)
+            if (currentFrame < CurrentAnimationFrameCount)
                 return;
 
             currentFrame = currentAnimation.Loop
                 ? 0
-                : currentAnimation.FrameCount - 1;
+                : CurrentAnimationFrameCount - 1;
         }
 
         private void SetFacingDirection(Vector2 direction)
@@ -327,11 +373,11 @@ namespace _1_2D_Top_Down
 
         private static int ResolveDirectionalRow(Vector2 direction)
         {
-            // The swordsman sheets use: right, front, left, back.
+            // The swordsman sheets use: front/down, left, right, back/up.
             if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
-                return direction.X < 0f ? 2 : 0;
+                return direction.X < 0f ? 1 : 2;
 
-            return direction.Y < 0f ? 3 : 1;
+            return direction.Y < 0f ? 3 : 0;
         }
         public void Draw(SpriteBatch spriteBatch)
         {
@@ -491,9 +537,15 @@ namespace _1_2D_Top_Down
         public void ResetMovementAbilities()
         {
             dashMotion.Stop();
+            attackLungeMotion.Stop();
             dashCooldownRemaining = 0f;
             lastMovementDirection = Vector2.UnitY;
             facingDirection = Vector2.UnitY;
+            attackDirection = Vector2.UnitY;
+            attackElapsed = 0f;
+            attackDuration = 0f;
+            hasReleasedAttack = false;
+            hasPendingMeleeAttack = false;
             wasDashKeyDown = IsDashKeyDown(Keyboard.GetState());
             knockback.Clear();
             ChangeState(PlayerState.Idle);
@@ -532,12 +584,22 @@ namespace _1_2D_Top_Down
                 return;
             }
 
-            if (CurrentState == PlayerState.Shoot)
+            if (CurrentState == PlayerState.Attacking)
             {
-                shootStateTimer -= deltaTime;
+                attackElapsed += deltaTime;
 
-                if (shootStateTimer > 0f)
+                if (!hasReleasedAttack &&
+                    attackElapsed >=
+                        attackDuration * BasicAttackReleaseProgress)
+                {
+                    hasReleasedAttack = true;
+                    hasPendingMeleeAttack = true;
+                }
+
+                if (attackElapsed < attackDuration)
                     return;
+
+                attackLungeMotion.Stop();
             }
 
             ChangeState(
@@ -546,11 +608,73 @@ namespace _1_2D_Top_Down
                     : PlayerState.Idle);
         }
 
-        public void EnterShootState()
+        public bool TryBeginMeleeAttack(Vector2 direction)
         {
-            shootStateTimer = ShootStateDuration;
+            if (CurrentState == PlayerState.Attacking || IsDashing)
+                return false;
 
-            ChangeState(PlayerState.Shoot);
+            if (direction == Vector2.Zero)
+                direction = facingDirection;
+
+            direction.Normalize();
+            attackDirection = direction;
+            SetFacingDirection(direction);
+            attackElapsed = 0f;
+            attackDuration =
+                Visuals.Attack.GetFrameCount(
+                    ResolveDirectionalRow(direction)) *
+                Visuals.Attack.FrameDuration /
+                Stats.AttackSpeed;
+            hasReleasedAttack = false;
+            hasPendingMeleeAttack = false;
+            attackLungeMotion.Begin(
+                GetRandomAttackLungeDirection(direction));
+
+            ChangeState(PlayerState.Attacking);
+            SetAnimation(Visuals.Attack);
+            return true;
+        }
+
+        private static Vector2 GetRandomAttackLungeDirection(
+            Vector2 attackDirection)
+        {
+            float angleMagnitude = MathHelper.Lerp(
+                AttackLungeMinimumAngleDegrees,
+                AttackLungeMaximumAngleDegrees,
+                Random.Shared.NextSingle());
+            float angleSign = Random.Shared.Next(2) == 0 ? -1f : 1f;
+            float angleRadians = MathHelper.ToRadians(
+                angleMagnitude * angleSign);
+
+            return Vector2.Transform(
+                attackDirection,
+                Matrix.CreateRotationZ(angleRadians));
+        }
+
+        public bool TryConsumeMeleeAttack(out MeleeAttack attack)
+        {
+            if (!hasPendingMeleeAttack)
+            {
+                attack = default;
+                return false;
+            }
+
+            hasPendingMeleeAttack = false;
+            Vector2 origin = Hurtbox.Center.ToVector2();
+            attack = new MeleeAttack(
+                origin,
+                attackDirection,
+                BasicAttackRange,
+                BasicAttackArcDegrees,
+                new CombatHit(
+                    Stats.Damage,
+                    DamageType.Physical,
+                    CombatFaction.Player,
+                    "player_melee",
+                    origin,
+                    Stats.Knockback));
+
+            return true;
         }
     }
 }

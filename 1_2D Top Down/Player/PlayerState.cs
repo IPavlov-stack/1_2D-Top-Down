@@ -5,6 +5,6 @@
         Idle,
         Walk,
         Dash,
-        Shoot
+        Attacking
     }
 }

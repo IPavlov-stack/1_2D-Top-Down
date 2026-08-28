@@ -3,6 +3,7 @@
     public enum GameFlowState
     {
         MainMenu,
+        ProfileSelection,
         Campaign,
         Options,
         Playing,
